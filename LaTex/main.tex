@@ -1,21 +1,101 @@
-\documentclass[12pt, a4paper]{article}
-\input{topo}
+% ----------------------------------------------------------
+% Modelo ABNT completo - baseado em abnTeX2
+% ----------------------------------------------------------
+\documentclass[
+12pt,oneside,a4paper,
+chapter=TITLE, % Títulos dos capítulos em maiúsculas
+section=TITLE, % Títulos das seções em maiúsculas
+brazil
+]{abntex2}
+
+
+% ----------------------------------------------------------
+% CONFIGURAÇÕES DO DOCUMENTO
+% ----------------------------------------------------------
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{0.2cm}
+\OnehalfSpacing
 
 \begin{document}
 
-\input{capa}
+% ----------------------------------------------------------
+% CAPA E FOLHA DE ROSTO
+% ----------------------------------------------------------
 
-\tableofcontents\newpage % sumário
-
-\listoffigures\newpage
-
-\input{cap/BancoDados}
-
-\input{cap/Backend}
-
-\input{cap/Frontend}
-
-\input{cap/cap4}
+\input{LaTex/capa}
+\imprimirfolhaderosto*
 
 
+
+% ----------------------------------------------------------
+% RESUMOS
+% ----------------------------------------------------------
+
+\input{LaTex/cap/Resumos}
+
+% ----------------------------------------------------------
+% LISTAS
+% ----------------------------------------------------------
+
+\listoffigures*
+\listoftables*
+%\listofquadros
+%\listofsiglas
+\cleardoublepage
+
+% ----------------------------------------------------------
+% SUMÁRIO
+% ----------------------------------------------------------
+\tableofcontents*
+\cleardoublepage
+
+% ----------------------------------------------------------
+% CAPÍTULOS
+% ----------------------------------------------------------
+
+\input{LaTex/cap/Introdução}
+
+% ----------------------------------------------------------
+
+\input{LaTex/cap/REVISÃO DA LITERATURA}
+
+
+% ----------------------------------------------------------
+
+\input{LaTex/cap/GESTÃO DO PROJETO}
+
+% ----------------------------------------------------------
+
+\input{LaTex/cap/DESENVOLVIMENTO DO PROJETO}
+
+% ----------------------------------------------------------
+
+\input{LaTex/cap/VIABILIDADE FINANCEIRA}
+
+% ----------------------------------------------------------
+
+\input{LaTex/cap/CONSIDERAÇÕES FINAIS}
+
+% ----------------------------------------------------------
+
+\input{LaTex/cap/REFERÊNCIAS}
+
+% ----------------------------------------------------------
+% APÊNDICES
+% ----------------------------------------------------------
+
+\input{LaTex/cap/APÊNDICES}
+
+% ----------------------------------------------------------
+% ANEXOS
+% ----------------------------------------------------------
+
+\input{LaTex/cap/ANEXOS}
+
+% ----------------------------------------------------------
+% FIM
+% ----------------------------------------------------------
 \end{document}
+
+
+

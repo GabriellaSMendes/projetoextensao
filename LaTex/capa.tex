@@ -1,25 +1,218 @@
+% ----------------------------------------------------------
+% Modelo ABNT completo - baseado em abnTeX2
+% ----------------------------------------------------------
+\documentclass[
+12pt,oneside,a4paper,
+chapter=TITLE, % Títulos dos capítulos em maiúsculas
+section=TITLE, % Títulos das seções em maiúsculas
+brazil
+]{abntex2}
+
+% ----------------------------------------------------------
+% PACOTES
+% ----------------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{indentfirst}
+\usepackage{microtype}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{hyperref}
+
+% ----------------------------------------------------------
+% CONFIGURAÇÕES DO DOCUMENTO
+% ----------------------------------------------------------
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{0.2cm}
+\OnehalfSpacing
+
+% ----------------------------------------------------------
+% DADOS DA CAPA E FOLHA DE ROSTO
+% ----------------------------------------------------------
+
 \thispagestyle{empty}
 
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.20\linewidth]{img/capa/IFSP_img.jpg}
-    \label{fig:img1}
-\end{figure}
+\titulo{Sistema de Gerenciamento de Sorveteria de uma Loja}
+\autor{Seu Nome Completo}
+\local{São Paulo}
+\data{Outubro, 2025}
+\instituicao{%
+Instituto Federal de Educação, Ciência e Tecnologia de São Paulo -- IFSP\\
+Campus São Paulo}
+\tipotrabalho{Projeto de Desenvolvimento de Software}
+\preambulo{Documento técnico apresentado como parte dos requisitos para o desenvolvimento e documentação do sistema proposto.}
 
-\begin{center}
-    \Large
-    \textbf{Instituto Federal de Educação, Ciência e Tecnologia de São Paulo}
+% ----------------------------------------------------------
+% INÍCIO DO DOCUMENTO
+% ----------------------------------------------------------
+\begin{document}
 
-    \vfill
+% ----------------------------------------------------------
+% CAPA E FOLHA DE ROSTO
+% ----------------------------------------------------------
+\imprimircapa
+\imprimirfolhaderosto*
 
-    \Huge
-    \textbf{Sistema de Gerenciamento de Sorveteria de uma Loja}
+% ----------------------------------------------------------
+% RESUMOS
+% ----------------------------------------------------------
+\begin{resumo}
+Este trabalho apresenta o desenvolvimento do Sistema de Gerenciamento de Sorveteria de uma Loja, com o objetivo de otimizar o controle de vendas, estoque e cadastro de produtos. A proposta visa demonstrar a aplicação de conceitos de engenharia de software e metodologias ágeis.
 
-    \vfill
+\vspace{\onelineskip}
 
-    \Large
-    Outubro, 2025
-\end{center}
+\noindent
+\textbf{Palavras-chave}: Sorveteria. Sistema de Gerenciamento. Software. IFSP.
+\end{resumo}
 
-\newpage
+\begin{resumo}[Abstract]
+\begin{otherlanguage*}{english}
+This work presents the development of the Ice Cream Shop Management System, aiming to optimize the control of sales, inventory, and product registration. The proposal demonstrates the application of software engineering concepts and agile methodologies.
+
+\vspace{\onelineskip}
+
+\noindent
+\textbf{Keywords}: Ice Cream Shop. Management System. Software. IFSP.
+\end{otherlanguage*}
+\end{resumo}
+
+% ----------------------------------------------------------
+% LISTAS
+% ----------------------------------------------------------
+\listoffigures*
+\listoftables*
+%\listofquadros
+%\listofsiglas
+\cleardoublepage
+
+% ----------------------------------------------------------
+% SUMÁRIO
+% ----------------------------------------------------------
+\tableofcontents*
+\cleardoublepage
+
+% ----------------------------------------------------------
+% CAPÍTULOS
+% ----------------------------------------------------------
+
+\chapter{INTRODUÇÃO}
+\section{Objetivos}
+\section{Problema e Solução Proposta}
+\section{Justificativa}
+\section{Análise da Concorrência}
+\subsection{Concorrente 1}
+\subsection{Concorrente 2}
+\subsection{Concorrente 3}
+\subsection{Comparativo}
+
+% ----------------------------------------------------------
+\chapter{REVISÃO DA LITERATURA}
+\section{Histórico do Assunto}
+\section{Atualidade do Assunto}
+\section{Outros Contextos do Assunto}
+
+% ----------------------------------------------------------
+\chapter{GESTÃO DO PROJETO}
+\section{Organização da Equipe}
+\subsection{Responsabilidades, Papéis e Atividades}
+\section{Metodologias de Gestão e Desenvolvimento}
+\subsection{Scrum / FDD / PMBOK}
+\subsubsection{Sprints}
+\section{Repositório da Aplicação}
+\subsection{Definição do Repositório}
+\subsection{Link e Especificações de Acesso}
+
+% ----------------------------------------------------------
+\chapter{DESENVOLVIMENTO DO PROJETO}
+\section{Escopo do Projeto}
+\subsection{Regras de Negócio}
+\subsection{Requisitos Funcionais}
+\subsection{Requisitos Não Funcionais}
+
+\section{Histórias de Usuário}
+\subsection{Descrição das Histórias}
+
+\section{Arquitetura}
+\subsection{Definições da Arquitetura}
+\subsection{Diagrama da Arquitetura}
+
+\section{Tecnologias}
+\subsection{Front-end}
+\subsection{Back-end}
+\subsection{Banco de Dados}
+\subsection{Infraestrutura}
+\subsubsection{Amazon Web Services (AWS)}
+
+\section{Testes e Manutenibilidade}
+\subsection{Plano de Testes}
+\subsection{Análise Estática}
+\subsection{Testes Funcionais}
+\subsubsection{Testes Unitários}
+\subsubsection{Testes de Componente}
+\subsubsection{Testes de Integração}
+\subsubsection{Testes End-to-End}
+\subsection{Testes Não Funcionais}
+\subsubsection{Testes de Performance}
+\subsubsection{Testes de Carga}
+\subsubsection{Testes de Configuração}
+\subsection{Testes Automatizados}
+\subsection{Logs}
+\subsection{Code Convention}
+
+\section{Segurança, Privacidade e Legislação}
+\subsection{Critérios de Segurança e Privacidade}
+\subsection{Observância à Legislação}
+
+\section{Modelo de Banco de Dados}
+\subsection{Modelo Entidade-Relacionamento (MER)}
+\subsection{Diagrama Entidade-Relacionamento (DER)}
+\subsection{Dicionário de Dados}
+
+\section{Duração / Cronograma}
+\subsection{Análise da Duração do Projeto}
+
+% ----------------------------------------------------------
+\chapter{VIABILIDADE FINANCEIRA}
+\section{Custos}
+\section{Receitas}
+\section{Cenário Realista}
+\section{Cenário Otimista}
+\section{Cenário Pessimista}
+
+% ----------------------------------------------------------
+\chapter{CONSIDERAÇÕES FINAIS}
+\section{Dificuldades, Escolhas e Descartes}
+
+% ----------------------------------------------------------
+% REFERÊNCIAS
+% ----------------------------------------------------------
+\bibliographystyle{abntex2-alf}
+\bibliography{referencias}
+
+% ----------------------------------------------------------
+% APÊNDICES
+% ----------------------------------------------------------
+\begin{apendicesenv}
+\chapter{Apêndice A – Exemplo de Código ou Documento Criado pelo Autor}
+Texto do apêndice...
+
+\end{apendicesenv}
+
+% ----------------------------------------------------------
+% ANEXOS
+% ----------------------------------------------------------
+\begin{anexosenv}
+\chapter{Anexo A – Documento de Terceiros}
+Texto do anexo...
+\end{anexosenv}
+
+% ----------------------------------------------------------
+% FIM
+% ----------------------------------------------------------
+\end{document}
+
 

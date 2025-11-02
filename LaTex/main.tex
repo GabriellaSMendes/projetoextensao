@@ -1,6 +1,12 @@
 % ----------------------------------------------------------
 % Modelo ABNT completo - baseado em abnTeX2
 % ----------------------------------------------------------
+
+
+
+
+
+
 \documentclass[
 12pt,oneside,a4paper,
 chapter=TITLE, % Títulos dos capítulos em maiúsculas
@@ -12,9 +18,35 @@ brazil
 % ----------------------------------------------------------
 % CONFIGURAÇÕES DO DOCUMENTO
 % ----------------------------------------------------------
+
+
+% ----------------------------------------------------------
+% Pacotes essenciais
+% ----------------------------------------------------------
+\usepackage[utf8]{inputenc}   % Codificação do arquivo
+\usepackage[T1]{fontenc}      % Codificação da fonte
+\usepackage[brazil]{babel}    % Idioma do documento
+
+% ----------------------------------------------------------
+% Bibliografia com biblatex (ABNT)
+% ----------------------------------------------------------
+\usepackage[
+  backend=biber,
+  style=abnt,
+  language=brazil,
+  sorting=nty,
+  doi=false, isbn=false, url=false
+]{biblatex}
+
+% Caminho do seu arquivo de referências (.bib)
+\addbibresource{referencias.bib}
+
+% ----------------------------------------------------------
+% Configurações do documento
+% ----------------------------------------------------------
 \setlength{\parindent}{1.25cm}
 \setlength{\parskip}{0.2cm}
-\OnehalfSpacing
+
 
 \begin{document}
 
@@ -55,10 +87,6 @@ brazil
 
 \input{LaTex/Capítulos/Introdução}
 
-% ----------------------------------------------------------
-
-\input{LaTex/Capítulos/REVISÃO DA LITERATURA}
-
 
 % ----------------------------------------------------------
 
@@ -78,7 +106,6 @@ brazil
 
 % ----------------------------------------------------------
 
-\input{LaTex/Capítulos/REFERÊNCIAS}
 
 % ----------------------------------------------------------
 % APÊNDICES
@@ -92,10 +119,10 @@ brazil
 
 \input{LaTex/Capítulos/ANEXOS}
 
-% ----------------------------------------------------------
-% FIM
-% ----------------------------------------------------------
+\printbibliography[title={Referências}]
+
 \end{document}
+
 
 
 

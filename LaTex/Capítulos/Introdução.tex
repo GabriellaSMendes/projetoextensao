@@ -13,27 +13,22 @@ Diante disso, o presente trabalho propõe o desenvolvimento de um sistema web de
 
 O sistema web proposto para a loja \textbf{Tropical Mix} tem como objetivo principal desenvolver uma plataforma online capaz de organizar e otimizar o controle de estoque e vendas, substituindo os processos manuais atualmente utilizados por uma solução moderna, intuitiva e eficiente. A proposta busca automatizar tarefas, reduzir falhas operacionais e disponibilizar informações em tempo real por meio de um painel dinâmico (\textbf{Dashboard}) que auxilie a gestão e a tomada de decisões estratégicas. Além disso, o sistema pretende aprimorar a integração entre os setores da empresa, assegurando maior consistência e confiabilidade dos dados, bem como gerar relatórios gerenciais que contribuam para o acompanhamento do desempenho e o planejamento das ações comerciais. Dessa forma, espera-se que o sistema proporcione maior eficiência operacional, facilidade de uso e suporte efetivo à administração da \textbf{Tropical Mix}.
 
+
 \section{Problema e Solução Proposta}
 
-Atualmente, a loja \textbf{Tropical Mix} realiza o controle e a atualização de seu estoque e das vendas de forma manual, o que gera uma série de problemas operacionais e administrativos. Esse processo demanda tempo, é suscetível a erros humanos e dificulta a obtenção de informações precisas e em tempo real sobre os produtos e o desempenho comercial. A ausência de uma ferramenta automatizada compromete a eficiência do gerenciamento, podendo ocasionar falhas no controle de entrada e saída de produtos, inconsistências em registros de vendas e dificuldades na análise de resultados financeiros.
+A \textbf{Tropical Mix} enfrenta dificuldades na gestão manual de seu estoque, o que pode resultar em inconsistências nas quantidades de produtos, falhas no controle de vendas e retrabalhos administrativos. A ausência de um sistema informatizado limita a capacidade de acompanhamento em tempo real e dificulta a análise de desempenho comercial.
 
-Diante dessa realidade, a solução proposta consiste no desenvolvimento de uma plataforma web capaz de automatizar e centralizar as principais operações relacionadas ao controle de estoque e vendas da empresa. O sistema permitirá que os usuários realizem o cadastro na plataforma, efetuem login e possam visualizar e adquirir produtos por meio de um ambiente virtual acessível e seguro.
-
-Na perspectiva do cliente, o sistema oferecerá recursos como o cadastro de usuário, navegação pelo catálogo de produtos, adição de itens ao carrinho e finalização de compras, proporcionando uma experiência simples e eficiente. Já na visão do funcionário, que representa o público-alvo principal da aplicação, o sistema disponibilizará funcionalidades avançadas de gerenciamento, como o acompanhamento de usuários que realizaram compras, histórico de transações, controle detalhado do estoque (quantidade disponível, tipos de produtos, inclusão e exclusão de itens) e monitoramento das vendas realizadas.
-
-Além disso, a plataforma contará com um painel administrativo dinâmico (\textit{}{Dashboard}), que reunirá dados sobre o desempenho comercial da loja, como volume de vendas, produtos mais vendidos, lucro e faturamento. Esse recurso possibilitará uma análise mais ampla e estratégica das operações, permitindo que a administração da \textbf{Tropical Mix} tome decisões com base em informações atualizadas e confiáveis.
-
-Com essa solução, espera-se não apenas eliminar as falhas decorrentes do processo manual, mas também otimizar o tempo de execução das atividades, melhorar o controle operacional e contribuir para o crescimento da empresa no meio do setor de sorveteria.
-
+Como solução, propõe-se o desenvolvimento de um sistema web construído com tecnologias modernas, utilizando \textbf{Python (Flask)} no \textit{back-end}, \textbf{MySQL} como banco de dados, e \textbf{React} no \textit{front-end}. Essa combinação garante flexibilidade, desempenho e escalabilidade. O sistema proporcionará controle centralizado das operações, armazenamento seguro dos dados e relatórios automatizados para gestão.
 
 \section{Justificativa}
 
+A modernização dos processos de gestão é essencial para que empresas de pequeno e médio porte possam competir em um mercado cada vez mais dinâmico e tecnológico. A implementação de um sistema web para a \textbf{Tropical Mix} se justifica pela necessidade de aprimorar o controle de estoque e vendas, garantindo confiabilidade e eficiência operacional.
+
+Além disso, o desenvolvimento deste projeto possibilita aos estudantes aplicar conhecimentos teóricos adquiridos ao longo da graduação, unindo teoria e prática no desenvolvimento de um sistema completo e funcional, voltado para um caso real de negócio.
 
 \section{Análise da Concorrência}
 
-A análise da concorrência tem como objetivo identificar soluções já existentes no mercado que atuam de forma semelhante ao sistema proposto, avaliando suas principais funcionalidades, pontos fortes e limitações. A partir dessa análise, é possível compreender oportunidades de melhoria e diferenciação para o sistema da loja \textbf{Tropical Mix}.
-
-\subsection{Concorrente 1: Luccrei PDV}
+\subsection{Luccrei PDV}
 
 A \textbf{Luccrei PDV} é uma plataforma voltada à gestão comercial e controle de vendas. Seu foco é proporcionar praticidade no atendimento ao cliente, com um sistema de frente de caixa rápido e eficiente. Dentre as principais funcionalidades, destacam-se:
 
@@ -46,7 +41,7 @@ A \textbf{Luccrei PDV} é uma plataforma voltada à gestão comercial e controle
 
 A plataforma é direcionada principalmente a pequenos e médios comércios que necessitam de um sistema ágil e intuitivo. No entanto, apresenta limitações no que diz respeito à personalização e integração com outros sistemas de análise de dados.
 
-\subsection{Concorrente 2: PedidoOK}
+\subsection{PedidoOK}
 
 O \textbf{PedidoOK} é um sistema completo para controle de vendas, estoque e emissão de documentos fiscais (NF-e, NFC-e e boletos). O sistema é voltado tanto para \textit{micro, pequenas e médias empresas} quanto para distribuidores e representantes comerciais. Suas principais características incluem:
 
@@ -59,7 +54,7 @@ O \textbf{PedidoOK} é um sistema completo para controle de vendas, estoque e em
 
 O diferencial do PedidoOK está na mobilidade e na integração com plataformas externas. Entretanto, a necessidade de assinatura mensal e a curva de aprendizado podem representar barreiras para pequenos negócios que buscam soluções mais simples e econômicas.
 
-\subsection{Concorrente 3: WM10 ERP}
+\subsection{WM10 ERP}
 
 A \textbf{WM10 ERP} oferece uma solução robusta e especializada para centralizar operações de \textbf{produção, loja física, e-commerce e equipe externa}. O sistema se destaca pela sua abordagem completa, sendo direcionado a empresas de médio e grande porte que necessitam de alto nível de automação. Suas principais funcionalidades são:
 
@@ -74,30 +69,14 @@ Apesar de ser uma plataforma avançada, o WM10 apresenta custos mais elevados e 
 
 \subsection{Comparativo}
 
-A Tabela~\ref{tab:comparativo-concorrentes} apresenta um comparativo geral entre as três soluções analisadas.
+A Tabela~\ref{tab:comparativo-concorrentes} apresenta um comparativo geral entre as três soluções analisadas, destacando as principais funcionalidades oferecidas pelos sistemas \textbf{Luccrei PDV}, \textbf{PedidoOK}, \textbf{WM10 ERP} e o sistema proposto para a loja \textbf{Tropical Mix}.
 
-\begin{quadro}
-\centering
-\caption{Tabela 1.4.4 - Comparativo de funcionalidades entre Tropical Mix e sistemas concorrentes}
-\label{tab:comparativo-concorrentes}
-\begin{tabular}{|p{5cm}|c|c|c|c|}
-\hline
-\textbf{Funcionalidade} & \textbf{Luccrei PDV} & \textbf{PedidoOK} & \textbf{WM10 ERP} & \textbf{Tropical Mix} \\ \hline
-Controle de estoque & X & X & X & X \\ \hline
-Emissão de notas fiscais & X & X & X &  \\ \hline
-Aplicativo móvel &  & X & X &  \\ \hline
-Acesso via navegador & X & X & X & X \\ \hline
-Relatórios gerenciais & X & X & X & X \\ \hline
-Dashboard de controle &  & X & X & X \\ \hline
-Integração com plataformas externas & X & X & X & X \\ \hline
-Gestão financeira & X & X & X & X \\ \hline
-Gestão de clientes e vendas & X & X & X & X \\ \hline
-Alertas automáticos de estoque &  &  & X & X \\ \hline
-Suporte técnico dedicado &  & X & X &  \\ \hline
-Custo estimado & Médio & Médio & Alto & Baixo \\ \hline
-\end{tabular}
-\fonte{Elaborado pelos autores}
-\end{quadro}
-
+\begin{figure}[H]
+    \centering
+    \caption{Comparativo de funcionalidades entre Tropical Mix e sistemas concorrentes.}
+    \includegraphics[width=1.05\textwidth]{LaTex/Capítulos/img/Introdução/Tabela_concorrente.png}
+    \fonte{Elaborado pelos autores.}
+    \label{tab:comparativo-concorrentes}
+\end{figure}
 
 A partir dessa análise, percebe-se que o sistema proposto para a loja \textbf{Tropical Mix} busca um equilíbrio entre simplicidade e eficiência, atendendo às necessidades específicas de um negócio de pequeno porte, sem os custos e complexidades dos sistemas corporativos mais robustos.

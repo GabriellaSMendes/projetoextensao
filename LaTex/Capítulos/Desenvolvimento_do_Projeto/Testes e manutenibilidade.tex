@@ -43,3 +43,19 @@ Os testes de carga foram aplicados para verificar o comportamento do sistema dia
 O sistema conta com um módulo de \textbf{logs} integrado ao \textit{back-end}, que registra automaticamente as operações críticas, como cadastros, exclusões e alterações de produtos ou usuários. Esses registros são fundamentais para auditoria e para o acompanhamento de possíveis falhas.  
 
 Quanto à manutenibilidade, o código foi estruturado seguindo padrões de boas práticas e convenções da comunidade Python e React, permitindo fácil compreensão e expansão futura. A modularização do código e o uso de documentação interna garantem que novas funcionalidades possam ser adicionadas sem comprometer o desempenho ou a integridade do sistema.
+
+\subsection{Code Convention}
+
+As convenções de código adotadas no desenvolvimento do sistema \textbf{Tropical Mix} têm como finalidade garantir padronização, legibilidade e facilidade de manutenção do código. O uso de boas práticas de escrita e organização permite que o projeto seja compreendido por diferentes desenvolvedores, facilite futuras atualizações e reduza a ocorrência de erros.
+
+Durante o desenvolvimento, foram seguidas diretrizes gerais de padronização de código, aplicáveis tanto à camada de \textit{front-end} quanto à de \textit{back-end}, tais como:
+
+\begin{itemize}
+    \item \textbf{Nomenclatura de variáveis e funções:} foi adotado o padrão \textit{camelCase} (ex.: \texttt{atualizarEstoque}) em funções e variáveis, e o padrão \textit{PascalCase} (ex.: \texttt{ProdutoCard}) para componentes visuais e classes.
+    \item \textbf{Organização do código:} o sistema foi estruturado de forma modular, separando arquivos por responsabilidade — como rotas, componentes, serviços e estilos — para simplificar a manutenção;
+    \item \textbf{Formatação e espaçamento:} manteve-se uma identação padronizada e o uso consistente de espaços e quebras de linha, garantindo legibilidade e uniformidade;
+    \item \textbf{Comentários e documentação:} foram inseridos comentários explicativos em trechos de maior complexidade e docstrings descritivas nas funções principais, facilitando o entendimento da lógica do sistema;
+    \item \textbf{Controle de versão:} todas as alterações no código foram gerenciadas pelo repositório \textbf{GitHub}, permitindo rastreamento das modificações e colaboração eficiente entre os membros da equipe.
+\end{itemize}
+
+

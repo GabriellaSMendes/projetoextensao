@@ -1,0 +1,84 @@
+\section{Escopo do Projeto}
+
+\subsection{Regras de Negócio}
+
+A Tabela~\ref{tab:regras-negocio} apresenta as regras de negócio estabelecidas para o sistema web da loja \textbf{Tropical Mix}. Essas regras foram definidas para garantir o controle, a integridade e a padronização dos processos internos relacionados à gestão de estoque e vendas.
+
+\begin{table}[H]
+\centering
+\caption{Regras de Negócio}
+\label{tab:regras-negocio}
+\begin{tabular}{|p{2cm}|p{3cm}|p{4cm}|p{6.5cm}|}
+\hline
+\textbf{Código} & \textbf{Atores} & \textbf{Nome da Regra} & \textbf{Descrição} \\ \hline
+RN01 & Administrador & Permissão de Acesso & Somente usuários autenticados podem acessar o sistema. Perfis diferentes (administrador e funcionário) possuem permissões distintas de visualização e edição de dados. \\ \hline
+RN02 & Administrador & Controle de Estoque Automático & O sistema deve atualizar automaticamente o estoque a cada venda registrada ou movimentação de entrada/saída de produtos, garantindo integridade das informações. \\ \hline
+RN03 & Funcionário & Registro Obrigatório de Vendas & Nenhuma venda pode ser finalizada sem que todos os campos obrigatórios estejam preenchidos: produto, quantidade, preço e forma de pagamento. \\ \hline
+RN04 & Administrador & Bloqueio de Exclusão de Produto & Produtos associados a vendas registradas não podem ser excluídos do sistema. Nesses casos, apenas a desativação do item será permitida, mantendo o histórico de dados. \\ \hline
+RN05 & Administrador / Funcionário & Alerta de Reposição & O sistema deverá emitir alertas automáticos para o administrador quando a quantidade de determinado produto atingir o nível mínimo definido para reposição de estoque. \\ \hline
+RN06 & Administrador & Relatórios Consolidados & Relatórios gerenciais devem consolidar dados de vendas, estoque e movimentações, apresentando indicadores de desempenho e tendências em períodos configuráveis. \\ \hline
+RN07 & Administrador & Registro de Ações & Toda ação administrativa relevante (cadastro, alteração ou exclusão) deve ser registrada em log interno, permitindo rastreabilidade e auditoria de operações. \\ \hline
+\end{tabular}
+\fonte{Elaborado pelos autores.}
+\end{table}
+
+\vspace{-0.5cm} % reduz espaço vertical entre tabelas
+
+\subsection{Requisitos Funcionais}
+
+A Tabela~\ref{tab:requisitos-funcionais} apresenta os requisitos funcionais do sistema, os quais descrevem as funcionalidades que devem ser implementadas para atender às regras de negócio e às necessidades operacionais da loja \textbf{Tropical Mix}.
+
+\begin{table}[H]
+\centering
+\caption{Requisitos Funcionais do Sistema}
+\label{tab:requisitos-funcionais}
+\begin{tabular}{|p{2cm}|p{3cm}|p{3.5cm}|p{7cm}|}
+\hline
+\textbf{Código Requisito} & \textbf{Atores} & \textbf{Nome} & \textbf{Descrição} \\ \hline
+RF01 & Administrador & Cadastro de Produtos & O sistema deve permitir que o administrador cadastre novos produtos no estoque, informando nome, categoria, quantidade, preço de venda e data de inclusão. Cada produto deve possuir um identificador único e poderá ser atualizado ou desativado posteriormente. \\ \hline
+RF02 & Administrador / Funcionário & Controle de Estoque & A aplicação deverá permitir o controle de entrada e saída de produtos, atualizando automaticamente a quantidade em estoque a cada movimentação registrada. O sistema deverá alertar quando um item atingir o nível mínimo definido para reposição. \\ \hline
+RF03 & Funcionário & Registro de Vendas & O sistema deve possibilitar o registro de vendas, vinculando cada operação a um funcionário responsável e à data da transação. As vendas devem reduzir automaticamente o estoque e gerar recibos ou relatórios para conferência. \\ \hline
+RF04 & Administrador & Relatórios Gerenciais & A aplicação deverá permitir a geração de relatórios personalizados sobre movimentações de estoque, volume de vendas, produtos mais vendidos e desempenho por período. Esses relatórios deverão ser exibidos em formato gráfico e exportáveis em PDF. \\ \hline
+RF05 & Administrador / Funcionário & Autenticação de Usuário & O sistema deve conter uma tela de login, permitindo o acesso apenas a usuários cadastrados. Perfis de acesso devem ser diferenciados entre administradores e funcionários, restringindo funções conforme as permissões atribuídas. \\ \hline
+RF06 & Administrador & Gerenciamento de Usuários & O administrador deverá ser capaz de cadastrar, editar ou excluir usuários do sistema, definindo perfis e senhas de acesso. Cada alteração deverá ser registrada para fins de auditoria e segurança. \\ \hline
+RF07 & Administrador & Dashboard Dinâmico & A aplicação deve conter um painel de controle (Dashboard) que apresente informações atualizadas em tempo real, como faturamento diário, produtos com menor estoque e histórico de vendas mensais. \\ \hline
+\end{tabular}
+\fonte{Elaborado pelos autores.}
+\end{table}
+
+\vspace{-0.5cm}
+
+\subsection{Requisitos Não Funcionais}
+
+A Tabela~\ref{tab:requisitos-nao-funcionais} apresenta os requisitos não funcionais definidos para o sistema web da loja \textbf{Tropical Mix}. Esses requisitos descrevem as propriedades de qualidade e desempenho que o sistema deve atender, garantindo segurança, usabilidade e confiabilidade nas operações realizadas.
+
+\begin{table}[H]
+\centering
+\caption{Requisitos Não Funcionais do Sistema}
+\label{tab:requisitos-nao-funcionais}
+\begin{tabular}{|p{2cm}|p{3cm}|p{4cm}|p{6.5cm}|}
+\hline
+\textbf{Código} & \textbf{Categoria} & \textbf{Nome do Requisito} & \textbf{Descrição} \\ \hline
+
+RNF01 & Desempenho & Tempo de Resposta & 
+O sistema deve responder às requisições do usuário em até 3 segundos, mesmo durante picos de acesso. \\ \hline
+
+RNF02 & Usabilidade & Interface Intuitiva & 
+A interface deve ser simples e de fácil navegação, permitindo que usuários sem experiência técnica realizem as principais tarefas de forma autônoma. \\ \hline
+
+RNF03 & Segurança & Controle de Acesso & 
+O sistema deve garantir autenticação de usuários com senhas criptografadas e níveis de permissão definidos conforme o perfil (administrador ou funcionário). \\ \hline
+
+RNF04 & Confiabilidade & Backup Automático & 
+Os dados do sistema devem ser salvos automaticamente em cópias de segurança diárias, evitando perda de informações em caso de falha. \\ \hline
+
+RNF06 & Manutenibilidade & Código Modular e Documentado & 
+O sistema deve ser desenvolvido em arquitetura modular, com código documentado, facilitando futuras atualizações e manutenção técnica. \\ \hline
+
+RNF07 & Disponibilidade & Funcionamento Contínuo & 
+O sistema deve estar disponível 99\% do tempo, com exceção de períodos programados de manutenção. \\ \hline
+
+\end{tabular}
+\fonte{Elaborado pelos autores.}
+\end{table}
+

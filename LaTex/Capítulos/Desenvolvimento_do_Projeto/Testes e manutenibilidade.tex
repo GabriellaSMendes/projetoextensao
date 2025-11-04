@@ -1,15 +1,45 @@
 \section{Testes e Manutenibilidade}
+
+A etapa de testes é essencial para assegurar a qualidade, confiabilidade e estabilidade do sistema desenvolvido. No caso do sistema \textbf{Tropical Mix}, os testes tiveram como objetivo verificar o funcionamento correto das principais funcionalidades, garantir a integração entre os módulos e validar o desempenho nas operações mais críticas, como o controle de estoque e o registro de vendas.  
+
+Foram aplicadas diferentes abordagens de testes, contemplando os níveis de unidade, integração e interface, de modo a assegurar o bom funcionamento tanto do \textit{back-end} quanto do \textit{front-end}.
+
 \subsection{Plano de Testes}
-\subsection{Análise Estática}
+
+O plano de testes foi elaborado com base nas funcionalidades mais relevantes para o negócio, priorizando os módulos de autenticação de usuários, controle de estoque, registro de vendas e geração de relatórios. Cada teste teve como meta validar se o sistema atende aos requisitos especificados e se mantém consistente diante de diferentes condições de uso.  
+
+Os testes foram executados em ambiente controlado, simulando situações reais de uso, como o cadastro de novos produtos, atualização de quantidades em estoque e verificação de relatórios no \textit{dashboard}.
+
 \subsection{Testes Funcionais}
+
+Os testes funcionais tiveram como finalidade verificar se cada funcionalidade do sistema executa corretamente as ações esperadas, de acordo com os requisitos definidos. Essa categoria de testes foi essencial para garantir a coerência entre as regras de negócio e o comportamento do sistema durante a execução.
+
 \subsubsection{Testes Unitários}
-\subsubsection{Testes de Componente}
+
+Os testes unitários foram aplicados principalmente na camada de \textit{back-end}, utilizando a biblioteca \textbf{Pytest}. O objetivo foi validar individualmente funções e rotas do Flask, como o cadastro de produtos, autenticação de usuários e atualização de estoque. Dessa forma, garantiu-se que cada componente da lógica de negócio operasse corretamente de maneira isolada.
+
 \subsubsection{Testes de Integração}
+
+Os testes de integração buscaram validar a comunicação entre o \textit{front-end}, o \textit{back-end} e o banco de dados. Foram realizados cenários de teste envolvendo o envio de requisições via \textbf{Axios} no React e o processamento dessas informações no Flask, com persistência dos dados no MySQL. Essa etapa assegurou que o fluxo de dados entre as camadas fosse contínuo e sem falhas.
+
 \subsubsection{Testes End-to-End}
+
+Os testes de ponta a ponta (E2E) foram utilizados para simular o comportamento real do usuário no sistema, garantindo que as principais funcionalidades pudessem ser executadas de forma completa, desde o login até o registro de uma venda e atualização do estoque. Ferramentas como \textbf{Selenium} ou \textbf{Cypress} podem ser utilizadas para automatizar essa etapa, permitindo a verificação de fluxos completos de navegação no sistema.
+
 \subsection{Testes Não Funcionais}
+
+Além dos testes funcionais, foram realizados testes não funcionais voltados à verificação do desempenho e da responsividade do sistema, assegurando que a aplicação mantenha um bom tempo de resposta e estabilidade sob diferentes condições de uso.
+
 \subsubsection{Testes de Performance}
+
+Os testes de performance tiveram como objetivo avaliar o tempo médio de resposta do sistema em operações como login, consulta de estoque e geração de relatórios. Com isso, buscou-se garantir que as requisições fossem processadas em até 3 segundos, mesmo em momentos de maior carga.
+
 \subsubsection{Testes de Carga}
-\subsubsection{Testes de Configuração}
-\subsection{Testes Automatizados}
-\subsection{Logs}
-\subsection{Code Convention}
+
+Os testes de carga foram aplicados para verificar o comportamento do sistema diante de múltiplos acessos simultâneos, simulando o uso por diversos funcionários da loja. Essa verificação foi essencial para assegurar a estabilidade do servidor e o correto gerenciamento das conexões com o banco de dados.
+
+\subsection{Logs e Manutenibilidade}
+
+O sistema conta com um módulo de \textbf{logs} integrado ao \textit{back-end}, que registra automaticamente as operações críticas, como cadastros, exclusões e alterações de produtos ou usuários. Esses registros são fundamentais para auditoria e para o acompanhamento de possíveis falhas.  
+
+Quanto à manutenibilidade, o código foi estruturado seguindo padrões de boas práticas e convenções da comunidade Python e React, permitindo fácil compreensão e expansão futura. A modularização do código e o uso de documentação interna garantem que novas funcionalidades possam ser adicionadas sem comprometer o desempenho ou a integridade do sistema.

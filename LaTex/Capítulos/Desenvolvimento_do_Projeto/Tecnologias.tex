@@ -4,25 +4,30 @@ O desenvolvimento do sistema \textbf{Tropical Mix} foi estruturado a partir de u
 
 \subsection{Front-end}
 
-A camada de \textit{front-end} foi desenvolvida utilizando a biblioteca \textbf{React.js}, que possibilita a criação de interfaces de usuário dinâmicas e responsivas. Essa tecnologia, baseada em componentes reutilizáveis, facilita a manutenção e a escalabilidade do sistema.  
+A camada de \textit{front-end} do sistema foi desenvolvida utilizando a biblioteca \textbf{React.js}, que possibilita a criação de interfaces de usuário modernas, dinâmicas e responsivas. Essa tecnologia, baseada em componentes reutilizáveis, permite a construção de telas interativas e modulares, facilitando a manutenção e a evolução da aplicação.  
 
-A escolha do React se deu por sua eficiência no gerenciamento do estado da aplicação e pela ampla comunidade de desenvolvedores, o que garante suporte contínuo e acesso a diversas bibliotecas complementares.  
+A escolha pelo React deve-se à sua eficiência no gerenciamento do estado da aplicação, à sua capacidade de atualização em tempo real e à ampla comunidade de desenvolvedores, o que assegura suporte contínuo e uma vasta gama de bibliotecas complementares.  
 
-Para a estilização e responsividade, foram utilizadas as tecnologias \textbf{HTML5}, \textbf{CSS3} e o framework \textbf{Tailwind CSS}, que permite o desenvolvimento de layouts modernos com maior produtividade. A comunicação entre o front-end e o back-end é realizada por meio de requisições HTTP utilizando a biblioteca \textbf{Axios}, garantindo agilidade na troca de dados.
+Para a estruturação e estilização das páginas, foram utilizadas as tecnologias \textbf{HTML5} e \textbf{CSS3}, permitindo a criação de layouts responsivos que se adaptam a diferentes dispositivos, como computadores, tablets e smartphones. A comunicação entre o \textit{front-end} e o \textit{back-end} é realizada por meio de requisições HTTP utilizando a biblioteca \textbf{Axios}, que possibilita a troca de dados de forma assíncrona e eficiente.  
+
+Além das funcionalidades de navegação e controle de estoque e vendas, o \textit{front-end} também inclui o módulo de um painel dinâmico, \textbf{Dashboard}, um painel interativo voltado à geração de relatórios e à exibição de indicadores de desempenho. Esse painel consome dados disponibilizados pela API do \textit{back-end} e apresenta informações estratégicas, como volume de vendas, produtos com menor estoque e desempenho por período, em gráficos e tabelas dinâmicas.  
+
+Dessa forma, o \textit{front-end} não apenas oferece uma interface intuitiva e agradável ao usuário, mas também serve como ferramenta de apoio à gestão, centralizando visualmente as informações mais relevantes para a tomada de decisão.
 
 \subsection{Back-end}
 
-O \textit{back-end} foi implementado utilizando a linguagem \textbf{Python}, em conjunto com o microframework \textbf{Flask}, responsável por gerenciar as rotas, regras de negócio e a comunicação com o banco de dados. O Flask foi escolhido por sua leveza, flexibilidade e facilidade de integração com outras tecnologias.  
+O \textit{back-end} foi implementado utilizando a linguagem \textbf{Python}, em conjunto com o microframework \textbf{Flask}, responsável por gerenciar as rotas, processar as regras de negócio e realizar a comunicação com o banco de dados. O Flask foi escolhido por sua leveza, flexibilidade e fácil integração com outras tecnologias, além de oferecer suporte nativo à construção de APIs RESTful.  
 
 Entre as principais funcionalidades desenvolvidas nessa camada, destacam-se:
 \begin{itemize}
-    \item Gerenciamento de usuários e autenticação;
+    \item Gerenciamento de usuários e autenticação, com controle de perfis de acesso;
     \item Registro e controle de vendas e movimentações de estoque;
-    \item Geração de relatórios e indicadores de desempenho;
-    \item Integração com o banco de dados MySQL.
+    \item Processamento de dados para geração de relatórios e indicadores exibidos no painel do \textit{front-end};
+    \item Integração com o banco de dados \textbf{MySQL} para armazenamento e consulta das informações.
 \end{itemize}
 
-O uso do Flask possibilita um desenvolvimento ágil e modular, permitindo que novas funcionalidades sejam adicionadas sem comprometer a estrutura do sistema.
+O uso do Flask proporciona um desenvolvimento ágil, modular e seguro, permitindo que novas funcionalidades sejam incorporadas de forma independente, sem comprometer a arquitetura do sistema. A comunicação com o \textit{front-end} ocorre por meio de uma \textbf{API REST}, garantindo a troca estruturada e eficiente de dados no formato \textbf{JSON}.
+
 
 \subsection{Banco de Dados}
 
@@ -34,3 +39,11 @@ Além disso, a estrutura relacional do MySQL possibilita consultas otimizadas pa
 
 
 
+\subsection{Infraestrutura}
+
+TEREMOS NÉ?
+
+
+\subsection{Ferramentas de apoio}
+
+TERAÁ ????

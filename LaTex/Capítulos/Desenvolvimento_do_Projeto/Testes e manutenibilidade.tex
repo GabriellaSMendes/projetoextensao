@@ -1,48 +1,45 @@
 \section{Testes e Manutenibilidade}
 
-A etapa de testes é essencial para assegurar a qualidade, confiabilidade e estabilidade do sistema desenvolvido. No caso do sistema \textbf{Tropical Mix}, os testes tiveram como objetivo verificar o funcionamento correto das principais funcionalidades, garantir a integração entre os módulos e validar o desempenho nas operações mais críticas, como o controle de estoque e o registro de vendas.  
-
-Foram aplicadas diferentes abordagens de testes, contemplando os níveis de unidade, integração e interface, de modo a assegurar o bom funcionamento tanto do \textit{back-end} quanto do \textit{front-end}.
+A etapa de testes é planejada para assegurar a qualidade, a estabilidade e a confiabilidade do sistema em todas as suas camadas. O processo será conduzido em ambiente de desenvolvimento controlado, com o objetivo de identificar erros, validar funcionalidades e garantir que o comportamento da aplicação esteja de acordo com os requisitos definidos.
 
 \subsection{Plano de Testes}
 
-O plano de testes foi elaborado com base nas funcionalidades mais relevantes para o negócio, priorizando os módulos de autenticação de usuários, controle de estoque, registro de vendas e geração de relatórios. Cada teste teve como meta validar se o sistema atende aos requisitos especificados e se mantém consistente diante de diferentes condições de uso.  
-
-Os testes foram executados em ambiente controlado, simulando situações reais de uso, como o cadastro de novos produtos, atualização de quantidades em estoque e verificação de relatórios no \textit{dashboard}.
+O plano de testes define os tipos, ferramentas e critérios que serão utilizados para verificar o funcionamento do sistema. Os principais módulos contemplados serão autenticação de usuários, controle de estoque, registro de vendas e geração de relatórios. Cada caso de teste será estruturado a partir de cenários reais de uso, assegurando que o sistema responda corretamente a diferentes condições e entradas de dados.
 
 \subsection{Testes Funcionais}
 
-Os testes funcionais tiveram como finalidade verificar se cada funcionalidade do sistema executa corretamente as ações esperadas, de acordo com os requisitos definidos. Essa categoria de testes foi essencial para garantir a coerência entre as regras de negócio e o comportamento do sistema durante a execução.
+Os testes funcionais têm como propósito validar se cada funcionalidade implementada cumpre as regras de negócio e os requisitos definidos. Essa categoria incluirá a verificação de rotas da API, formulários de entrada de dados e respostas esperadas na interface, garantindo que o sistema opere de forma coerente entre as camadas.
 
 \subsubsection{Testes Unitários}
 
-Os testes unitários foram aplicados principalmente na camada de \textit{back-end}, utilizando a biblioteca \textbf{Pytest}. O objetivo foi validar individualmente funções e rotas do Flask, como o cadastro de produtos, autenticação de usuários e atualização de estoque. Dessa forma, garantiu-se que cada componente da lógica de negócio operasse corretamente de maneira isolada.
+Os testes unitários serão aplicados à camada de back-end, utilizando a biblioteca \textbf{Pytest} para o framework Flask. Eles validarão funções individuais, como cadastro e atualização de produtos, autenticação e cálculos de estoque. O foco será garantir que cada parte do código funcione de forma independente e confiável.
 
 \subsubsection{Testes de Integração}
 
-Os testes de integração buscaram validar a comunicação entre o \textit{front-end}, o \textit{back-end} e o banco de dados. Foram realizados cenários de teste envolvendo o envio de requisições via \textbf{Axios} no React e o processamento dessas informações no Flask, com persistência dos dados no MySQL. Essa etapa assegurou que o fluxo de dados entre as camadas fosse contínuo e sem falhas.
+Os testes de integração validarão o fluxo completo entre front-end, back-end e banco de dados. Serão simuladas requisições enviadas pelo React via Axios e processadas pelo Flask, com persistência no MySQL. Essa etapa confirmará a correta comunicação entre as camadas e o retorno de dados consistentes.
 
 \subsubsection{Testes End-to-End}
 
-Os testes de ponta a ponta (E2E) foram utilizados para simular o comportamento real do usuário no sistema, garantindo que as principais funcionalidades pudessem ser executadas de forma completa, desde o login até o registro de uma venda e atualização do estoque. Ferramentas como \textbf{Selenium} ou \textbf{Cypress} podem ser utilizadas para automatizar essa etapa, permitindo a verificação de fluxos completos de navegação no sistema.
+Os testes end-to-end (\textit{E2E}) simularão a experiência completa do usuário no sistema, desde o login até o registro de uma venda e a atualização automática do estoque. Ferramentas como \textbf{Cypress} ou \textbf{Selenium} poderão ser utilizadas para automatizar esses fluxos, garantindo que as principais funcionalidades se comportem conforme o esperado em ambiente de execução real.
 
 \subsection{Testes Não Funcionais}
 
-Além dos testes funcionais, foram realizados testes não funcionais voltados à verificação do desempenho e da responsividade do sistema, assegurando que a aplicação mantenha um bom tempo de resposta e estabilidade sob diferentes condições de uso.
+Os testes não funcionais avaliarão aspectos de desempenho, segurança e confiabilidade da aplicação. Essa categoria inclui os seguintes subtipos:
 
 \subsubsection{Testes de Performance}
 
-Os testes de performance tiveram como objetivo avaliar o tempo médio de resposta do sistema em operações como login, consulta de estoque e geração de relatórios. Com isso, buscou-se garantir que as requisições fossem processadas em até 3 segundos, mesmo em momentos de maior carga.
+Medirão o tempo de resposta das operações críticas, como consultas de estoque e geração de relatórios. O objetivo é garantir que as requisições sejam processadas em até 3 segundos, mesmo sob múltiplos acessos simultâneos.
 
 \subsubsection{Testes de Carga}
 
-Os testes de carga foram aplicados para verificar o comportamento do sistema diante de múltiplos acessos simultâneos, simulando o uso por diversos funcionários da loja. Essa verificação foi essencial para assegurar a estabilidade do servidor e o correto gerenciamento das conexões com o banco de dados.
+Os testes de carga simularão múltiplos acessos simultâneos à aplicação, avaliando o comportamento do servidor e do banco de dados sob picos de utilização. Essa análise ajudará a identificar possíveis gargalos e a otimizar o uso de recursos.
 
 \subsection{Logs e Manutenibilidade}
 
-O sistema conta com um módulo de \textbf{logs} integrado ao \textit{back-end}, que registra automaticamente as operações críticas, como cadastros, exclusões e alterações de produtos ou usuários. Esses registros são fundamentais para auditoria e para o acompanhamento de possíveis falhas.  
+O sistema contará com logs automáticos integrados ao back-end, registrando operações críticas como cadastros, exclusões e alterações de dados. Esses registros serão essenciais para auditoria, depuração e rastreamento de falhas. 
 
-Quanto à manutenibilidade, o código foi estruturado seguindo padrões de boas práticas e convenções da comunidade Python e React, permitindo fácil compreensão e expansão futura. A modularização do código e o uso de documentação interna garantem que novas funcionalidades possam ser adicionadas sem comprometer o desempenho ou a integridade do sistema.
+A manutenibilidade será garantida pela adoção de código modular, documentação interna e versionamento contínuo no GitHub. Essas práticas permitirão a expansão do sistema e a correção de falhas de forma ágil e organizada.
+
 
 \subsection{Code Convention}
 

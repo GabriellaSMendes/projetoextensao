@@ -41,7 +41,20 @@ Além disso, a estrutura relacional do MySQL possibilita consultas otimizadas pa
 
 \subsection{Infraestrutura}
 
-TEREMOS NÉ?
+A infraestrutura planejada para o sistema Tropical Mix visa garantir estabilidade e segurança ao ambiente de execução da aplicação. Durante o desenvolvimento, a aplicação será executada em ambiente local pelos integrantes da equipe, utilizando servidores Flask para o back-end e o serviço de hospedagem local do React para o front-end.
+
+Para a fase de implantação, considera-se a utilização de um serviço de computação em nuvem, como a \textbf{Amazon Web Services (AWS)} ou o \textbf{Render}, que oferecem planos gratuitos e compatíveis com aplicações em Flask e React. O banco de dados MySQL poderá ser hospedado em serviços como o \textbf{Railway} ou o \textbf{PlanetScale}, garantindo persistência remota e acessibilidade para todos os desenvolvedores.
+
+A arquitetura proposta segue o modelo cliente-servidor, em que o front-end (cliente) se comunica com o back-end (servidor Flask) via API REST, como mostra a Figura~\ref{fig:cliente-servidor}. O ambiente de nuvem permitirá a configuração de endpoints públicos e o gerenciamento de logs, autenticação e escalabilidade sob demanda.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{LaTex/Capítulos/img/desenvolvimento/cliente-servidor.png}
+  \caption{Arquitetura Cliente-Servidor.}
+  \fonte{Adaptado de Sampaio, G. \textit{Introdução à Arquitetura Cliente-Servidor}. Medium, 2021. Disponível em: \url{https://medium.com/@kaisergui258/introdu%C3%A7%C3%A3o-a-arquitetura-cliente-servidor-dfae4c0218bd}. Acesso em: 27 out. 2025.}
+  \label{fig:cliente-servidor}
+\end{figure}
+
 
 
 \subsection{Ferramentas de Apoio}

@@ -2,11 +2,6 @@
 % Modelo ABNT completo - baseado em abnTeX2
 % ----------------------------------------------------------
 
-
-
-
-
-
 \documentclass[
 12pt,oneside,a4paper,
 chapter=TITLE, % Títulos dos capítulos em maiúsculas
@@ -14,21 +9,20 @@ section=TITLE, % Títulos das seções em maiúsculas
 brazil
 ]{abntex2}
 
-
-% ----------------------------------------------------------
-% CONFIGURAÇÕES DO DOCUMENTO
-% ----------------------------------------------------------
-
-
 % ----------------------------------------------------------
 % Pacotes essenciais
 % ----------------------------------------------------------
-\usepackage[utf8]{inputenc}   % Codificação do arquivo
+\usepackage[utf8]{inputenc}   % Codificação UTF-8
 \usepackage[T1]{fontenc}      % Codificação da fonte
 \usepackage[brazil]{babel}    % Idioma do documento
-
-\usepackage{graphicx}
-\usepackage{float}
+\usepackage{graphicx}         % Inserção de imagens
+\usepackage{float}            % Controle de posicionamento de figuras
+\usepackage{fancyhdr}         % Personalização de cabeçalho e rodapé
+\usepackage{hyperref}         % Links clicáveis
+\usepackage{indentfirst}      % Indenta o primeiro parágrafo
+\usepackage{setspace}         % Controle de espaçamento
+\usepackage{lipsum}           % Texto de exemplo (caso precise)
+\usepackage{tocloft}          % Personalização do sumário
 \graphicspath{{img/}{img/Introducao/}}
 
 
@@ -42,18 +36,28 @@ brazil
   sorting=nty,
   doi=false, isbn=false, url=false
 ]{biblatex}
-
-% Caminho do seu arquivo de referências (.bib)
 \addbibresource{referencias.bib}
 
 % ----------------------------------------------------------
-% Configurações do documento
+% Formatação dos parágrafos
 % ----------------------------------------------------------
 \setlength{\parindent}{1.25cm}
 \setlength{\parskip}{0.2cm}
 
+% ----------------------------------------------------------
+% CONFIGURAÇÃO DO CABEÇALHO PERSONALIZADO 
+% ----------------------------------------------------------
+\fancypagestyle{capitulos}{
+  \fancyhf{} % limpa cabeçalho e rodapé
+  \fancyhead[L]{\textbf{\leftmark}} % Nome do capítulo à esquerda
+  \fancyhead[R]{\thepage} % Número da página à direita
+  \renewcommand{\headrulewidth}{0.4pt} % linha horizontal
+  \renewcommand{\footrulewidth}{0pt}   % sem linha no rodapé
+}
 
-
+% ----------------------------------------------------------
+% INÍCIO DO DOCUMENTO
+% ----------------------------------------------------------
 \begin{document}
 
 % ----------------------------------------------------------
@@ -62,7 +66,6 @@ brazil
 
 \input{LaTex/capa}
 \imprimirfolhaderosto*
-
 
 
 % ----------------------------------------------------------
@@ -87,35 +90,26 @@ brazil
 \tableofcontents*
 \cleardoublepage
 
+
+% ----------------------------------------------------------
+% CORPO DO TEXTO 
+% ----------------------------------------------------------
+\mainmatter
+\pagestyle{capitulos}
+
+
 % ----------------------------------------------------------
 % CAPÍTULOS
 % ----------------------------------------------------------
 
 \input{LaTex/Capítulos/Introdução}
-
-
-% ----------------------------------------------------------
-
-
 \input{LaTex/Capítulos/REVISÃO DA LITERATURA}
-
-
-% ----------------------------------------------------------
-
 \input{LaTex/Capítulos/GESTÃO DO PROJETO}
-
-% ----------------------------------------------------------
-
 \input{LaTex/Capítulos/DESENVOLVIMENTO DO PROJETO}
-
-% ----------------------------------------------------------
-
 \input{LaTex/Capítulos/VIABILIDADE FINANCEIRA}
-
-% ----------------------------------------------------------
-
 \input{LaTex/Capítulos/CONSIDERAÇÕES FINAIS}
 
+% ----------------------------------------------------------
 % APÊNDICES
 % ----------------------------------------------------------
 
@@ -127,6 +121,9 @@ brazil
 
 \input{LaTex/Capítulos/ANEXOS}
 
+% ----------------------------------------------------------
+% REFERÊNCIAS
+% ----------------------------------------------------------
 \printbibliography[title={Referências}]
 
 \end{document}

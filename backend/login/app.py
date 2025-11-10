@@ -6,7 +6,7 @@ pymysql.install_as_MySQLdb()
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/tropical_mix' # ATUALIZAR PARA CONECTAR AO BD
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:Judo09041003.@localhost/tropical_mix' # ATUALIZAR PARA CONECTAR AO BD
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)

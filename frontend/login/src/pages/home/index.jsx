@@ -1,11 +1,12 @@
 import './style.css'
 import { useState, useEffect } from 'react'
 import api from '../../services/api'
+import { Link } from "react-router-dom";
 
 function Home() {
 
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const [users, setUsers] = useState([]); //lista de usuários
+  const [users, setUsers] = useState([]); // lista de usuários
 
   // Atualiza os campos do form
   const handleChange = (e) => {
@@ -15,35 +16,34 @@ function Home() {
     });
   };
 
-  //funçao pra buscar todos os usuários
+  // Busca todos os usuários
   const getUsers = async () => {
     try {
       const response = await api.get('/users');
       setUsers(response.data);
     } catch (error) {
-      console.error('Erro ao buscar usuários: ', error)
+      console.error('Erro ao buscar usuários: ', error);
     }
   };
 
-  //Atualiza o site automaticamente qnd recarrega o site
   useEffect(() => {
-    getUsers()
+    getUsers();
   }, []);
 
-  //funçao pra login
+  // Login
   const handleLogin = async () => {
     try {
       const response = await api.post('/login', {
         email: formData.email,
         password: formData.password
       });
-      alert(response.data.message)
+      alert(response.data.message);
     } catch (error) {
       alert('Erro: ' + (error.response?.data.error || "Erro ao fazer login"));
     }
   };
 
-  //função pra cadastro
+  // Cadastro
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -54,11 +54,11 @@ function Home() {
       alert(response.data.message);
       getUsers();
     } catch (error) {
-      alert('Erro: ' + (error.response?.data.error || "Erro desconhecido"))
+      alert('Erro: ' + (error.response?.data.error || "Erro desconhecido"));
     }
   };
 
-  //função pra deletar cadastro
+  // Excluir usuário
   const deleteUser = async (id) => {
     try {
       await api.delete(`/delete/${id}`);
@@ -69,7 +69,7 @@ function Home() {
     }
   };
 
-  //função pra editar a senha
+  // Atualizar senha
   const updatePassword = async (id) => {
     const newPassword = prompt("Digite a nova senha: ");
     if (!newPassword) return;
@@ -84,7 +84,7 @@ function Home() {
   return (
     <div className='container'>
 
-      {/*formulario principal de cadastro */}
+      {/* formulário principal */}
       <form onSubmit={handleSubmit}>
         <h1>Login de Usuário</h1>
 
@@ -104,11 +104,16 @@ function Home() {
           onChange={handleChange}
         />
 
+        {/* botão para ir à página de Estoque */}
+        <Link to="/estoque">
+          <button type="button">Ir para Estoque</button>
+        </Link>
+
         <button className='button-login' type='button' onClick={handleLogin}>Login</button>
         <button className='button-register' type='submit'>Cadastrar</button>
       </form>
 
-      {/*Lista de usuários */}
+      {/* lista de usuários */}
       <div className='userList'>
         {users.map(user => (
           <div key={user.id} className='user-card'>
@@ -116,18 +121,15 @@ function Home() {
               <p>Email: <span>{user.email}</span></p>
             </div>
             <div className='user-card-buttons'>
-            <button onClick={() => updatePassword(user.id)}>✏️</button>
-            <button onClick={() => deleteUser(user.id)}>🗑️</button>
+              <button onClick={() => updatePassword(user.id)}>✏️</button>
+              <button onClick={() => deleteUser(user.id)}>🗑️</button>
             </div>
           </div>
-        ))
-        }
-
+        ))}
       </div>
 
-
     </div>
-  )
+  );
 }
 
-export default Home
+export default Home;

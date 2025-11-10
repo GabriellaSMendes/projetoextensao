@@ -1,147 +1,234 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
+import "./style.css"; // importa o CSS separado
 
 export default function Estoque() {
   const [itens, setItens] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [q, setQ] = useState("");
+  const [busca, setBusca] = useState("");
+  const [form, setForm] = useState({
+    nome: "",
+    categoria: "",
+    quantidade: "",
+    preco: "",
+  });
 
-  // form simples
-  const [f, setF] = useState({ nome: "", categoria: "", quantidade: "", preco: "" });
-  const onChange = (e) => setF({ ...f, [e.target.name]: e.target.value });
+  // Atualiza os campos do formulário
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-  // carrega lista
-  const load = async () => {
+  // Busca os itens cadastrados
+  const carregarItens = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get("/items"); // ajuste se sua rota for outra
+      const { data } = await api.get("/items"); // ajuste conforme seu backend
       setItens(data || []);
-    } catch (e) {
-      alert("Erro ao carregar estoque.");
-      console.error(e);
+    } catch (error) {
+      alert("Erro ao carregar estoque");
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    carregarItens();
+  }, []);
 
-  // criar
-  const createItem = async (e) => {
+  // Cadastrar item
+  const cadastrarItem = async (e) => {
     e.preventDefault();
-    if (!f.nome.trim()) return alert("Informe o nome.");
+    if (!form.nome.trim()) return alert("Informe o nome do item.");
     try {
       setLoading(true);
-      const payload = {
-        nome: f.nome.trim(),
-        categoria: f.categoria.trim(),
-        quantidade: Number(f.quantidade || 0),
-        preco: Number(f.preco || 0),
+      const novoItem = {
+        nome: form.nome.trim(),
+        categoria: form.categoria.trim(),
+        quantidade: Number(form.quantidade || 0),
+        preco: Number(form.preco || 0),
       };
-      const { data } = await api.post("/items", payload);
+      const { data } = await api.post("/items", novoItem);
       setItens([data, ...itens]);
-      setF({ nome: "", categoria: "", quantidade: "", preco: "" });
-    } catch (e) {
-      alert("Erro ao cadastrar.");
-      console.error(e);
+      setForm({ nome: "", categoria: "", quantidade: "", preco: "" });
+    } catch (error) {
+      alert("Erro ao cadastrar item");
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
-  // excluir
-  const del = async (id) => {
-    if (!confirm("Excluir este item?")) return;
+  // Excluir item
+  const excluirItem = async (id) => {
+    if (!confirm("Deseja realmente excluir este item?")) return;
     try {
       await api.delete(`/items/${id}`);
-      setItens(itens.filter(i => i.id !== id));
-    } catch (e) {
-      alert("Erro ao excluir.");
-      console.error(e);
+      setItens(itens.filter((i) => i.id !== id));
+    } catch (error) {
+      alert("Erro ao excluir item");
+      console.error(error);
     }
   };
 
-  // editar inline (salva tudo que foi alterado)
-  const save = async (i) => {
+  // Salvar alterações inline
+  const salvarEdicao = async (item) => {
     try {
-      const payload = {
-        nome: i.nome?.trim() || "",
-        categoria: i.categoria?.trim() || "",
-        quantidade: Number(i.quantidade || 0),
-        preco: Number(i.preco || 0),
-      };
-      const { data } = await api.put(`/items/${i.id}`, payload);
-      setItens(itens.map(x => x.id === i.id ? data : x));
-      alert("Salvo!");
-    } catch (e) {
-      alert("Erro ao salvar.");
-      console.error(e);
+      const { data } = await api.put(`/items/${item.id}`, item);
+      setItens(itens.map((i) => (i.id === item.id ? data : i)));
+      alert("Item atualizado!");
+    } catch (error) {
+      alert("Erro ao atualizar item");
+      console.error(error);
     }
   };
 
-  // filtro básico
-  const list = itens.filter(i =>
-    `${i.nome} ${i.categoria}`.toLowerCase().includes(q.toLowerCase())
+  // Filtrar itens localmente
+  const listaFiltrada = itens.filter((i) =>
+    `${i.nome} ${i.categoria}`.toLowerCase().includes(busca.toLowerCase())
   );
 
   return (
     <div className="container">
-      <h1>Estoque</h1>
+      <h1>Controle de Estoque</h1>
 
-      <form onSubmit={createItem}>
-        <input name="nome" placeholder="Nome" value={f.nome} onChange={onChange} />
-        <input name="categoria" placeholder="Categoria" value={f.categoria} onChange={onChange} />
-        <input name="quantidade" placeholder="Qtd." value={f.quantidade} onChange={onChange} />
-        <input name="preco" placeholder="Preço (R$)" value={f.preco} onChange={onChange} />
-        <button type="submit" disabled={loading}>{loading ? "Aguarde..." : "Cadastrar"}</button>
+      {/* Formulário de cadastro */}
+      <form onSubmit={cadastrarItem} className="estoque-form">
+        <input
+          name="nome"
+          placeholder="Nome do item"
+          value={form.nome}
+          onChange={handleChange}
+        />
+        <input
+          name="categoria"
+          placeholder="Categoria"
+          value={form.categoria}
+          onChange={handleChange}
+        />
+        <input
+          name="quantidade"
+          placeholder="Quantidade"
+          value={form.quantidade}
+          onChange={handleChange}
+        />
+        <input
+          name="preco"
+          placeholder="Preço (R$)"
+          value={form.preco}
+          onChange={handleChange}
+        />
+        <button type="submit" disabled={loading}>
+          {loading ? "Salvando..." : "Cadastrar"}
+        </button>
       </form>
 
+      {/* Campo de busca */}
       <div className="userList">
         <input
           className="search"
-          placeholder="Buscar..."
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          style={{
-            border: "1px solid #48456C", borderRadius: 30, height: 40,
-            background: "#363643", color: "#fff", padding: "0 12px", width: 400
-          }}
+          placeholder="Buscar item..."
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
         />
 
-        {loading && !itens.length && <p style={{ color:"#fff" }}>Carregando…</p>}
+        {loading && !itens.length && (
+          <p style={{ color: "#fff" }}>Carregando...</p>
+        )}
 
-        {list.map(i => (
-          <div key={i.id} className="user-card">
+        {/* Listagem dos itens */}
+        {listaFiltrada.map((item) => (
+          <div key={item.id} className="user-card">
             <div>
-              <p>Nome: <span>
-                <input value={i.nome ?? ""} onChange={(e)=>setItens(s=>s.map(x=>x.id===i.id?{...x,nome:e.target.value}:x))}
-                  style={inp} />
-              </span></p>
+              <p>
+                Nome:{" "}
+                <span>
+                  <input
+                    className="row-input"
+                    value={item.nome}
+                    onChange={(e) =>
+                      setItens((s) =>
+                        s.map((x) =>
+                          x.id === item.id ? { ...x, nome: e.target.value } : x
+                        )
+                      )
+                    }
+                  />
+                </span>
+              </p>
 
-              <p>Categoria: <span>
-                <input value={i.categoria ?? ""} onChange={(e)=>setItens(s=>s.map(x=>x.id===i.id?{...x,categoria:e.target.value}:x))}
-                  style={inp} />
-              </span></p>
+              <p>
+                Categoria:{" "}
+                <span>
+                  <input
+                    className="row-input"
+                    value={item.categoria}
+                    onChange={(e) =>
+                      setItens((s) =>
+                        s.map((x) =>
+                          x.id === item.id
+                            ? { ...x, categoria: e.target.value }
+                            : x
+                        )
+                      )
+                    }
+                  />
+                </span>
+              </p>
 
-              <p>Qtd.: <span>
-                <input value={i.quantidade ?? ""} onChange={(e)=>setItens(s=>s.map(x=>x.id===i.id?{...x,quantidade:e.target.value}:x))}
-                  style={inp} />
-              </span></p>
+              <p>
+                Qtd.:{" "}
+                <span>
+                  <input
+                    className="row-input"
+                    value={item.quantidade}
+                    onChange={(e) =>
+                      setItens((s) =>
+                        s.map((x) =>
+                          x.id === item.id
+                            ? { ...x, quantidade: e.target.value }
+                            : x
+                        )
+                      )
+                    }
+                  />
+                </span>
+              </p>
 
-              <p>Preço (R$): <span>
-                <input value={i.preco ?? ""} onChange={(e)=>setItens(s=>s.map(x=>x.id===i.id?{...x,preco:e.target.value}:x))}
-                  style={inp} />
-              </span></p>
+              <p>
+                Preço (R$):{" "}
+                <span>
+                  <input
+                    className="row-input"
+                    value={item.preco}
+                    onChange={(e) =>
+                      setItens((s) =>
+                        s.map((x) =>
+                          x.id === item.id
+                            ? { ...x, preco: e.target.value }
+                            : x
+                        )
+                      )
+                    }
+                  />
+                </span>
+              </p>
             </div>
 
             <div className="user-card-buttons">
-              <button title="Salvar" onClick={() => save(i)}>💾</button>
-              <button title="Excluir" onClick={() => del(i.id)}>🗑️</button>
+              <button title="Salvar" onClick={() => salvarEdicao(item)}>
+                💾
+              </button>
+              <button title="Excluir" onClick={() => excluirItem(item.id)}>
+                🗑️
+              </button>
             </div>
           </div>
         ))}
 
-        {!loading && !list.length && <p style={{ color:"#fff" }}>Sem itens.</p>}
+        {!loading && !listaFiltrada.length && (
+          <p style={{ color: "#fff" }}>Nenhum item encontrado.</p>
+        )}
       </div>
     </div>
   );

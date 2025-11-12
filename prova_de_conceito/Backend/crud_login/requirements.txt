@@ -1,6 +1,0 @@
-flask
-flask_sqlalchemy
-Flask-Bcrypt
-pymysql
-
-# pip install -r requirements.txt

@@ -1,0 +1,133 @@
+% ----------------------------------------------------------
+% Modelo ABNT completo - baseado em abnTeX2
+% ----------------------------------------------------------
+
+\documentclass[
+12pt,oneside,a4paper,
+chapter=TITLE, % Títulos dos capítulos em maiúsculas
+section=TITLE, % Títulos das seções em maiúsculas
+brazil
+]{abntex2}
+
+% ----------------------------------------------------------
+% Pacotes essenciais
+% ----------------------------------------------------------
+\usepackage[utf8]{inputenc}   % Codificação UTF-8
+\usepackage[T1]{fontenc}      % Codificação da fonte
+\usepackage[brazil]{babel}    % Idioma do documento
+\usepackage{graphicx}         % Inserção de imagens
+\usepackage{float}            % Controle de posicionamento de figuras
+\usepackage{fancyhdr}         % Personalização de cabeçalho e rodapé
+\usepackage{hyperref}         % Links clicáveis
+\usepackage{indentfirst}      % Indenta o primeiro parágrafo
+\usepackage{setspace}         % Controle de espaçamento
+\usepackage{lipsum}           % Texto de exemplo (caso precise)
+\usepackage{tocloft}          % Personalização do sumário
+\graphicspath{{img/}{img/Introducao/}}
+
+
+% ----------------------------------------------------------
+% Bibliografia com biblatex (ABNT)
+% ----------------------------------------------------------
+\usepackage[
+  backend=biber,
+  style=abnt,
+  language=brazil,
+  sorting=nty,
+  doi=false, isbn=false, url=false
+]{biblatex}
+\addbibresource{referencias.bib}
+
+% ----------------------------------------------------------
+% Formatação dos parágrafos
+% ----------------------------------------------------------
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{0.2cm}
+
+% ----------------------------------------------------------
+% CONFIGURAÇÃO DO CABEÇALHO PERSONALIZADO 
+% ----------------------------------------------------------
+\fancypagestyle{capitulos}{
+  \fancyhf{} % limpa cabeçalho e rodapé
+  \fancyhead[L]{\itshape\small \nouppercase{\leftmark}}% nome do capítulo menor e em itálico
+  \fancyhead[R]{\small\thepage} % número da página menor
+  \renewcommand{\headrulewidth}{0.4pt} % linha horizontal
+  \renewcommand{\footrulewidth}{0pt}   % sem linha no rodapé
+}
+
+% ----------------------------------------------------------
+% INÍCIO DO DOCUMENTO
+% ----------------------------------------------------------
+\begin{document}
+
+% ----------------------------------------------------------
+% CAPA E FOLHA DE ROSTO
+% ----------------------------------------------------------
+
+\input{LaTex/capa}
+\imprimirfolhaderosto*
+
+
+% ----------------------------------------------------------
+% RESUMOS
+% ----------------------------------------------------------
+
+\input{LaTex/Capítulos/Resumos}
+
+% ----------------------------------------------------------
+% LISTAS
+% ----------------------------------------------------------
+
+\listoffigures*
+\listoftables*
+%\listofquadros
+%\listofsiglas
+\cleardoublepage
+
+% ----------------------------------------------------------
+% SUMÁRIO
+% ----------------------------------------------------------
+\tableofcontents*
+\cleardoublepage
+
+
+% ----------------------------------------------------------
+% CORPO DO TEXTO 
+% ----------------------------------------------------------
+\mainmatter
+\pagestyle{capitulos}
+
+
+% ----------------------------------------------------------
+% CAPÍTULOS
+% ----------------------------------------------------------
+
+\input{LaTex/Capítulos/Introdução}
+\input{LaTex/Capítulos/REVISÃO DA LITERATURA}
+\input{LaTex/Capítulos/GESTÃO DO PROJETO}
+\input{LaTex/Capítulos/DESENVOLVIMENTO DO PROJETO}
+\input{LaTex/Capítulos/VIABILIDADE FINANCEIRA}
+\input{LaTex/Capítulos/CONSIDERAÇÕES FINAIS}
+
+% ----------------------------------------------------------
+% APÊNDICES
+% ----------------------------------------------------------
+
+\input{LaTex/Capítulos/APÊNDICES}
+
+% ----------------------------------------------------------
+% ANEXOS
+% ----------------------------------------------------------
+
+\input{LaTex/Capítulos/ANEXOS}
+
+% ----------------------------------------------------------
+% REFERÊNCIAS
+% ----------------------------------------------------------
+\printbibliography[title={Referências}]
+
+\end{document}
+
+
+
+

@@ -1,0 +1,45 @@
+.home {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  gap: 24px;
+  background: #f7f7f9;
+  font-family: system-ui, Arial, sans-serif;
+  padding: 24px;
+  text-align: center;
+}
+
+.home-title {
+  font-size: 32px;
+  color: #6b1e77;
+}
+
+.home-sub {
+  color: #555;
+  margin-top: -8px;
+}
+
+.home-menu {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.home-btn {
+  background: white;
+  color: #6b1e77;
+  border: 2px solid #e6d9ec;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,.06);
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+.home-btn:hover {
+  background: #f4ecf7;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,.08);
+}

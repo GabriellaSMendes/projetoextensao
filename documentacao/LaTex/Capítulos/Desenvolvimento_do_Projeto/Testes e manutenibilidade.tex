@@ -1,0 +1,58 @@
+\section{Testes e Manutenibilidade}
+
+A etapa de testes é planejada para assegurar a qualidade, a estabilidade e a confiabilidade do sistema em todas as suas camadas. O processo será conduzido em ambiente de desenvolvimento controlado, com o objetivo de identificar erros, validar funcionalidades e garantir que o comportamento da aplicação esteja de acordo com os requisitos definidos.
+
+\subsection{Plano de Testes}
+
+O plano de testes define os tipos, ferramentas e critérios que serão utilizados para verificar o funcionamento do sistema. Os principais módulos contemplados serão autenticação de usuários, controle de estoque, registro de vendas e geração de relatórios. Cada caso de teste será estruturado a partir de cenários reais de uso, assegurando que o sistema responda corretamente a diferentes condições e entradas de dados.
+
+\subsection{Testes Funcionais}
+
+Os testes funcionais têm como propósito validar se cada funcionalidade implementada cumpre as regras de negócio e os requisitos definidos. Essa categoria incluirá a verificação de rotas da API, formulários de entrada de dados e respostas esperadas na interface, garantindo que o sistema opere de forma coerente entre as camadas.
+
+\subsubsection{Testes Unitários}
+
+Os testes unitários serão aplicados à camada de back-end, utilizando a biblioteca \textbf{Pytest} para o framework Flask. Eles validarão funções individuais, como cadastro e atualização de produtos, autenticação e cálculos de estoque. O foco será garantir que cada parte do código funcione de forma independente e confiável.
+
+\subsubsection{Testes de Integração}
+
+Os testes de integração validarão o fluxo completo entre front-end, back-end e banco de dados. Serão simuladas requisições enviadas pelo React via Axios e processadas pelo Flask, com persistência no MySQL. Essa etapa confirmará a correta comunicação entre as camadas e o retorno de dados consistentes.
+
+\subsubsection{Testes End-to-End}
+
+Os testes end-to-end (\textit{E2E}) simularão a experiência completa do usuário no sistema, desde o login até o registro de uma venda e a atualização automática do estoque. Ferramentas como \textbf{Cypress} ou \textbf{Selenium} poderão ser utilizadas para automatizar esses fluxos, garantindo que as principais funcionalidades se comportem conforme o esperado em ambiente de execução real.
+
+\subsection{Testes Não Funcionais}
+
+Os testes não funcionais avaliarão aspectos de desempenho, segurança e confiabilidade da aplicação. Essa categoria inclui os seguintes subtipos:
+
+\subsubsection{Testes de Performance}
+
+Medirão o tempo de resposta das operações críticas, como consultas de estoque e geração de relatórios. O objetivo é garantir que as requisições sejam processadas em até 3 segundos, mesmo sob múltiplos acessos simultâneos.
+
+\subsubsection{Testes de Carga}
+
+Os testes de carga simularão múltiplos acessos simultâneos à aplicação, avaliando o comportamento do servidor e do banco de dados sob picos de utilização. Essa análise ajudará a identificar possíveis gargalos e a otimizar o uso de recursos.
+
+\subsection{Logs e Manutenibilidade}
+
+O sistema contará com logs automáticos integrados ao back-end, registrando operações críticas como cadastros, exclusões e alterações de dados. Esses registros serão essenciais para auditoria, depuração e rastreamento de falhas. 
+
+A manutenibilidade será garantida pela adoção de código modular, documentação interna e versionamento contínuo no GitHub. Essas práticas permitirão a expansão do sistema e a correção de falhas de forma ágil e organizada.
+
+
+\subsection{Code Convention}
+
+As convenções de código adotadas no desenvolvimento do sistema \textbf{Tropical Mix} têm como finalidade garantir padronização, legibilidade e facilidade de manutenção do código. O uso de boas práticas de escrita e organização permite que o projeto seja compreendido por diferentes desenvolvedores, facilite futuras atualizações e reduza a ocorrência de erros.
+
+Durante o desenvolvimento, foram seguidas diretrizes gerais de padronização de código, aplicáveis tanto à camada de \textit{front-end} quanto à de \textit{back-end}, tais como:
+
+\begin{itemize}
+    \item \textbf{Nomenclatura de variáveis e funções:} foi adotado o padrão \textit{camelCase} (ex.: \texttt{atualizarEstoque}) em funções e variáveis, e o padrão \textit{PascalCase} (ex.: \texttt{ProdutoCard}) para componentes visuais e classes.
+    \item \textbf{Organização do código:} o sistema foi estruturado de forma modular, separando arquivos por responsabilidade — como rotas, componentes, serviços e estilos — para simplificar a manutenção;
+    \item \textbf{Formatação e espaçamento:} manteve-se uma identação padronizada e o uso consistente de espaços e quebras de linha, garantindo legibilidade e uniformidade;
+    \item \textbf{Comentários e documentação:} foram inseridos comentários explicativos em trechos de maior complexidade e docstrings descritivas nas funções principais, facilitando o entendimento da lógica do sistema;
+    \item \textbf{Controle de versão:} todas as alterações no código foram gerenciadas pelo repositório \textbf{GitHub}, permitindo rastreamento das modificações e colaboração eficiente entre os membros da equipe.
+\end{itemize}
+
+

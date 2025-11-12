@@ -1,235 +1,128 @@
-import { useEffect, useState } from "react";
-import api from "../../services/api";
-import "./style.css"; // importa o CSS separado
+import { useMemo, useState } from "react";
+import "./style.css";
 
 export default function Estoque() {
-  const [itens, setItens] = useState([]);
-  const [loading, setLoading] = useState(false);
+  // Mock simples (você pode trocar depois por chamada à API)
+  const [itens, setItens] = useState([
+    {
+      id: 1,
+      img: "https://via.placeholder.com/40x60?text=🍦",
+      nome: "Casquinha de sorvete",
+      codigo: "XXXXXXX",
+      categoria: "Casquinhas e Wafers",
+      descricao: "Descrição",
+      estoque: 50,
+      ativo: true,
+    },
+  ]);
+
   const [busca, setBusca] = useState("");
-  const [form, setForm] = useState({
-    nome: "",
-    categoria: "",
-    quantidade: "",
-    preco: "",
-  });
 
-  // Atualiza os campos do formulário
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const filtrados = useMemo(() => {
+    const q = busca.trim().toLowerCase();
+    if (!q) return itens;
+    return itens.filter((i) =>
+      `${i.nome} ${i.codigo} ${i.categoria} ${i.descricao}`
+        .toLowerCase()
+        .includes(q)
+    );
+  }, [itens, busca]);
+
+  const toggleAtivo = (id) => {
+    setItens((arr) =>
+      arr.map((i) => (i.id === id ? { ...i, ativo: !i.ativo } : i))
+    );
   };
-
-  // Busca os itens cadastrados
-  const carregarItens = async () => {
-    try {
-      setLoading(true);
-      const { data } = await api.get("/items"); // ajuste conforme seu backend
-      setItens(data || []);
-    } catch (error) {
-      alert("Erro ao carregar estoque");
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    carregarItens();
-  }, []);
-
-  // Cadastrar item
-  const cadastrarItem = async (e) => {
-    e.preventDefault();
-    if (!form.nome.trim()) return alert("Informe o nome do item.");
-    try {
-      setLoading(true);
-      const novoItem = {
-        nome: form.nome.trim(),
-        categoria: form.categoria.trim(),
-        quantidade: Number(form.quantidade || 0),
-        preco: Number(form.preco || 0),
-      };
-      const { data } = await api.post("/items", novoItem);
-      setItens([data, ...itens]);
-      setForm({ nome: "", categoria: "", quantidade: "", preco: "" });
-    } catch (error) {
-      alert("Erro ao cadastrar item");
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Excluir item
-  const excluirItem = async (id) => {
-    if (!confirm("Deseja realmente excluir este item?")) return;
-    try {
-      await api.delete(`/items/${id}`);
-      setItens(itens.filter((i) => i.id !== id));
-    } catch (error) {
-      alert("Erro ao excluir item");
-      console.error(error);
-    }
-  };
-
-  // Salvar alterações inline
-  const salvarEdicao = async (item) => {
-    try {
-      const { data } = await api.put(`/items/${item.id}`, item);
-      setItens(itens.map((i) => (i.id === item.id ? data : i)));
-      alert("Item atualizado!");
-    } catch (error) {
-      alert("Erro ao atualizar item");
-      console.error(error);
-    }
-  };
-
-  // Filtrar itens localmente
-  const listaFiltrada = itens.filter((i) =>
-    `${i.nome} ${i.categoria}`.toLowerCase().includes(busca.toLowerCase())
-  );
 
   return (
-    <div className="container">
-      <h1>Controle de Estoque</h1>
+    <div className="estoque-page">
+      {/* Top bar / logo + menu */}
+      <header className="tm-header">
+        <div className="tm-logo">🌞 Tropical <b>Mix</b></div>
+        <nav className="tm-menu">
+          <a href="#" className="muted">Início</a>
+          <a href="#" className="muted">Análise</a>
+          <a href="#" className="active">Estoque</a>
+          <a href="#" className="muted">Vendas</a>
+          <a href="#" className="muted">Fornecedores</a>
+        </nav>
+        <div className="tm-account">Minha conta 🔎</div>
+      </header>
 
-      {/* Formulário de cadastro */}
-      <form onSubmit={cadastrarItem} className="estoque-form">
-        <input
-          name="nome"
-          placeholder="Nome do item"
-          value={form.nome}
-          onChange={handleChange}
-        />
-        <input
-          name="categoria"
-          placeholder="Categoria"
-          value={form.categoria}
-          onChange={handleChange}
-        />
-        <input
-          name="quantidade"
-          placeholder="Quantidade"
-          value={form.quantidade}
-          onChange={handleChange}
-        />
-        <input
-          name="preco"
-          placeholder="Preço (R$)"
-          value={form.preco}
-          onChange={handleChange}
-        />
-        <button type="submit" disabled={loading}>
-          {loading ? "Salvando..." : "Cadastrar"}
-        </button>
-      </form>
+      <main className="tm-main">
+        {/* Título + total */}
+        <div className="tm-title-row">
+          <h1>PRODUTOS</h1>
+          <small>
+            <strong>{filtrados.length}</strong> item(s) cadastrados
+          </small>
+        </div>
 
-      {/* Campo de busca */}
-      <div className="userList">
-        <input
-          className="search"
-          placeholder="Buscar item..."
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-        />
-
-        {loading && !itens.length && (
-          <p style={{ color: "#fff" }}>Carregando...</p>
-        )}
-
-        {/* Listagem dos itens */}
-        {listaFiltrada.map((item) => (
-          <div key={item.id} className="user-card">
-            <div>
-              <p>
-                Nome:{" "}
-                <span>
-                  <input
-                    className="row-input"
-                    value={item.nome}
-                    onChange={(e) =>
-                      setItens((s) =>
-                        s.map((x) =>
-                          x.id === item.id ? { ...x, nome: e.target.value } : x
-                        )
-                      )
-                    }
-                  />
-                </span>
-              </p>
-
-              <p>
-                Categoria:{" "}
-                <span>
-                  <input
-                    className="row-input"
-                    value={item.categoria}
-                    onChange={(e) =>
-                      setItens((s) =>
-                        s.map((x) =>
-                          x.id === item.id
-                            ? { ...x, categoria: e.target.value }
-                            : x
-                        )
-                      )
-                    }
-                  />
-                </span>
-              </p>
-
-              <p>
-                Qtd.:{" "}
-                <span>
-                  <input
-                    className="row-input"
-                    value={item.quantidade}
-                    onChange={(e) =>
-                      setItens((s) =>
-                        s.map((x) =>
-                          x.id === item.id
-                            ? { ...x, quantidade: e.target.value }
-                            : x
-                        )
-                      )
-                    }
-                  />
-                </span>
-              </p>
-
-              <p>
-                Preço (R$):{" "}
-                <span>
-                  <input
-                    className="row-input"
-                    value={item.preco}
-                    onChange={(e) =>
-                      setItens((s) =>
-                        s.map((x) =>
-                          x.id === item.id
-                            ? { ...x, preco: e.target.value }
-                            : x
-                        )
-                      )
-                    }
-                  />
-                </span>
-              </p>
-            </div>
-
-            <div className="user-card-buttons">
-              <button title="Salvar" onClick={() => salvarEdicao(item)}>
-                💾
+        {/* Barra de busca e filtro */}
+        <div className="tm-search-row">
+          <div className="tm-search">
+            <span className="icon">🔍</span>
+            <input
+              placeholder="Buscar"
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+            />
+            {busca && (
+              <button className="clear" onClick={() => setBusca("")}>
+                ×
               </button>
-              <button title="Excluir" onClick={() => excluirItem(item.id)}>
-                🗑️
-              </button>
-            </div>
+            )}
           </div>
-        ))}
 
-        {!loading && !listaFiltrada.length && (
-          <p style={{ color: "#fff" }}>Nenhum item encontrado.</p>
-        )}
-      </div>
+          <button className="tm-filter">
+            Filtrar por <span className="icon">🧪</span>
+          </button>
+        </div>
+
+        {/* Tabela básica */}
+        <div className="tm-table">
+          <div className="tm-thead">
+            <div className="col img-col"></div>
+            <div className="col">Produto</div>
+            <div className="col">Código</div>
+            <div className="col">Categoria</div>
+            <div className="col">Descrição</div>
+            <div className="col estq">Estoque</div>
+            <div className="col action">Editar</div>
+            <div className="col toggle-col"></div>
+          </div>
+
+          {filtrados.map((i) => (
+            <div className="tm-row" key={i.id}>
+              <div className="col img-col">
+                <img src={i.img} alt={i.nome} />
+              </div>
+              <div className="col">{i.nome}</div>
+              <div className="col">{i.codigo}</div>
+              <div className="col">{i.categoria}</div>
+              <div className="col">{i.descricao}</div>
+              <div className="col estq">{i.estoque}</div>
+              <div className="col action">
+                <button className="link">Editar</button>
+              </div>
+              <div className="col toggle-col">
+                <label className="switch">
+                  <input
+                    type="checkbox"
+                    checked={i.ativo}
+                    onChange={() => toggleAtivo(i.id)}
+                  />
+                  <span className="slider" />
+                </label>
+              </div>
+            </div>
+          ))}
+
+          {!filtrados.length && (
+            <div className="tm-empty">Nenhum produto encontrado.</div>
+          )}
+        </div>
+      </main>
     </div>
   );
 }

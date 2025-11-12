@@ -1,11 +1,11 @@
-// Importa hooks do React para estado e memorização
+// Importa os hooks do React
 import { useMemo, useState } from "react";
-// Importa o CSS específico desta página
+// Importa o arquivo de estilos
 import "./style.css";
 
-// Componente principal da página de Estoque
-export default function Estoque() {
-  // ===== Mock inicial de itens (substitua por API depois) =====
+// ===== Componente principal Estoque =====
+function Estoque() {
+  // Lista de produtos mockada (pode ser substituída pela API futuramente)
   const [itens, setItens] = useState([
     {
       id: 1,
@@ -15,14 +15,14 @@ export default function Estoque() {
       categoria: "Casquinhas e Wafers",
       descricao: "Descrição",
       estoque: 50,
-      ativo: true, // controle do toggle
+      ativo: true,
     },
   ]);
 
-  // Estado do campo de busca
+  // Campo de busca
   const [busca, setBusca] = useState("");
 
-  // Filtragem local (não faz request)
+  // Filtra itens conforme a busca
   const filtrados = useMemo(() => {
     const q = busca.trim().toLowerCase();
     if (!q) return itens;
@@ -33,14 +33,16 @@ export default function Estoque() {
     );
   }, [itens, busca]);
 
-  // Alterna o status "ativo" do item (toggle)
+  // Alterna ativo/inativo
   const toggleAtivo = (id) => {
-    setItens((arr) => arr.map((i) => (i.id === id ? { ...i, ativo: !i.ativo } : i)));
+    setItens((arr) =>
+      arr.map((i) => (i.id === id ? { ...i, ativo: !i.ativo } : i))
+    );
   };
 
   return (
     <div className="estoque-page">
-      {/* Título e contagem simples */}
+      {/* Título */}
       <div className="title-row">
         <h1>PRODUTOS</h1>
         <small>
@@ -48,7 +50,7 @@ export default function Estoque() {
         </small>
       </div>
 
-      {/* Barra de busca + botão "Filtrar por" (somente visual) */}
+      {/* Barra de busca e botão de filtro */}
       <div className="search-row">
         <div className="searchbox">
           <span className="icon">🔍</span>
@@ -69,9 +71,8 @@ export default function Estoque() {
         </button>
       </div>
 
-      {/* Tabela minimalista */}
+      {/* Tabela */}
       <div className="table">
-        {/* Cabeçalho */}
         <div className="thead">
           <div className="col img-col"></div>
           <div className="col">Produto</div>
@@ -83,7 +84,6 @@ export default function Estoque() {
           <div className="col toggle-col"></div>
         </div>
 
-        {/* Linhas de dados */}
         {filtrados.map((i) => (
           <div className="row" key={i.id}>
             <div className="col img-col">
@@ -98,7 +98,6 @@ export default function Estoque() {
               <button className="link">Editar</button>
             </div>
             <div className="col toggle-col">
-              {/* Toggle custom simples */}
               <label className="switch">
                 <input
                   type="checkbox"
@@ -111,7 +110,6 @@ export default function Estoque() {
           </div>
         ))}
 
-        {/* Estado vazio */}
         {!filtrados.length && (
           <div className="empty">Nenhum produto encontrado.</div>
         )}
@@ -119,3 +117,6 @@ export default function Estoque() {
     </div>
   );
 }
+
+// Exporta o componente para uso no App.jsx
+export default Estoque;

@@ -1,15 +1,17 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";         // ⬅️ nova Home
 import Cadastro from "./pages/Cadastro";
 import Estoque from "./pages/Estoque";
-import Vendas from "./pages/Vendas"; // <-- import da nova tela
+import Vendas from "./pages/Vendas";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Cadastro />} />
+        <Route path="/" element={<Home />} />        {/* Home simples */}
+        <Route path="/cadastro" element={<Cadastro />} />
         <Route path="/estoque" element={<Estoque />} />
-        <Route path="/vendas" element={<Vendas />} /> {/* <-- nova rota */}
+        <Route path="/vendas" element={<Vendas />} />
       </Routes>
     </BrowserRouter>
   );

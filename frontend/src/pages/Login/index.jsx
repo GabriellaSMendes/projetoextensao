@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import api from '../../services/api'
 import { Link } from "react-router-dom";
 
-function Home() {
+function Login() {
 
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [users, setUsers] = useState([]); // lista de usuários
@@ -104,13 +104,6 @@ function Home() {
           onChange={handleChange}
         />
 
-        {/* botão para ir à página de Estoque */}
-        <Link to="/estoque">
-          <button type="button">Ir para Estoque</button>
-        </Link>
-
-        <button className='button-login' type='button' onClick={handleLogin}>Login</button>
-        <button className='button-register' type='submit'>Cadastrar</button>
       </form>
 
       {/* lista de usuários */}
@@ -132,4 +125,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default Login;

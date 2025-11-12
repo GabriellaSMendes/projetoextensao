@@ -8,7 +8,7 @@ function Home() {
       <p className="home-sub">Escolha uma seção para começar:</p>
 
       <nav className="home-menu">
-        <Link to="/cadastro" className="home-btn">Cadastro</Link>
+        <Link to="/login" className="home-btn">Login</Link>
         <Link to="/estoque" className="home-btn">Estoque</Link>
         <Link to="/vendas" className="home-btn">Vendas</Link>
       </nav>

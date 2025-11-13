@@ -106,9 +106,6 @@ function Vendas() {
           )}
         </div>
 
-        <button className="filter-btn">
-          Filtrar por <span className="icon">🧪</span>
-        </button>
       </div>
 
       {/* Tabela */}

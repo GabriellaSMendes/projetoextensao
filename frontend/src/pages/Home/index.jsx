@@ -50,9 +50,6 @@ function Home() {
         </nav>
       </main>
 
-      <footer className="home-footer">
-        <span>Sistema acadêmico — Tropical Mix</span>
-      </footer>
     </div>
   );
 }

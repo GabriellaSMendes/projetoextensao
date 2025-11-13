@@ -6,7 +6,7 @@ function Estoque() {
   const [produtos, setProdutos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [busca, setBusca] = useState("");
-
+  const [produtoEditando, setProdutoEditando] = useState(null);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -60,14 +60,33 @@ function Estoque() {
 
   //filtro
   const filtrados = produtos.filter((p) =>
-    `${p.nome_produto} ${p.marca} ${p.nome_categoria}`
+    `${p.nome_produto} ${p.marca} ${p.nome}`
       .toLowerCase()
       .includes(busca.toLowerCase())
   );
 
-  //hander
+  //handler de inputs
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  //atualizar o produto (botão editar)
+  const atualizarProduto = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      await api.put(`/estoque/produtos/${produtoEditando.id_produto}`, formData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      alert("Produto atualizado!");
+      setModalOpen(false);
+      carregarProdutos();
+      setProdutoEditando(null);
+    } catch (error) {
+      console.log(error);
+      alert("Erro ao atualizar produto");
+    }
   };
 
   // salvar produto
@@ -99,7 +118,6 @@ function Estoque() {
     }
   };
 
-
   return (
     <div className="estoque-page">
 
@@ -111,7 +129,19 @@ function Estoque() {
           <small><strong>{filtrados.length}</strong> itens listados</small>
         </div>
 
-        <button className="add-btn" onClick={() => setModalOpen(true)}>
+        <button className="add-btn" onClick={() => {
+          setProdutoEditando(null);
+          setFormData({
+            nome_produto: "",
+            sabor: "",
+            marca: "",
+            quantidade: "",
+            data_vencimento: "",
+            preco_unitario: "",
+            id_categoria: "",
+          });
+          setModalOpen(true);
+        }}>
           + Adicionar novo
         </button>
 
@@ -159,63 +189,113 @@ function Estoque() {
             </div>
 
             <div className="col">{p.nome_produto}</div>
-            <div className="col">{p.nome_categoria}</div>
+            <div className="col">{p.nome}</div>
             <div className="col">{p.marca}</div>
             <div className="col center">{p.qtdd_atual}</div>
 
             <div className="col action">
-              <button className="edit-btn">Editar</button>
+              <button
+                className="edit-btn"
+                onClick={() => {
+                  setProdutoEditando(p);
+                  setFormData({
+                    nome_produto: p.nome_produto,
+                    sabor: p.sabor || "",
+                    marca: p.marca || "",
+                    quantidade: p.qtdd_atual,
+                    data_vencimento: p.data_vencimento || "",
+                    preco_unitario: p.preco_unitario,
+                    id_categoria: p.id_categoria || ""
+                  });
+                  setModalOpen(true);
+                }}
+              >
+                Editar
+              </button>
             </div>
           </div>
         ))}
       </div>
 
-      {/* model - forms p cadastro de novo produto*/}
+      {/* modal - forms p cadastro/edição */}
       {modalOpen && (
         <div className="modal-overlay">
           <div className="modal-box">
 
-            <h2>Novo Produto</h2>
+            {/* título dinâmico */}
+            <h2>{produtoEditando ? "Editar Produto" : "Novo Produto"}</h2>
 
             <div className="form-grid">
 
               <div>
                 <label>Nome do produto</label>
-                <input name="nome_produto" onChange={handleChange} />
+                <input
+                  name="nome_produto"
+                  value={formData.nome_produto}
+                  onChange={handleChange}
+                />
               </div>
 
               <div>
                 <label>Sabor</label>
-                <input name="sabor" onChange={handleChange} />
+                <input
+                  name="sabor"
+                  value={formData.sabor}
+                  onChange={handleChange}
+                />
               </div>
 
               <div>
                 <label>Marca</label>
-                <input name="marca" onChange={handleChange} />
+                <input
+                  name="marca"
+                  value={formData.marca}
+                  onChange={handleChange}
+                />
               </div>
 
               <div>
-                <label>Quantidade inicial</label>
-                <input type="number" name="quantidade" onChange={handleChange} />
+                <label>Quantidade</label>
+                <input
+                  type="number"
+                  name="quantidade"
+                  value={formData.quantidade}
+                  onChange={handleChange}
+                />
               </div>
 
               <div>
                 <label>Preço unitário</label>
-                <input type="number" step="0.01" name="preco_unitario" onChange={handleChange} />
+                <input
+                  type="number"
+                  step="0.01"
+                  name="preco_unitario"
+                  value={formData.preco_unitario}
+                  onChange={handleChange}
+                />
               </div>
 
               <div>
                 <label>Data de vencimento</label>
-                <input type="date" name="data_vencimento" onChange={handleChange} />
+                <input
+                  type="date"
+                  name="data_vencimento"
+                  value={formData.data_vencimento}
+                  onChange={handleChange}
+                />
               </div>
 
               <div>
                 <label>Categoria</label>
-                <select name="id_categoria" onChange={handleChange}>
+                <select
+                  name="id_categoria"
+                  value={formData.id_categoria}
+                  onChange={handleChange}
+                >
                   <option value="">Selecione...</option>
                   {categorias.map((c) => (
                     <option key={c.id_categoria} value={c.id_categoria}>
-                      {c.nome_categoria}
+                      {c.nome}
                     </option>
                   ))}
                 </select>
@@ -224,8 +304,19 @@ function Estoque() {
             </div>
 
             <div className="modal-actions">
-              <button className="cancel-btn" onClick={() => setModalOpen(false)}>Cancelar</button>
-              <button className="save-btn" onClick={salvarProduto}>Salvar</button>
+              <button className="cancel-btn" onClick={() => setModalOpen(false)}>
+                Cancelar
+              </button>
+
+              <button
+                className="save-btn"
+                onClick={() => {
+                  if (produtoEditando) atualizarProduto();
+                  else salvarProduto();
+                }}
+              >
+                Salvar
+              </button>
             </div>
 
           </div>

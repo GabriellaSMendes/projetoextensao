@@ -56,7 +56,7 @@ def listar_produtos():
             "marca": p.marca,
             "preco_unitario": str(p.preco_unitario),
             "id_categoria": p.id_categoria,
-            "nome_categoria": p.categoria.nome if p.categoria else None,
+            "nome": p.categoria.nome if p.categoria else None,
             "qtdd_atual": e.qtdd_atual
         })
     return jsonify(produtos=lista_json), 200

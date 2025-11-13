@@ -7,6 +7,7 @@ import Perfil from "./pages/Perfil"
 import Fornecedores from "./pages/Fornecedores"
 import Cadastro from "./pages/Cadastro"
 import Navbar from "./components/navbar";
+import Relatorio from "./pages/Relatorio"
 
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
         <Route path="/perfil" element={<Perfil />}></Route>
         <Route path="/fornecedores" element={<Fornecedores />}></Route>
         <Route path="/cadastro" element={<Cadastro />}></Route>
+        <Route path="/relatorio" element={<Relatorio />}></Route>
       </Routes>
     </BrowserRouter>
   );

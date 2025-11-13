@@ -14,6 +14,7 @@ function Vendas() {
       valor: 100.0,
       notaFiscal: "#NF-0001",
       metodoPagamento: "Cartão de crédito",
+      ativa: true,
     },
     {
       id: 2,
@@ -23,12 +24,14 @@ function Vendas() {
       valor: 50.0,
       notaFiscal: "#NF-0002",
       metodoPagamento: "PIX",
+      ativa: true,
     },
   ]);
 
   const [busca, setBusca] = useState("");
 
   // Filtro da busca (cliente, itens, método)
+  // Filtro da busca (procura em cliente, itens e método)
   const filtradas = useMemo(() => {
     const q = busca.trim().toLowerCase();
     if (!q) return vendas;
@@ -38,6 +41,13 @@ function Vendas() {
   }, [vendas, busca]);
 
   // Formata em reais
+      `${v.cliente} ${v.itens} ${v.metodoPagamento}`
+        .toLowerCase()
+        .includes(q)
+    );
+  }, [vendas, busca]);
+
+  // Formata valor em reais
   const formatR$ = (v) =>
     (Number(v) || 0).toLocaleString("pt-BR", {
       style: "currency",
@@ -48,6 +58,7 @@ function Vendas() {
   const totalMes = vendas.length;
 
   // Editar venda (valor + método de pagamento via prompt)
+  // Editar venda (altera valor e método de pagamento via prompt)
   const editarVenda = (id) => {
     const venda = vendas.find((v) => v.id === id);
     if (!venda) return;
@@ -84,6 +95,9 @@ function Vendas() {
     setVendas((lista) => lista.filter((v) => v.id !== id));
   };
 
+  // Total de vendas (só para exibir no cabeçalho)
+  const totalMes = vendas.length;
+
   return (
     <div className="vendas-page">
       {/* Cabeçalho igual ao layout: VENDAS + texto do lado */}
@@ -95,6 +109,13 @@ function Vendas() {
       </div>
 
       {/* Barra de busca + botão Filtrar por */}
+        <div>
+          <h1>VENDAS</h1>
+          <small>{totalMes} venda(s) no mês atual</small>
+        </div>
+      </div>
+
+      {/* Barra de busca + botão de filtro */}
       <div className="search-row">
         <div className="searchbox">
           <span className="icon">🔍</span>
@@ -113,17 +134,23 @@ function Vendas() {
         <button className="filter-btn">
           Filtrar por <span className="icon">🧪</span>
         </button> */}
+
+        <button className="filter-btn">
+          Filtrar por <span className="icon">🧪</span>
+        </button>
       </div>
 
       {/* Tabela */}
       <div className="table">
         {/* Cabeçalho da tabela */}
+        {/* Cabeçalho da tabela igual ao da imagem */}
         <div className="thead">
           <div className="col">Data da venda</div>
           <div className="col">Cliente</div>
           <div className="col">Itens</div>
           <div className="col right">Valor da venda</div>
           {/* <div className="col">Nota fiscal</div> */}
+          <div className="col">Nota fiscal</div>
           <div className="col">Método pagamento</div>
           <div className="col action">Editar</div>
           <div className="col center">Excluir</div>
@@ -139,6 +166,9 @@ function Vendas() {
             {/* <div className="col">
               <button className="link">Acessar nota fiscal</button>
             </div> */}
+            <div className="col">
+              <button className="link">Acessar nota fiscal</button>
+            </div>
             <div className="col">{v.metodoPagamento}</div>
             <div className="col action">
               <button className="link" onClick={() => editarVenda(v.id)}>

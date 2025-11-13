@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 function Home() {
   return (
     <div className="home">
-      {/* faixa superior com logo e nome */}
+      {/* faixa superior com logo e nome
       <header className="home-header">
         <div className="home-logo">
           <span className="home-logo-icon">🌴</span>
@@ -15,7 +15,7 @@ function Home() {
             </span>
           </div>
         </div>
-      </header>
+      </header> */}
 
       {/* conteúdo central */}
       <main className="home-content">
@@ -50,9 +50,6 @@ function Home() {
         </nav>
       </main>
 
-      <footer className="home-footer">
-        <span>Sistema acadêmico — Tropical Mix</span>
-      </footer>
     </div>
   );
 }

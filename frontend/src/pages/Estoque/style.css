@@ -1,0 +1,232 @@
+.estoque-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.estoque-page {
+  min-height: 100vh;
+  background: #fff;
+  padding: 32px;
+  font-family: "Poppins", sans-serif;
+  color: #4e1633;
+}
+
+/* TÍTULO */
+.estoque-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.estoque-title h1 {
+  font-size: 32px;
+  color: #4e1633;
+}
+
+.estoque-title small {
+  color: #7b1f50;
+}
+
+/* Botão */
+.add-btn {
+  background: #ffd262;
+  color: #4e1633;
+  padding: 8px 16px;          
+  border: none;
+  border-radius: 6px;         
+  font-weight: 600;
+  font-size: 14px;            
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);  
+}
+
+.add-btn:hover {
+  background: #ffca40;
+  transform: translateY(-2px);             
+}
+
+/* BUSCA */
+.estoque-search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.searchbox {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #eee;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.searchbox input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+}
+
+.searchbox .clear {
+  background: #ddd;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.filter-btn {
+  background: #7b1f50;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* TABELA */
+.estoque-table {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.thead, .row {
+  display: grid;
+  grid-template-columns: 2fr 1.4fr 1.2fr 0.6fr 0.8fr;
+  padding: 12px;
+  align-items: center;
+}
+
+.thead {
+  background: #f3e6ef;
+  color: #4e1633;
+  font-weight: 600;
+  border-bottom: 2px solid #c36196;
+}
+
+.row:nth-child(even) {
+  background: #fafafa;
+}
+
+.col {
+  padding: 8px;
+}
+
+.col.center {
+  text-align: center;
+}
+
+.col.action {
+  text-align: center;
+}
+
+.edit-btn {
+  background: #ffd262;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.empty, .loading {
+  padding: 20px;
+  text-align: center;
+  color: #7b1f50;
+}
+
+/* Modal geral */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-box {
+  background: white;
+  width: 40%;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.modal-box h2 {
+  color: #4e1633;
+}
+
+/* Form grid */
+.form-grid {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.form-grid label {
+  font-size: 14px;
+  color: #4e1633;
+  font-weight: 600;
+}
+
+.form-grid input,
+.form-grid select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* Ações */
+.modal-actions {
+  margin-top: 25px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.cancel-btn {
+  background: #ccc;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.save-btn {
+  background: #4e1633;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+/* Placeholder da imagem */
+.placeholder-img {
+  width: 40px;
+  height: 40px;
+  background: #e0e0e0;
+  border-radius: 6px;
+}

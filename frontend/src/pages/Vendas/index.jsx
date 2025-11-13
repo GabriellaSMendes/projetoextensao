@@ -4,73 +4,101 @@ import "./style.css";
 
 // ===== Componente principal =====
 function Vendas() {
-  // Dados mockados de exemplo
-  const [itens, setItens] = useState([
+  // Dados mockados de exemplo (uma venda por linha da tabela)
+  const [vendas, setVendas] = useState([
     {
       id: 1,
-      img: "https://via.placeholder.com/40x60?text=🍦",
-      nome: "Casquinha de sorvete",
-      codigo: "C-0001",
-      categoria: "Casquinhas e Wafers",
-      preco: 2.9,
-      quantidade: 5,
-      ativo: true,
+      data: "01/11/2025",
+      cliente: "Maria Silva",
+      itens: "Casquinha de sorvete, Calda de chocolate",
+      valor: 100.0,
+      notaFiscal: "#NF-0001",
+      metodoPagamento: "Cartão de crédito",
+      ativa: true,
     },
     {
       id: 2,
-      img: "https://via.placeholder.com/40x60?text=🍫",
-      nome: "Calda de chocolate",
-      codigo: "S-0102",
-      categoria: "Coberturas",
-      preco: 12.5,
-      quantidade: 2,
-      ativo: true,
+      data: "05/11/2025",
+      cliente: "João Souza",
+      itens: "Casquinha de sorvete",
+      valor: 50.0,
+      notaFiscal: "#NF-0002",
+      metodoPagamento: "PIX",
+      ativa: true,
     },
   ]);
 
   const [busca, setBusca] = useState("");
 
-  // Filtro da busca
-  const filtrados = useMemo(() => {
+  // Filtro da busca (procura em cliente, itens e método)
+  const filtradas = useMemo(() => {
     const q = busca.trim().toLowerCase();
-    if (!q) return itens;
-    return itens.filter((i) =>
-      `${i.nome} ${i.codigo} ${i.categoria}`.toLowerCase().includes(q)
+    if (!q) return vendas;
+    return vendas.filter((v) =>
+      `${v.cliente} ${v.itens} ${v.metodoPagamento}`
+        .toLowerCase()
+        .includes(q)
     );
-  }, [itens, busca]);
+  }, [vendas, busca]);
 
-  // Alterna ativo/inativo
-  const toggleAtivo = (id) => {
-    setItens((arr) =>
-      arr.map((i) => (i.id === id ? { ...i, ativo: !i.ativo } : i))
+  // Formata valor em reais
+  const formatR$ = (v) =>
+    (Number(v) || 0).toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+
+  // Editar venda (altera valor e método de pagamento via prompt)
+  const editarVenda = (id) => {
+    const venda = vendas.find((v) => v.id === id);
+    if (!venda) return;
+
+    const novoValorStr = prompt(
+      "Informe o novo valor da venda:",
+      String(venda.valor)
+    );
+    if (novoValorStr === null) return;
+    const novoValor = Number(novoValorStr.replace(",", "."));
+    if (isNaN(novoValor) || novoValor < 0) {
+      alert("Valor inválido.");
+      return;
+    }
+
+    const novoMetodo =
+      prompt(
+        "Informe o novo método de pagamento:",
+        venda.metodoPagamento
+      ) ?? venda.metodoPagamento;
+
+    setVendas((lista) =>
+      lista.map((v) =>
+        v.id === id
+          ? { ...v, valor: novoValor, metodoPagamento: novoMetodo }
+          : v
+      )
     );
   };
 
-  // Formata em reais
-  const formatR$ = (v) =>
-    (Number(v) || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  // Excluir venda
+  const excluirVenda = (id) => {
+    if (!confirm("Deseja realmente excluir esta venda?")) return;
+    setVendas((lista) => lista.filter((v) => v.id !== id));
+  };
 
-  // Soma total
-  const totalGeral = useMemo(
-    () =>
-      filtrados.reduce(
-        (acc, i) => acc + (Number(i.preco) || 0) * (Number(i.quantidade) || 0),
-        0
-      ),
-    [filtrados]
-  );
+  // Total de vendas (só para exibir no cabeçalho)
+  const totalMes = vendas.length;
 
   return (
     <div className="vendas-page">
       {/* Cabeçalho */}
       <div className="title-row">
-        <h1>VENDAS</h1>
-        <small>
-          <strong>{filtrados.length}</strong> produto(s) listados
-        </small>
+        <div>
+          <h1>VENDAS</h1>
+          <small>{totalMes} venda(s) no mês atual</small>
+        </div>
       </div>
 
-      {/* Busca */}
+      {/* Barra de busca + botão de filtro */}
       <div className="search-row">
         <div className="searchbox">
           <span className="icon">🔍</span>
@@ -85,56 +113,55 @@ function Vendas() {
             </button>
           )}
         </div>
-        <div className="total-tag">Total: {formatR$(totalGeral)}</div>
+
+        <button className="filter-btn">
+          Filtrar por <span className="icon">🧪</span>
+        </button>
       </div>
 
       {/* Tabela */}
       <div className="table">
+        {/* Cabeçalho da tabela igual ao da imagem */}
         <div className="thead">
-          <div className="col img-col"></div>
-          <div className="col">Produto</div>
-          <div className="col">Código</div>
-          <div className="col">Categoria</div>
-          <div className="col right">Preço</div>
-          <div className="col center">Qtd.</div>
-          <div className="col right">Subtotal</div>
+          <div className="col">Data da venda</div>
+          <div className="col">Cliente</div>
+          <div className="col">Itens</div>
+          <div className="col right">Valor da venda</div>
+          <div className="col">Nota fiscal</div>
+          <div className="col">Método pagamento</div>
           <div className="col action">Editar</div>
-          <div className="col toggle-col"></div>
+          <div className="col center">Excluir</div>
         </div>
 
-        {filtrados.map((i) => {
-          const subtotal =
-            (Number(i.preco) || 0) * (Number(i.quantidade) || 0);
-          return (
-            <div className="row" key={i.id}>
-              <div className="col img-col">
-                <img src={i.img} alt={i.nome} />
-              </div>
-              <div className="col">{i.nome}</div>
-              <div className="col">{i.codigo}</div>
-              <div className="col">{i.categoria}</div>
-              <div className="col right">{formatR$(i.preco)}</div>
-              <div className="col center">{i.quantidade}</div>
-              <div className="col right">{formatR$(subtotal)}</div>
-              <div className="col action">
-                <button className="link">Editar</button>
-              </div>
-              <div className="col toggle-col">
-                <label className="switch">
-                  <input
-                    type="checkbox"
-                    checked={i.ativo}
-                    onChange={() => toggleAtivo(i.id)}
-                  />
-                  <span className="slider" />
-                </label>
-              </div>
+        {/* Linhas */}
+        {filtradas.map((v) => (
+          <div className="row" key={v.id}>
+            <div className="col">{v.data}</div>
+            <div className="col">{v.cliente}</div>
+            <div className="col">{v.itens}</div>
+            <div className="col right">{formatR$(v.valor)}</div>
+            <div className="col">
+              <button className="link">Acessar nota fiscal</button>
             </div>
-          );
-        })}
+            <div className="col">{v.metodoPagamento}</div>
+            <div className="col action">
+              <button className="link" onClick={() => editarVenda(v.id)}>
+                Editar
+              </button>
+            </div>
+            <div className="col center">
+              <button
+                className="delete-btn"
+                onClick={() => excluirVenda(v.id)}
+              >
+                ✖
+              </button>
+            </div>
+          </div>
+        ))}
 
-        {!filtrados.length && (
-          <div className="empty">Nenhum produto encontrado.</div>
+        {!filtradas.length && (
+          <div className="empty">Nenhuma venda encontrada.</div>
         )}
       </div>
     </div>

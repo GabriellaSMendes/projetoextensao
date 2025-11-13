@@ -27,7 +27,7 @@ function Vendas() {
       ativa: true,
     },
   ]);
-
+  // Estado da busca
   const [busca, setBusca] = useState("");
 
   // Filtro da busca (procura em cliente, itens e método)

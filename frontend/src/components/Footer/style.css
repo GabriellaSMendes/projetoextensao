@@ -1,0 +1,14 @@
+.footer {
+  background-color: #4e1633; /* um roxo mais escuro para dar contraste */
+  color: white;
+  text-align: center;
+  padding: 15px 0;
+  font-size: 14px;
+  font-weight: 500;
+  width: 100%;
+  margin-top: 40px; /* dá espaço do conteúdo */
+}
+
+.footer p {
+  margin: 0;
+}

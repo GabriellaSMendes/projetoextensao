@@ -1,12 +1,19 @@
-*{
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Poppins", sans-serif;  
+  font-family: "Poppins", sans-serif;
 }
 
-body{
+body {
   min-height: 100vh;
   width: 100vw;
-  background: linear-gradient(100deg, #363467 0%, rgba(20, 29, 79, 0.8) 100%);
+  background-color: #FFFFFF !important; 
+  overflow-x: hidden; 
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }

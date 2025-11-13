@@ -8,6 +8,7 @@ import Fornecedores from "./pages/Fornecedores"
 import Cadastro from "./pages/Cadastro"
 import Navbar from "./components/navbar";
 import Relatorio from "./pages/Relatorio"
+import Footer from "./components/Footer/Footer";
 
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
         <Route path="/cadastro" element={<Cadastro />}></Route>
         <Route path="/relatorio" element={<Relatorio />}></Route>
       </Routes>
+      <Footer />
     </BrowserRouter>
   );
 }

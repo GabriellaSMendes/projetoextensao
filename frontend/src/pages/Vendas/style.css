@@ -1,38 +1,54 @@
+/* ===== PÁGINA GERAL ===== */
 .vendas-page {
-  background: #fff;
   min-height: 100vh;
-  padding: 20px;
-  font-family: system-ui, Arial, sans-serif;
+  padding: 24px 20px;
+  background: #ffffff;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: #222;
 }
 
-/* título */
+/* ===== TÍTULO / CONTADOR ===== */
 .title-row {
   display: flex;
   align-items: baseline;
-  gap: 16px;
-  margin-bottom: 14px;
+  gap: 8px;
+  margin-bottom: 16px;
 }
-.title-row h1 { font-size: 32px; letter-spacing: .5px; }
-.title-row small { color: #666; }
 
-/* busca e total */
+.title-row h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.title-row .subtitle {
+  font-size: 14px;
+  color: #555;
+}
+
+/* ===== BARRA DE BUSCA + FILTRO ===== */
 .search-row {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 8px 0 16px;
+  margin-bottom: 20px;
 }
+
 .searchbox {
   flex: 1;
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #eee;
-  border-radius: 8px;
-  padding: 8px;
+  background: #f1f1f1;
+  border-radius: 10px;
+  padding: 8px 14px;
+  border: 1px solid #e1e1e1;
 }
-.searchbox .icon { opacity: .7; }
+
+.searchbox .icon {
+  opacity: 0.7;
+}
+
 .searchbox input {
   flex: 1;
   border: none;
@@ -40,101 +56,135 @@
   background: transparent;
   font-size: 14px;
 }
+
 .searchbox .clear {
   border: none;
-  background: #ddd;
+  background: #e0e0e0;
   border-radius: 6px;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   cursor: pointer;
-}
-.total-tag {
-  background: #f4f4f4;
-  border: 1px solid #e6e6e6;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* tabela */
-.table {
-  border: 1px solid #ddd;
+/* Botão "Filtrar por" à direita */
+.filter-btn {
+  border: 1px solid #dcdcdc;
+  background: #f1f1f1;
   border-radius: 6px;
-  overflow: hidden;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
-.thead, .row {
+
+/* ===== TABELA ===== */
+.table {
+  margin-top: 4px;
+  border-radius: 8px;
+  border: 1px solid #e3e3e3;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+/* Cabeçalho e linhas usam grid */
+.thead,
+.row {
   display: grid;
-  grid-template-columns: 64px 1.2fr .9fr 1.2fr .8fr .6fr .9fr .6fr 64px;
+  grid-template-columns: 1.1fr 1.4fr 1.6fr 1.1fr 1.3fr 1.2fr 0.7fr 0.5fr;
   align-items: center;
 }
+
+/* Cabeçalho */
 .thead {
-  background: #f4f4f4;
-  color: #333;
+  background: #f6f6f6;
   font-weight: 700;
   font-size: 14px;
-}
-.thead .col, .row .col {
-  padding: 12px;
-  border-right: 1px solid #e9e9e9;
-}
-.row:nth-child(even) { background: #fafafa; }
-
-/* alinhamentos */
-.col.img-col { text-align: center; }
-.col.center { text-align: center; }
-.col.right { text-align: right; }
-.col.action { text-align: center; }
-.col.toggle-col { text-align: center; }
-
-/* imagem */
-.row img {
-  width: 40px;
-  height: 60px;
-  object-fit: cover;
-  border-radius: 4px;
+  color: #333;
+  border-bottom: 1px solid #e2e2e2;
 }
 
-/* botão editar */
+.thead .col {
+  padding: 12px 16px;
+}
+
+/* Linhas */
+.row {
+  font-size: 14px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.row .col {
+  padding: 14px 16px;
+}
+
+/* alinhamentos especiais */
+.col.right {
+  text-align: right;
+}
+.col.center {
+  text-align: center;
+}
+.col.action {
+  text-align: center;
+}
+
+/* ===== LINKS / BOTÕES ===== */
+
+/* "Acessar nota fiscal" e "Editar" */
 .link {
-  background: transparent;
-  color: #6b1e77;
   border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
   cursor: pointer;
-  font-weight: 700;
+  color: #6b1e77;          /* roxo usado nas outras telas */
   text-decoration: underline;
+  font-size: 14px;
+  font-weight: 600;
 }
 
-/* vazio */
+/* Botão de excluir (X) */
+.delete-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* Mensagem de tabela vazia */
 .empty {
-  padding: 20px;
+  padding: 18px 16px;
   text-align: center;
   color: #666;
+  font-size: 14px;
 }
 
-/* toggle */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 44px;
-  height: 24px;
+/* ===== RESPONSIVO BÁSICO ===== */
+@media (max-width: 900px) {
+  .title-row h1 {
+    font-size: 26px;
+  }
+
+  .thead,
+  .row {
+    font-size: 13px;
+  }
+
+  .thead .col,
+  .row .col {
+    padding: 10px 8px;
+  }
 }
-.switch input { display: none; }
-.slider {
-  position: absolute;
-  inset: 0;
-  background-color: #cfcfcf;
-  border-radius: 24px;
-  transition: .2s;
-}
-.slider:before {
-  content: "";
-  position: absolute;
-  height: 18px; width: 18px;
-  left: 3px; top: 3px;
-  background: white;
-  border-radius: 50%;
-  transition: .2s;
-  box-shadow: 0 1px 2px rgba(0,0,0,.2);
-}
-.switch input:checked + .slider { background-color: #7ddc6b; }
-.switch input:checked + .slider:before { transform: translateX(20px); }

@@ -1,31 +1,106 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";   
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
+import Home from "./pages/Home";
 import Estoque from "./pages/Estoque";
 import Vendas from "./pages/Vendas";
-import Home from "./pages/Home";
-import Perfil from "./pages/Perfil"
-import Fornecedores from "./pages/Fornecedores"
-import Cadastro from "./pages/Cadastro"
+import Perfil from "./pages/Perfil";
+import Fornecedores from "./pages/Fornecedores";
+import Cadastro from "./pages/Cadastro";
+import Relatorio from "./pages/Relatorio";
 import Navbar from "./components/navbar";
-import Relatorio from "./pages/Relatorio"
 import Footer from "./components/Footer/Footer";
 
+// ROTA PROTEGIDA
+function ProtectedRoute({ children }) {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    return <Navigate to="/" replace />;
+  }
+
+  return (
+    <>
+      <Navbar />
+      {children}
+      <Footer />
+    </>
+  );
+}
 
 function App() {
   return (
     <BrowserRouter>
-      <Navbar />
       <Routes>
-        <Route path="/" element={<Home />} />  
-        <Route path="/login" element={<Login />} />
-        <Route path="/estoque" element={<Estoque />} />
-        <Route path="/vendas" element={<Vendas />} />
-        <Route path="/perfil" element={<Perfil />}></Route>
-        <Route path="/fornecedores" element={<Fornecedores />}></Route>
-        <Route path="/cadastro" element={<Cadastro />}></Route>
-        <Route path="/relatorio" element={<Relatorio />}></Route>
+
+        {/* Login */}
+        <Route path="/" element={<Login />} />
+
+        {/* Home */}
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rotas Protegidas */}
+        <Route
+          path="/estoque"
+          element={
+            <ProtectedRoute>
+              <Estoque />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/vendas"
+          element={
+            <ProtectedRoute>
+              <Vendas />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/perfil"
+          element={
+            <ProtectedRoute>
+              <Perfil />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/fornecedores"
+          element={
+            <ProtectedRoute>
+              <Fornecedores />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/cadastro"
+          element={
+            <ProtectedRoute>
+              <Cadastro />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/relatorio"
+          element={
+            <ProtectedRoute>
+              <Relatorio />
+            </ProtectedRoute>
+          }
+        />
+
       </Routes>
-      <Footer />
     </BrowserRouter>
   );
 }

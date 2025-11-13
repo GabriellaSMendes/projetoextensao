@@ -30,11 +30,17 @@ function Vendas() {
 
   const [busca, setBusca] = useState("");
 
+  // Filtro da busca (cliente, itens, método)
   // Filtro da busca (procura em cliente, itens e método)
   const filtradas = useMemo(() => {
     const q = busca.trim().toLowerCase();
     if (!q) return vendas;
     return vendas.filter((v) =>
+      `${v.cliente} ${v.itens} ${v.metodoPagamento}`.toLowerCase().includes(q)
+    );
+  }, [vendas, busca]);
+
+  // Formata em reais
       `${v.cliente} ${v.itens} ${v.metodoPagamento}`
         .toLowerCase()
         .includes(q)
@@ -48,6 +54,10 @@ function Vendas() {
       currency: "BRL",
     });
 
+  // Total de vendas no mês (para o cabeçalho)
+  const totalMes = vendas.length;
+
+  // Editar venda (valor + método de pagamento via prompt)
   // Editar venda (altera valor e método de pagamento via prompt)
   const editarVenda = (id) => {
     const venda = vendas.find((v) => v.id === id);
@@ -90,8 +100,15 @@ function Vendas() {
 
   return (
     <div className="vendas-page">
-      {/* Cabeçalho */}
+      {/* Cabeçalho igual ao layout: VENDAS + texto do lado */}
       <div className="title-row">
+        <h1>VENDAS</h1>
+        <span className="subtitle">
+          {totalMes} venda(s) no mês atual
+        </span>
+      </div>
+
+      {/* Barra de busca + botão Filtrar por */}
         <div>
           <h1>VENDAS</h1>
           <small>{totalMes} venda(s) no mês atual</small>
@@ -113,6 +130,10 @@ function Vendas() {
             </button>
           )}
         </div>
+{/* 
+        <button className="filter-btn">
+          Filtrar por <span className="icon">🧪</span>
+        </button> */}
 
         <button className="filter-btn">
           Filtrar por <span className="icon">🧪</span>
@@ -121,12 +142,14 @@ function Vendas() {
 
       {/* Tabela */}
       <div className="table">
+        {/* Cabeçalho da tabela */}
         {/* Cabeçalho da tabela igual ao da imagem */}
         <div className="thead">
           <div className="col">Data da venda</div>
           <div className="col">Cliente</div>
           <div className="col">Itens</div>
           <div className="col right">Valor da venda</div>
+          {/* <div className="col">Nota fiscal</div> */}
           <div className="col">Nota fiscal</div>
           <div className="col">Método pagamento</div>
           <div className="col action">Editar</div>
@@ -140,6 +163,9 @@ function Vendas() {
             <div className="col">{v.cliente}</div>
             <div className="col">{v.itens}</div>
             <div className="col right">{formatR$(v.valor)}</div>
+            {/* <div className="col">
+              <button className="link">Acessar nota fiscal</button>
+            </div> */}
             <div className="col">
               <button className="link">Acessar nota fiscal</button>
             </div>
@@ -168,5 +194,5 @@ function Vendas() {
   );
 }
 
-// Exporta para uso no App.jsx
+// Exporta para uso no App
 export default Vendas;

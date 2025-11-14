@@ -1,36 +1,66 @@
-# RODAR O CÓDIGO (por enquanto)
+# Como rodar o projeto - Tropical Mix 🌴
+Como executar **banco de dados**, **backend** e **frontend** do sistema Tropical Mix.
 
-## Pro banco
-- MySQL
-- conexão do localhost mesmo
+## 1) Preparando o banco de dados
+**1.1 Requisitos:** MySQL
 
-- CREATE DATABASE crud_login; //atualizar
+**1.2 Rodar o arquivo:** ```database/banco.sql```
 
-## Pro backend
-No arquivo app.py:
--  Atualizar a linha com seu usuário e senha (da conexão com o localhost do MySQL):
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://usuario:senha@localhost/crud_login'  //atualizar
+(Pode copiar e colar no MySQL)
 
-Daí no VSCode abre o terminal, entra na pasta do back onde estão os arquivos e:
-- python -m venv venv    
-- .\venv\Scripts\activate     
--  pip install -r requirements.txt
+## 2) Executando o backend
 
-Pra rodar o back:
-- python app.py
+### 2.1 Configurar conexão com o banco
+- Edite o arquivo: ```backend/app/config.py```
+- Atualize a linha: ```SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://usuario:senha@localhost/tropicalmix_db'```
 
-Ai abre outro terminal pro front (melhor deixar um rodando o back e um rodando o front)
-- npm create vite@latest (Selecione "React" -> Selecione "Javascript" -> crie a nova pasta e logo após pode excluir)
-- npm install axios
--  npm install
+Substitua **usuario** e **senha** pelos seus do seu MySQL.
 
-## Pro frontend:
-- cd frontend
-- npm create vite@latest (Selecione "React" -> Selecione "Javascript" > crie a nova pasta e logo após pode excluir)
-- npm install axios
-- npm install react-router-dom
-- npm install react-icons
-- npm run dev
+
+### 2.2 Ativar ambiente virtual *(somente a primera vez)**
+
+No terminal, execute os comandos a seguir, um de cada vez
+
+Entra na pasta do backend: ```cd backend``` 
+
+```python -m venv venv```
+
+```.\venv\Scripts\activate```
+
+*Ou caso o ambiente não esteja ativado antes de rodar o código novamente
+
+### 2.3 Instalar dependências *(somente a primeira vez)*
+```pip install -r requirements.txt```
+
+### Rodar o backend
+```python run.py```
+
+## 3) Executando o frontend
+Deixa o backend rodando e abre outro terminal
+
+Entre na pasta do frontend: ```cd frontend```
+
+### 3.1 Crie a estrutura do Vite *(somente a primeira vez)*
+``npm create vite@latest`` 
+
+Vão aparecer opções para selecionar:
+  
+- Selecione ```React``` 
+- Selecione ```Javascript``` 
+  
+Crie a nova pasta e logo após **pode excluir** essa pasta criada
+
+### 3.2 Instalar dependências *(somente a primeira vez)*
+```npm install axios```
+
+```npm install react-router-dom```
+
+```npm install react-icons```
+
+### Rodar o frontend
+```npm run dev```
+
+Abra no navegador o link que aparecer *(http://localhost:5173/)*
 
 
 

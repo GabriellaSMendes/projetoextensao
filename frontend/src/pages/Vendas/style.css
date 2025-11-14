@@ -10,7 +10,7 @@
 /* ===== TÍTULO / CONTADOR ===== */
 .title-row {
   display: flex;
-  justify-content: center;
+  justify-content: left;
   align-items: baseline;
   gap: 8px;
   margin-bottom: 16px;

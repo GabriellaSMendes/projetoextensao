@@ -19,6 +19,7 @@ function traduzMetodo(mtd) {
 }
 
 function Vendas() {
+  // estados principais
   const [vendas, setVendas] = useState([]);
   const [busca, setBusca] = useState("");
   const [loading, setLoading] = useState(true);
@@ -76,11 +77,11 @@ function Vendas() {
 
         const itensTexto = det?.itens_vendidos
           ? det.itens_vendidos
-              .map(
-                (item) =>
-                  `${item.qtdd_venda}x ${item.nome_produto ?? "Produto"}`
-              )
-              .join(", ")
+            .map(
+              (item) =>
+                `${item.qtdd_venda}x ${item.nome_produto ?? "Produto"}`
+            )
+            .join(", ")
           : "Itens não disponíveis";
 
         return {
@@ -443,6 +444,7 @@ function Vendas() {
               <div className="col">{v.itens}</div>
               <div className="col right">{formatR$(v.valor_total)}</div>
               <div className="col">{v.metodo_pagamento}</div>
+
               <div className="col action">
                 <button
                   className="link"
@@ -451,6 +453,7 @@ function Vendas() {
                   Editar
                 </button>
               </div>
+
               <div className="col center">
                 <button
                   className="delete-btn"

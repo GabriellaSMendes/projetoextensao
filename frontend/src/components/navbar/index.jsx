@@ -1,34 +1,45 @@
-import logo from "../../assets/logo.png"
-import iconLogo from "../../assets/icon-logo.png"
-import "./style.css"
-import { Link } from "react-router-dom"
-import { FaUserCircle, FaSignOutAlt } from "react-icons/fa"
-import { useState, useRef, useEffect } from "react"
+import logo from "../../assets/logo.png";
+import iconLogo from "../../assets/icon-logo.png";
+import "./style.css";
+import { Link, useNavigate } from "react-router-dom";
+import { FaUserCircle, FaSignOutAlt } from "react-icons/fa";
+import { useState, useRef, useEffect } from "react";
 
 function Navbar() {
+    const [menuAberto, setMenuAberto] = useState(false);
 
-    const [menuAberto, setMenuAberto] = useState(false)
+    const menuRef = useRef(null);
 
-    const menuRef = useRef(null)
+    const navigate = useNavigate();
 
-    const toggleMenu = () => setMenuAberto(!menuAberto)
+    // Carrega nome + nível de acesso do usuário
+    const nomeUsuario = localStorage.getItem("userName") || "Usuário";
+    const nivelAcesso = localStorage.getItem("userLevel") || "vendedor";
 
-    const handleItemClick = () => setMenuAberto(false)
+    const toggleMenu = () => setMenuAberto(!menuAberto);
 
-    {/*Função pra ter o efeito hover on click no ícone do perfil */}
+    const handleItemClick = () => setMenuAberto(false);
+
+    // Logout
+    const logout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("nome_usuario");
+        localStorage.removeItem("nivel_acesso");
+        setMenuAberto(false);
+        navigate("/");
+    };
+
+    // Fecha o menu clicando fora
     useEffect(() => {
         function handleClickOutside(event) {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
-                setMenuAberto(false)
+                setMenuAberto(false);
             }
         }
 
-        document.addEventListener("mousedown", handleClickOutside)
-
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside)
-        }
-    }, [])
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     return (
         <header className="navbar">
@@ -37,11 +48,11 @@ function Navbar() {
             </div>
 
             <nav className="navbar-menu">
-                <Link to="/" className="nav-link">Home</Link>
+                <Link to="/home" className="nav-link">Home</Link>
                 <Link to="/estoque" className="nav-link">Estoque</Link>
                 <Link to="/vendas" className="nav-link">Vendas</Link>
 
-                <Link to="/">
+                <Link to="/home">
                     <img src={iconLogo} alt="Home" className="navbar-sun" />
                 </Link>
 
@@ -51,37 +62,45 @@ function Navbar() {
 
             <div className="navbar-right">
                 <div className="user-menu-container">
-
-                    <FaUserCircle
-                        className="navbar-user"
-                        onClick={toggleMenu}
-                    />
+                    <FaUserCircle className="navbar-user" onClick={toggleMenu} />
 
                     {menuAberto && (
                         <div className="user-dropdown" ref={menuRef}>
+
+                            {/* SAUDAÇÃO */}
+                            <div className="dropdown-header">
+                                Olá, {nomeUsuario}!
+                            </div>
+                            <hr className="dropdown-divider" />
+
+                            {/* Itens do menu */}
                             <Link to="/perfil" className="dropdown-item" onClick={handleItemClick}>
                                 Ver perfil
                             </Link>
 
-                            <Link to="/cadastro" className="dropdown-item" onClick={handleItemClick}>
-                                Cadastrar novo usuário
-                            </Link>
+                            {/* Só aparece para admin */}
+                            {nivelAcesso === "admin" && (
+                                <Link
+                                    to="/cadastro"
+                                    className="dropdown-item"
+                                    onClick={handleItemClick}
+                                >
+                                    Cadastrar usuário
+                                </Link>
+                            )}
 
                             <hr className="dropdown-divider" />
 
-                            <button
-                                className="dropdown-item logout-btn"
-                                onClick={handleItemClick}
-                            >
+                            <button className="dropdown-item logout-btn" onClick={logout}>
                                 <FaSignOutAlt className="logout-icon" /> Sair
                             </button>
+
                         </div>
                     )}
-
                 </div>
             </div>
         </header>
-    )
+    );
 }
 
-export default Navbar
+export default Navbar;

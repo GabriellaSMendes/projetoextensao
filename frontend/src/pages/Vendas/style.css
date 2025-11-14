@@ -7,15 +7,14 @@
   color: #222;
 }
 
-/* ===== TÍTULO / CONTADOR ===== */
+/* ===== TÍTULO / CONTADOR + BOTÃO ===== */
 .title-row {
   display: flex;
-  justify-content: left;
-  align-items: baseline;
-  gap: 8px;
+  align-items: center;
   margin-bottom: 16px;
 }
 
+/* já usamos inline justifyContent, então aqui só base */
 .title-row h1 {
   font-size: 28px;
   font-weight: 700;
@@ -24,11 +23,31 @@
 }
 
 .title-row .subtitle {
-  font-size: 15px;
+  font-size: 14px;
   color: #555;
 }
 
-/* ===== BARRA DE BUSCA + FILTRO ===== */
+/* Botão de adicionar (igual conceito do estoque) */
+.add-btn {
+  background: #4e1633;
+  color: #ffffff;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.add-btn:hover {
+  background: #651b45;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
+}
+
+/* ===== BARRA DE BUSCA ===== */
 .search-row {
   display: flex;
   align-items: center;
@@ -73,31 +92,6 @@
   font-weight: 700;
 }
 
-/* Botão "Filtrar por" à direita */
-.filter-btn {
-  border: 1px solid #4e1633;
-  background: #fdf9fc;
-  border-radius: 10px;
-  padding: 9px 14px;
-  cursor: pointer;
-  font-size: 14px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #4e1633;
-  font-weight: 600;
-  transition: background 0.15s ease, box-shadow 0.15s ease;
-}
-
-.filter-btn .icon {
-  font-size: 15px;
-}
-
-.filter-btn:hover {
-  background: #f3e3f1;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.07);
-}
-
 /* ===== TABELA ===== */
 .table {
   margin-top: 4px;
@@ -111,7 +105,7 @@
 .thead,
 .row {
   display: grid;
-  grid-template-columns: 1.1fr 1.4fr 1.6fr 1.1fr 1.3fr 1.2fr 0.7fr 0.5fr;
+  grid-template-columns: 1.1fr 1.4fr 1.6fr 1.1fr 1.2fr 0.7fr 0.5fr;
   align-items: center;
 }
 
@@ -163,9 +157,18 @@
   text-align: center;
 }
 
-/* ===== LINKS / BOTÕES ===== */
+/* Mensagens auxiliares */
+.empty,
+.loading {
+  padding: 18px 16px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+}
 
-/* "Acessar nota fiscal" e "Editar" */
+/* ===== LINKS / BOTÕES NA TABELA ===== */
+
+/* "Editar" */
 .link {
   border: none;
   background: transparent;
@@ -203,20 +206,118 @@
   color: #ffffff;
 }
 
-/* Mensagem de tabela vazia */
-.empty {
-  padding: 18px 16px;
-  text-align: center;
-  color: #666;
+/* ===== MODAL (mesmo padrão do Estoque) ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.modal-box {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px 22px;
+  max-width: 720px;
+  width: 100%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.modal-box h2 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 20px;
+  color: #4e1633;
+}
+
+.modal-box h3 {
+  margin: 10px 0 8px;
+  font-size: 16px;
+  color: #4e1633;
+}
+
+/* grade do formulário */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px 16px;
+  margin-top: 10px;
+}
+
+.form-grid label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 4px;
+  color: #444;
+}
+
+.form-grid input,
+.form-grid select {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #d6c5dd;
+  font-size: 14px;
+  outline: none;
+}
+
+.form-grid input:focus,
+.form-grid select:focus {
+  border-color: #4e1633;
+}
+
+/* ações do modal */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.cancel-btn {
+  border: 1px solid #ccc;
+  background: #f5f5f5;
+  color: #444;
+  border-radius: 20px;
+  padding: 6px 16px;
+  cursor: pointer;
   font-size: 14px;
 }
 
-/* ===== RESPONSIVO BÁSICO ===== */
-@media (max-width: 900px) {
-  .title-row h1 {
-    font-size: 24px;
-  }
+.cancel-btn:hover {
+  background: #e9e9e9;
+}
 
+.save-btn {
+  border: none;
+  background: #4e1633;
+  color: #ffffff;
+  border-radius: 20px;
+  padding: 7px 18px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.save-btn:hover {
+  background: #651b45;
+}
+
+/* lista de itens da venda dentro do modal */
+.modal-box ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.modal-box li {
+  font-size: 14px;
+}
+
+/* ===== RESPONSIVO ===== */
+@media (max-width: 900px) {
   .thead,
   .row {
     font-size: 13px;
@@ -226,5 +327,25 @@
   .row .col {
     padding: 10px 8px;
   }
+
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
+@media (max-width: 640px) {
+  .title-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-box {
+    max-width: 95%;
+    padding: 16px;
+  }
+}

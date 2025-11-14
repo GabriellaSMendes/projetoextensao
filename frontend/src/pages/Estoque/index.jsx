@@ -2,6 +2,13 @@ import { useEffect, useState } from "react";
 import api from "../../services/api";
 import "./style.css";
 
+// normaliza data para o input date
+function normalizarDataISO(data) {
+  if (!data) return "";
+  return data.split("T")[0]; // remove T00:00:00 se existir
+}
+
+
 function Estoque() {
   const [produtos, setProdutos] = useState([]);
   const [categorias, setCategorias] = useState([]);
@@ -75,19 +82,31 @@ function Estoque() {
     try {
       const token = localStorage.getItem("token");
 
-      await api.put(`/estoque/produtos/${produtoEditando.id_produto}`, formData, {
-        headers: { Authorization: `Bearer ${token}` }
+      const body = {
+        nome_produto: formData.nome_produto,
+        sabor: formData.sabor,
+        marca: formData.marca,
+        preco_unitario: Number(formData.preco_unitario),
+        id_categoria: Number(formData.id_categoria),
+        data_vencimento: formData.data_vencimento || null,
+      };
+
+      await api.put(`/estoque/produtos/${produtoEditando.id_produto}`, body, {
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       alert("Produto atualizado!");
       setModalOpen(false);
       carregarProdutos();
       setProdutoEditando(null);
+
     } catch (error) {
-      console.log(error);
+      console.error(error);
       alert("Erro ao atualizar produto");
     }
   };
+
+
 
   // salvar produto
   const salvarProduto = async () => {
@@ -118,6 +137,7 @@ function Estoque() {
     }
   };
 
+
   return (
     <div className="estoque-page">
 
@@ -144,7 +164,6 @@ function Estoque() {
         }}>
           + Adicionar novo
         </button>
-
       </div>
 
       {/* Barra de busca */}
@@ -170,8 +189,9 @@ function Estoque() {
           <div className="col img-col"></div>
           <div className="col">Produto</div>
           <div className="col">Categoria</div>
+          <div className="col">Sabor</div>
           <div className="col">Marca</div>
-          <div className="col center">Qtd</div>
+          <div className="col center">Qtd.</div>
           <div className="col action">Editar</div>
         </div>
 
@@ -190,6 +210,7 @@ function Estoque() {
 
             <div className="col">{p.nome_produto}</div>
             <div className="col">{p.nome}</div>
+            <div className="col">{p.sabor}</div>
             <div className="col">{p.marca}</div>
             <div className="col center">{p.qtdd_atual}</div>
 
@@ -203,7 +224,7 @@ function Estoque() {
                     sabor: p.sabor || "",
                     marca: p.marca || "",
                     quantidade: p.qtdd_atual,
-                    data_vencimento: p.data_vencimento || "",
+                    data_vencimento: normalizarDataISO(p.data_vencimento),
                     preco_unitario: p.preco_unitario,
                     id_categoria: p.id_categoria || ""
                   });
@@ -261,7 +282,10 @@ function Estoque() {
                   name="quantidade"
                   value={formData.quantidade}
                   onChange={handleChange}
+                  disabled={produtoEditando !== null}
+                  className={produtoEditando ? "input-disabled" : ""}
                 />
+
               </div>
 
               <div>

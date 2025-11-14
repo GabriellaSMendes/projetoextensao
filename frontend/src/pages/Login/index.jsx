@@ -4,6 +4,7 @@ import api from "../../services/api";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
 
+
 function Login() {
   const navigate = useNavigate();
 
@@ -37,15 +38,24 @@ function Login() {
         return;
       }
 
-      // salva token no navegador
-      localStorage.setItem("token", token);
+      //Salvar token
+       localStorage.setItem("token", token);
 
+      //Decodificar token JWT
+      const payload = JSON.parse(atob(token.split(".")[1]));
+
+      // acessa campos enviados pelo backend
+      localStorage.setItem("userName", payload.nome);
+      localStorage.setItem("userLevel", payload.nivel);
+
+      //Redirecionar
       navigate("/home");
     } catch (error) {
       console.error(error);
       alert(error.response?.data?.erro || "Verifique suas credenciais.");
     }
   };
+
 
   // CADASTRAR NOVO USUÁRIO
   const handleRegister = async (e) => {
@@ -54,7 +64,7 @@ function Login() {
     try {
       // rota /auth/registrar NÃO exige token
       const response = await api.post("/auth/registrar", {
-        nome_usuario: formData.nome_usuario,   
+        nome_usuario: formData.nome_usuario,
         email: formData.email,
         senha: formData.senha,
         nivel_acesso: "admin",
@@ -82,7 +92,7 @@ function Login() {
       <form onSubmit={handleRegister} className="login-card">
         <h1>Login</h1>
 
-        {/* NOME DO USUÁRIO */}
+        {/* NOME DO USUÁRIO 
         <input
           placeholder="Nome do usuário"
           type="text"
@@ -90,7 +100,7 @@ function Login() {
           value={formData.nome_usuario}
           onChange={handleChange}
         />
-
+*/}
         {/* EMAIL */}
         <input
           placeholder="E-mail"
@@ -118,10 +128,11 @@ function Login() {
           Entrar
         </button>
 
-        {/* BOTÃO CADASTRAR */}
+        {/* BOTÃO CADASTRAR 
         <button className="button-register" type="button" onClick={handleRegister}>
           Cadastrar usuário
         </button>
+        */}
       </form>
     </div>
   );

@@ -2,22 +2,43 @@
 Como executar **banco de dados**, **backend** e **frontend** do sistema.
 
 ## 1) Preparando o banco de dados
-**1.1 Requisitos:** MySQL
+### 1.1 Requisitos:
+MySQL Workbench
 
-**1.2 Rodar o arquivo:** ```database/banco.sql```
+### 1.2 Rodar o arquivo:
 
-(Pode copiar e colar no MySQL)
+```database/banco.sql``` -> Pode copiar e colar no MySQL
 
-## 2) Executando o backend
+## 2) PARA TESTES | Criar um usuário no banco para conseguir fazer login no sistema (Importante!)
 
-### 2.1 Configurar conexão com o banco
+### 2.1 Colar esse comando no MySQL para criar o usuário já com a senha armazenada em hash
+```
+INSERT INTO usuario (nome_usuario, email, senha, nivel_acesso)
+VALUES (
+  'Admin',
+  'admin@tropicalmix.com',
+  '$2b$12$JoCZ3YOUsCrpDI8w/pYzWOzHcvKV46JC8QpunjJAvkoG.qLTR31ja',
+  'admin'
+);
+```
+
+## 2.2 Fazer login usando as credenciais
+- Login: admin@tropicalmix.com
+
+- Senha: 1234
+
+Sem essa etapa você fica preso na tela de login sem conseguir criar um usuário
+
+## 3) Executando o backend
+
+### 3.1 Configurar conexão com o banco
 - Edita o arquivo: ```backend/app/config.py```
 - Atualiza a linha: ```SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://usuario:senha@localhost/tropicalmix_db'```
 
 Substitui **usuario** e **senha** pelos seus do seu MySQL.
 
 
-### 2.2 Ativar ambiente virtual *(somente a primera vez)**
+### 3.2 Ativar ambiente virtual *(somente a primera vez)**
 
 No terminal, executa os comandos a seguir, um de cada vez
 
@@ -29,18 +50,18 @@ Entra na pasta do backend: ```cd backend```
 
 *Ou caso o ambiente não esteja ativado antes de rodar o código novamente
 
-### 2.3 Instalar dependências *(somente a primeira vez)*
+### 3.3 Instalar dependências *(somente a primeira vez)*
 ```pip install -r requirements.txt```
 
 ### Rodar o backend
 ```python run.py```
 
-## 3) Executando o frontend
+## 4) Executando o frontend
 Deixa o backend rodando e abre outro terminal
 
 Entra na pasta do frontend: ```cd frontend```
 
-### 3.1 Crie a estrutura do Vite *(somente a primeira vez)*
+### 4.1 Crie a estrutura do Vite *(somente a primeira vez)*
 ``npm create vite@latest`` 
 
 Vão aparecer opções para selecionar:
@@ -50,7 +71,7 @@ Vão aparecer opções para selecionar:
   
 Cria a nova pasta e logo após **pode excluir** essa pasta criada
 
-### 3.2 Instalar dependências *(somente a primeira vez)*
+### 4.2 Instalar dependências *(somente a primeira vez)*
 ```npm install axios```
 
 ```npm install react-router-dom```

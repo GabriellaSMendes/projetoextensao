@@ -1,126 +1,139 @@
-import './style.css'
-import { useState, useEffect } from 'react'
-import api from '../../services/api'
-import { Link } from "react-router-dom";
+import "./style.css";
+import { useState } from "react";
+import api from "../../services/api";
+import { useNavigate } from "react-router-dom";
+import logo from "../../assets/logo.png";
+
 
 function Login() {
+  const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [users, setUsers] = useState([]); // lista de usuários
+  // agora inclui nome_usuario também
+  const [formData, setFormData] = useState({
+    nome_usuario: "",
+    email: "",
+    senha: ""
+  });
 
-  // Atualiza os campos do form
+  // Atualiza campos do form
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
-  // Busca todos os usuários
-  const getUsers = async () => {
-    try {
-      const response = await api.get('/users');
-      setUsers(response.data);
-    } catch (error) {
-      console.error('Erro ao buscar usuários: ', error);
-    }
-  };
-
-  useEffect(() => {
-    getUsers();
-  }, []);
-
-  // Login
+  // LOGIN
   const handleLogin = async () => {
     try {
-      const response = await api.post('/login', {
+      const response = await api.post("/auth/login", {
         email: formData.email,
-        password: formData.password
+        senha: formData.senha,
       });
-      alert(response.data.message);
+
+      const token = response.data.access_token;
+
+      if (!token) {
+        alert("Token não recebido. Verifique o backend.");
+        return;
+      }
+
+      //Salvar token
+       localStorage.setItem("token", token);
+
+      //Decodificar token JWT
+      const payload = JSON.parse(atob(token.split(".")[1]));
+
+      // acessa campos enviados pelo backend
+      localStorage.setItem("userName", payload.nome);
+      localStorage.setItem("userLevel", payload.nivel);
+
+      //Redirecionar
+      navigate("/home");
     } catch (error) {
-      alert('Erro: ' + (error.response?.data.error || "Erro ao fazer login"));
+      console.error(error);
+      alert(error.response?.data?.erro || "Verifique suas credenciais.");
     }
   };
 
-  // Cadastro
-  const handleSubmit = async (e) => {
+
+  // CADASTRAR NOVO USUÁRIO
+  const handleRegister = async (e) => {
     e.preventDefault();
+
     try {
-      const response = await api.post('/register', {
+      // rota /auth/registrar NÃO exige token
+      const response = await api.post("/auth/registrar", {
+        nome_usuario: formData.nome_usuario,
         email: formData.email,
-        password: formData.password
+        senha: formData.senha,
+        nivel_acesso: "admin",
       });
-      alert(response.data.message);
-      getUsers();
-    } catch (error) {
-      alert('Erro: ' + (error.response?.data.error || "Erro desconhecido"));
-    }
-  };
 
-  // Excluir usuário
-  const deleteUser = async (id) => {
-    try {
-      await api.delete(`/delete/${id}`);
-      alert("Usuário excluído com sucesso!");
-      getUsers();
-    } catch (error) {
-      alert("Falha ao excluir o usuário.");
-    }
-  };
+      alert(response.data.mensagem || "Usuário registrado com sucesso!");
 
-  // Atualizar senha
-  const updatePassword = async (id) => {
-    const newPassword = prompt("Digite a nova senha: ");
-    if (!newPassword) return;
-    try {
-      await api.put(`update/${id}`, { password: newPassword });
-      alert("Senha atualizada com sucesso!");
+      // limpa os campos
+      setFormData({ nome_usuario: "", email: "", senha: "" });
     } catch (error) {
-      alert("Erro ao atualizar a senha");
+      console.error(error);
+      alert(
+        "Erro ao cadastrar usuário: " +
+        (error.response?.data?.erro || "Erro desconhecido")
+      );
     }
   };
 
   return (
-    <div className='container'>
+    <div className="login-wrapper">
 
-      {/* formulário principal */}
-      <form onSubmit={handleSubmit}>
-        <h1>Login de Usuário</h1>
+      {/* Logo acima do cartão */}
+      <img src={logo} alt="Tropical Mix" className="login-logo" />
 
+      <form onSubmit={handleRegister} className="login-card">
+        <h1>Login</h1>
+
+        {/* NOME DO USUÁRIO 
         <input
-          placeholder='E-mail'
+          placeholder="Nome do usuário"
+          type="text"
+          name="nome_usuario"
+          value={formData.nome_usuario}
+          onChange={handleChange}
+        />
+*/}
+        {/* EMAIL */}
+        <input
+          placeholder="E-mail"
           type="email"
-          name='email'
+          name="email"
           value={formData.email}
           onChange={handleChange}
         />
 
+        {/* SENHA */}
         <input
-          placeholder='Senha'
+          placeholder="Senha"
           type="password"
-          name='password'
-          value={formData.password}
+          name="senha"
+          value={formData.senha}
           onChange={handleChange}
         />
 
+        {/* BOTÃO LOGIN */}
+        <button
+          className="button-login"
+          type="button"
+          onClick={handleLogin}
+        >
+          Entrar
+        </button>
+
+        {/* BOTÃO CADASTRAR 
+        <button className="button-register" type="button" onClick={handleRegister}>
+          Cadastrar usuário
+        </button>
+        */}
       </form>
-
-      {/* lista de usuários */}
-      <div className='userList'>
-        {users.map(user => (
-          <div key={user.id} className='user-card'>
-            <div>
-              <p>Email: <span>{user.email}</span></p>
-            </div>
-            <div className='user-card-buttons'>
-              <button onClick={() => updatePassword(user.id)}>✏️</button>
-              <button onClick={() => deleteUser(user.id)}>🗑️</button>
-            </div>
-          </div>
-        ))}
-      </div>
-
     </div>
   );
 }

@@ -7,14 +7,15 @@
   color: #222;
 }
 
-/* ===== TÍTULO / CONTADOR + BOTÃO ===== */
+/* ===== TÍTULO / CONTADOR ===== */
 .title-row {
   display: flex;
-  align-items: center;
+  justify-content: left;
+  align-items: baseline;
+  gap: 8px;
   margin-bottom: 16px;
 }
 
-/* já usamos inline justifyContent, então aqui só base */
 .title-row h1 {
   font-size: 28px;
   font-weight: 700;
@@ -23,31 +24,11 @@
 }
 
 .title-row .subtitle {
-  font-size: 14px;
+  font-size: 15px;
   color: #555;
 }
 
-/* Botão de adicionar (igual conceito do estoque) */
-.add-btn {
-  background: #4e1633;
-  color: #ffffff;
-  border: none;
-  border-radius: 20px;
-  padding: 8px 18px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
-}
-
-.add-btn:hover {
-  background: #651b45;
-  transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
-}
-
-/* ===== BARRA DE BUSCA ===== */
+/* ===== BARRA DE BUSCA + FILTRO ===== */
 .search-row {
   display: flex;
   align-items: center;
@@ -92,6 +73,31 @@
   font-weight: 700;
 }
 
+/* Botão "Filtrar por" à direita */
+.filter-btn {
+  border: 1px solid #4e1633;
+  background: #fdf9fc;
+  border-radius: 10px;
+  padding: 9px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #4e1633;
+  font-weight: 600;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.filter-btn .icon {
+  font-size: 15px;
+}
+
+.filter-btn:hover {
+  background: #f3e3f1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.07);
+}
+
 /* ===== TABELA ===== */
 .table {
   margin-top: 4px;
@@ -105,7 +111,7 @@
 .thead,
 .row {
   display: grid;
-  grid-template-columns: 1.1fr 1.4fr 1.6fr 1.1fr 1.2fr 0.7fr 0.5fr;
+  grid-template-columns: 1.1fr 1.4fr 1.6fr 1.1fr 1.3fr 1.2fr 0.7fr 0.5fr;
   align-items: center;
 }
 
@@ -157,18 +163,7 @@
   text-align: center;
 }
 
-/* Mensagens auxiliares */
-.empty,
-.loading {
-  padding: 18px 16px;
-  text-align: center;
-  color: #666;
-  font-size: 14px;
-}
-
-/* ===== LINKS / BOTÕES NA TABELA ===== */
-
-/* "Editar" */
+/* "Acessar nota fiscal" e "Editar" */
 .link {
   border: none;
   background: transparent;
@@ -206,118 +201,20 @@
   color: #ffffff;
 }
 
-/* ===== MODAL (mesmo padrão do Estoque) ===== */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 50;
-}
-
-.modal-box {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 20px 22px;
-  max-width: 720px;
-  width: 100%;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-}
-
-.modal-box h2 {
-  margin-top: 0;
-  margin-bottom: 10px;
-  font-size: 20px;
-  color: #4e1633;
-}
-
-.modal-box h3 {
-  margin: 10px 0 8px;
-  font-size: 16px;
-  color: #4e1633;
-}
-
-/* grade do formulário */
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px 16px;
-  margin-top: 10px;
-}
-
-.form-grid label {
-  display: block;
-  font-size: 13px;
-  margin-bottom: 4px;
-  color: #444;
-}
-
-.form-grid input,
-.form-grid select {
-  width: 100%;
-  padding: 6px 8px;
-  border-radius: 6px;
-  border: 1px solid #d6c5dd;
-  font-size: 14px;
-  outline: none;
-}
-
-.form-grid input:focus,
-.form-grid select:focus {
-  border-color: #4e1633;
-}
-
-/* ações do modal */
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 18px;
-}
-
-.cancel-btn {
-  border: 1px solid #ccc;
-  background: #f5f5f5;
-  color: #444;
-  border-radius: 20px;
-  padding: 6px 16px;
-  cursor: pointer;
+/* Mensagem de tabela vazia */
+.empty {
+  padding: 18px 16px;
+  text-align: center;
+  color: #666;
   font-size: 14px;
 }
 
-.cancel-btn:hover {
-  background: #e9e9e9;
-}
-
-.save-btn {
-  border: none;
-  background: #4e1633;
-  color: #ffffff;
-  border-radius: 20px;
-  padding: 7px 18px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.save-btn:hover {
-  background: #651b45;
-}
-
-/* lista de itens da venda dentro do modal */
-.modal-box ul {
-  list-style: none;
-  padding-left: 0;
-}
-
-.modal-box li {
-  font-size: 14px;
-}
-
-/* ===== RESPONSIVO ===== */
+/* ===== RESPONSIVO BÁSICO ===== */
 @media (max-width: 900px) {
+  .title-row h1 {
+    font-size: 24px;
+  }
+
   .thead,
   .row {
     font-size: 13px;
@@ -327,25 +224,186 @@
   .row .col {
     padding: 10px 8px;
   }
-
-  .form-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
-@media (max-width: 640px) {
-  .title-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
 
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
+.modal-box {
+  background: #ffffff;
+  width: 480px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  animation: fadeIn 0.25s ease-out;
+  color: #4e1633;
+}
 
-  .modal-box {
-    max-width: 95%;
-    padding: 16px;
-  }
+.modal-box h2 {
+  font-size: 22px;
+  margin-bottom: 16px;
+  font-weight: 700;
+  text-align: left;
+  color: #4e1633;
+}
+
+.modal-box h3 {
+  margin-top: 20px;
+  margin-bottom: 6px;
+  font-size: 17px;
+  color: #4e1633;
+}
+
+.modal-box input,
+.modal-box select {
+  width: 100%;
+  padding: 10px 12px;
+  margin-top: 6px;
+  border: 1px solid #d2c5d3;
+  border-radius: 8px;
+  outline: none;
+  font-size: 14px;
+  background: #faf8fb;
+}
+
+.modal-box input:focus,
+.modal-box select:focus {
+  border-color: #7b1f50;
+}
+
+.carrinho-lista {
+  list-style: none;
+  padding: 0;
+  margin-top: 8px;
+}
+
+.carrinho-lista li {
+  background: #faf5f9;
+  border: 1px solid #eed9e9;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.estoque-info {
+  margin-top: 6px;
+  color: #7b1f50;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+.modal-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.cancel-btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  background: #ccc;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.cancel-btn:hover {
+  background: #b5b5b5;
+}
+
+.save-btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  background: #4e1633;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.save-btn:hover {
+  background: #701e49;
+}
+
+.novo-cliente-form {
+  margin-top: 16px;
+  padding: 14px;
+  background: #faf5f9;
+  border: 1px solid #eed9e9;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.add-btn {
+  background: #ffd262;
+  color: #4e1633;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.add-btn:hover {
+  background: #ffca40;
+  transform: translateY(-2px);
+}
+
+.carrinho-lista .delete-btn {
+  border: 1px solid #b37ea0;
+  background: #ffffff;
+  color: #4e1633;
+  font-size: 15px;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.carrinho-lista .delete-btn:hover {
+  background: #4e1633;
+  color: #fff;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.modal-box::-webkit-scrollbar {
+  width: 8px;
+}
+.modal-box::-webkit-scrollbar-thumb {
+  background: #d5bfd4;
+  border-radius: 6px;
+}
+.modal-box::-webkit-scrollbar-track {
+  background: #f8f2f7;
 }

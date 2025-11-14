@@ -30,9 +30,9 @@ function Home() {
 
         {/* cards de navegação */}
         <nav className="home-menu">
-          <Link to="/login" className="home-card">
+          <Link to="/cadastro" className="home-card">
             <div className="home-card-icon">🔐</div>
-            <h2>Login / Cadastro</h2>
+            <h2>Usuários e Cadastros</h2>
             <p>Acesse ou gerencie contas de usuários do sistema.</p>
           </Link>
 

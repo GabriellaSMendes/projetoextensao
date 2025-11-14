@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../../services/api";
 import "./style.css";
 
-// traduz enum do banco para texto amigável
+// traduz enum do banco
 function traduzMetodo(mtd) {
   switch (mtd) {
     case "dinheiro":
@@ -19,75 +19,90 @@ function traduzMetodo(mtd) {
 }
 
 function Vendas() {
-  // estados principais
+  // --------------------- ESTADOS ---------------------
   const [vendas, setVendas] = useState([]);
   const [busca, setBusca] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // modal nova venda
   const [modalOpen, setModalOpen] = useState(false);
 
-  // selects
   const [clientes, setClientes] = useState([]);
   const [produtos, setProdutos] = useState([]);
 
-  // form da venda
-  const [formVenda, setFormVenda] = useState({
-    id_cliente: "",
-    mtd_pagamento: "",
-  });
+  const [cliente, setCliente] = useState("");
+  const [novoCliente, setNovoCliente] = useState("");
 
-  // campos para CADASTRO RÁPIDO de cliente/produto
-  const [novoClienteNome, setNovoClienteNome] = useState("");
+  const [itemProduto, setItemProduto] = useState("");
+  const [itemQtd, setItemQtd] = useState(1);
+  const [carrinho, setCarrinho] = useState([]);
 
-  const [novoProdutoNome, setNovoProdutoNome] = useState("");
-  const [novoProdutoPreco, setNovoProdutoPreco] = useState("");
-  const [novoProdutoEstoque, setNovoProdutoEstoque] = useState("");
+  const [pagamento, setPagamento] = useState("pix");
 
-  // itens adicionados à venda
-  const [itensVenda, setItensVenda] = useState([]);
+  // formulário de novo cliente
+  const [showNovoClienteForm, setShowNovoClienteForm] = useState(false);
+  const [clienteNome, setClienteNome] = useState("");
+  const [clienteCpf, setClienteCpf] = useState("");
+  const [clienteTelefone, setClienteTelefone] = useState("");
+  const [clienteEmail, setClienteEmail] = useState("");
+  const [clienteEndereco, setClienteEndereco] = useState("");
 
-  // controles do "item sendo montado"
-  const [novoItem, setNovoItem] = useState({
-    id_produto: "",
-    quantidade: "",
-  });
+  // ------------------ CARREGAR DADOS ------------------
+  const carregarClientes = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const resp = await api.get("/clientes", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setClientes(resp.data.clientes);
+    } catch (err) {
+      console.error("Erro ao carregar clientes:", err);
+    }
+  };
 
-  // ---------- CARREGAR DADOS BÁSICOS ----------
+  const carregarProdutos = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const resp = await api.get("/estoque/produtos", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProdutos(resp.data.produtos);
+    } catch (err) {
+      console.error("Erro ao carregar produtos:", err);
+    }
+  };
+
   const carregarVendas = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const config = token
-        ? { headers: { Authorization: `Bearer ${token}` } }
-        : {};
 
-      // 1) lista básica de vendas
-      const respLista = await api.get("/vendas", config);
+      const respLista = await api.get("/vendas", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       const lista = respLista.data?.vendas || [];
 
-      // 2) detalhes de cada venda (itens)
-      const detalhesPromises = lista.map((v) =>
-        api.get(`/vendas/${v.id_venda}`, config).catch(() => null)
+      const detalhes = await Promise.all(
+        lista.map((v) =>
+          api.get(`/vendas/${v.id_venda}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }).catch(() => null)
+        )
       );
-      const detalhes = await Promise.all(detalhesPromises);
 
-      const vendasFormatadas = lista.map((venda, index) => {
-        const det = detalhes[index]?.data;
+      const vendasFormatadas = lista.map((venda, i) => {
+        const det = detalhes[i]?.data;
 
         const itensTexto = det?.itens_vendidos
           ? det.itens_vendidos
-            .map(
-              (item) =>
-                `${item.qtdd_venda}x ${item.nome_produto ?? "Produto"}`
-            )
-            .join(", ")
+              .map((item) => `${item.qtdd_venda}x ${item.nome_produto}`)
+              .join(", ")
           : "Itens não disponíveis";
 
         return {
           id_venda: venda.id_venda,
           dataFormatada: new Date(venda.dt_venda).toLocaleDateString("pt-BR"),
-          nome_cliente: venda.nome_cliente || "Cliente não encontrado",
+          nome_cliente: venda.nome_cliente,
           itens: itensTexto,
           valor_total: Number(venda.valor_total || 0),
           metodo_pagamento: traduzMetodo(venda.mtd_pagamento),
@@ -95,318 +110,143 @@ function Vendas() {
       });
 
       setVendas(vendasFormatadas);
-    } catch (error) {
-      console.error("Erro ao carregar vendas:", error);
+    } catch (err) {
+      console.error(err);
       alert("Erro ao carregar vendas.");
     } finally {
       setLoading(false);
     }
   };
 
-  const carregarClientes = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const config = token
-        ? { headers: { Authorization: `Bearer ${token}` } }
-        : {};
-
-      const resp = await api.get("/clientes", config);
-      setClientes(resp.data.clientes || resp.data || []);
-    } catch (error) {
-      console.error("Erro ao carregar clientes:", error);
-    }
-  };
-
-  const carregarProdutos = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const config = token
-        ? { headers: { Authorization: `Bearer ${token}` } }
-        : {};
-
-      const resp = await api.get("/estoque/produtos", config);
-      setProdutos(resp.data.produtos || []);
-    } catch (error) {
-      console.error("Erro ao carregar produtos:", error);
-    }
-  };
-
   useEffect(() => {
     carregarVendas();
-    carregarClientes();
-    carregarProdutos();
   }, []);
 
-  // ---------- FILTRO ----------
+  // ------------------ FILTRO ------------------
   const filtradas = vendas.filter((v) =>
     `${v.nome_cliente} ${v.itens} ${v.metodo_pagamento}`
       .toLowerCase()
       .includes(busca.toLowerCase())
   );
 
-  // ---------- UTILITÁRIOS ----------
   const formatR$ = (v) =>
     (Number(v) || 0).toLocaleString("pt-BR", {
       style: "currency",
       currency: "BRL",
     });
 
-  // editar venda só no front
-  const editarVenda = (id_venda) => {
-    const venda = vendas.find((v) => v.id_venda === id_venda);
-    if (!venda) return;
+  // ------------------ EXCLUIR (BACKEND) ------------------
+  const excluirVenda = async (id_venda) => {
+    if (!confirm("Deseja realmente excluir esta venda? Isso devolve os itens ao estoque.")) return;
 
-    const novoValorStr = prompt(
-      "Informe o novo valor da venda:",
-      String(venda.valor_total)
-    );
-    if (novoValorStr === null) return;
+    try {
+      const token = localStorage.getItem("token");
 
-    const novoValor = Number(novoValorStr.replace(",", "."));
-    if (isNaN(novoValor) || novoValor < 0) {
-      alert("Valor inválido.");
-      return;
+      await api.delete(`/vendas/${id_venda}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      alert("Venda excluída com sucesso.");
+      carregarVendas();
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao excluir venda.");
     }
-
-    const novoMetodo =
-      prompt("Informe o novo método de pagamento:", venda.metodo_pagamento) ??
-      venda.metodo_pagamento;
-
-    setVendas((lista) =>
-      lista.map((v) =>
-        v.id_venda === id_venda
-          ? { ...v, valor_total: novoValor, metodo_pagamento: novoMetodo }
-          : v
-      )
-    );
   };
 
-  const excluirVenda = (id_venda) => {
-    if (!confirm("Deseja realmente excluir esta venda da listagem?")) return;
-    setVendas((lista) => lista.filter((v) => v.id_venda !== id_venda));
-  };
+  // ------------------ CARRINHO ------------------
+  const adicionarItem = () => {
+    if (!itemProduto) return alert("Selecione um produto.");
+    const produto = produtos.find((p) => p.id_produto == itemProduto);
 
-  // ---------- FORM NOVA VENDA / MODAL ----------
+    if (itemQtd > produto.qtdd_atual)
+      return alert("Quantidade maior que o estoque disponível.");
 
-  const abrirModalNovaVenda = () => {
-    setFormVenda({ id_cliente: "", mtd_pagamento: "" });
-    setNovoClienteNome("");
-    setNovoProdutoNome("");
-    setNovoProdutoPreco("");
-    setNovoProdutoEstoque("");
-    setItensVenda([]);
-    setNovoItem({ id_produto: "", quantidade: "" });
-    setModalOpen(true);
-  };
-
-  const handleChangeVenda = (e) => {
-    const { name, value } = e.target;
-    setFormVenda((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleChangeNovoItem = (e) => {
-    const { name, value } = e.target;
-    setNovoItem((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // adiciona item à lista (produto existente OU novo produto)
-  const adicionarItemVenda = () => {
-    const quantidadeNum = Number(novoItem.quantidade);
-
-    if (!quantidadeNum || quantidadeNum <= 0) {
-      alert("Informe uma quantidade válida.");
-      return;
-    }
-
-    // CASO 1: produto existente selecionado no select
-    if (novoItem.id_produto) {
-      const produto = produtos.find(
-        (p) => p.id_produto === Number(novoItem.id_produto)
-      );
-      if (!produto) {
-        alert("Produto selecionado inválido.");
-        return;
-      }
-
-      setItensVenda((lista) => [
-        ...lista,
-        {
-          tipo: "existente",
-          id_produto: produto.id_produto,
-          nome_produto: produto.nome_produto,
-          quantidade: quantidadeNum,
-        },
-      ]);
-      setNovoItem({ id_produto: "", quantidade: "" });
-      return;
-    }
-
-    // CASO 2: nenhum produto selecionado, mas foi digitado um novo
-    if (!novoProdutoNome.trim()) {
-      alert(
-        "Selecione um produto existente OU preencha os dados do novo produto."
-      );
-      return;
-    }
-
-    const precoNum = Number(
-      (novoProdutoPreco || "").toString().replace(",", ".")
-    );
-    const estoqueInicialNum = Number(novoProdutoEstoque || quantidadeNum);
-
-    if (!precoNum || precoNum <= 0) {
-      alert("Informe um preço válido para o novo produto.");
-      return;
-    }
-
-    if (!estoqueInicialNum || estoqueInicialNum <= 0) {
-      alert("Informe o estoque inicial do novo produto.");
-      return;
-    }
-
-    setItensVenda((lista) => [
-      ...lista,
+    setCarrinho((prev) => [
+      ...prev,
       {
-        tipo: "novo",
-        nome_produto: novoProdutoNome.trim(),
-        quantidade: quantidadeNum,
-        preco_unitario: precoNum,
-        qtdd_inicial: estoqueInicialNum,
+        id_produto: produto.id_produto,
+        nome: produto.nome_produto,
+        quantidade: itemQtd,
+        preco: Number(produto.preco_unitario),
       },
     ]);
 
-    // não limpamos os campos de produto novo totalmente para reaproveitar,
-    // só zeramos a quantidade do item atual
-    setNovoItem({ id_produto: "", quantidade: "" });
+    setItemProduto("");
+    setItemQtd(1);
   };
 
-  const removerItemVenda = (index) => {
-    setItensVenda((lista) => lista.filter((_, i) => i !== index));
+  const removerItem = (id) => {
+    setCarrinho((prev) => prev.filter((c) => c.id_produto !== id));
   };
 
-  // salva venda (cria cliente/produto se for o caso)
+  const totalCarrinho = carrinho.reduce(
+    (acc, i) => acc + i.preco * i.quantidade,
+    0
+  );
+
+  // ------------------ SALVAR VENDA ------------------
   const salvarVenda = async () => {
+    if (!cliente) return alert("Selecione um cliente.");
+    if (carrinho.length === 0) return alert("Carrinho vazio.");
+
+    const payload = {
+      id_cliente: Number(cliente),
+      mtd_pagamento: pagamento,
+      itens: carrinho.map((i) => ({
+        id_produto: i.id_produto,
+        quantidade: i.quantidade,
+      })),
+    };
+
     try {
       const token = localStorage.getItem("token");
-      const config = token
-        ? { headers: { Authorization: `Bearer ${token}` } }
-        : {};
 
-      // 1) resolver cliente (existente ou novo)
-      let idClienteFinal = formVenda.id_cliente
-        ? Number(formVenda.id_cliente)
-        : null;
-
-      if (!idClienteFinal && novoClienteNome.trim()) {
-        const respCli = await api.post(
-          "/clientes",
-          {
-            nome_cliente: novoClienteNome.trim(),
-            // adicione aqui outros campos se quiser (cpf, email, telefone...)
-          },
-          config
-        );
-
-        const dadosCli = respCli.data || {};
-        // ajuste o nome do campo conforme sua API
-        idClienteFinal =
-          dadosCli.id_cliente || dadosCli.id || dadosCli.novo_id || null;
-      }
-
-      if (!idClienteFinal) {
-        alert("Selecione um cliente ou cadastre um novo.");
-        return;
-      }
-
-      if (!formVenda.mtd_pagamento) {
-        alert("Selecione o método de pagamento.");
-        return;
-      }
-
-      if (itensVenda.length === 0) {
-        alert("Adicione pelo menos um item à venda.");
-        return;
-      }
-
-      // 2) resolver produtos (existentes + criar novos antes de enviar venda)
-      const itensParaEnviar = [];
-
-      for (const item of itensVenda) {
-        if (item.tipo === "existente") {
-          itensParaEnviar.push({
-            id_produto: item.id_produto,
-            quantidade: item.quantidade,
-          });
-        } else {
-          // cria produto novo no estoque
-          const respProd = await api.post(
-            "/estoque/produtos",
-            {
-              nome_produto: item.nome_produto,
-              sabor: "",
-              marca: "",
-              data_vencimento: null,
-              preco_unitario: item.preco_unitario,
-              id_categoria: null, // opcional
-              qtdd_inicial: item.qtdd_inicial,
-            },
-            config
-          );
-
-          const dadosProd = respProd.data || {};
-          const novoIdProd =
-            dadosProd.id_produto ||
-            dadosProd.id ||
-            dadosProd.novo_id_produto ||
-            null;
-
-          if (!novoIdProd) {
-            throw new Error("Não foi possível obter o ID do novo produto.");
-          }
-
-          itensParaEnviar.push({
-            id_produto: novoIdProd,
-            quantidade: item.quantidade,
-          });
-        }
-      }
-
-      // 3) envia venda para o backend
-      const body = {
-        id_cliente: idClienteFinal,
-        mtd_pagamento: formVenda.mtd_pagamento,
-        itens: itensParaEnviar,
-      };
-
-      await api.post("/vendas", body, config);
+      await api.post("/vendas", payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       alert("Venda registrada com sucesso!");
       setModalOpen(false);
       carregarVendas();
-    } catch (error) {
-      console.error("Erro ao registrar venda:", error);
+    } catch (err) {
+      console.error(err);
       alert("Erro ao registrar venda.");
     }
   };
 
   const totalMes = vendas.length;
 
-  // ---------- RENDER ----------
+  // ------------------ RENDER ------------------
   return (
     <div className="vendas-page">
-      {/* Título + botão nova venda */}
+      {/* Título */}
       <div className="title-row" style={{ justifyContent: "space-between" }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "baseline" }}>
           <h1>VENDAS</h1>
           <span className="subtitle">{totalMes} venda(s) no mês atual</span>
         </div>
 
-        <button className="add-btn" onClick={abrirModalNovaVenda}>
+        <button
+          className="add-btn"
+          onClick={() => {
+            carregarClientes();
+            carregarProdutos();
+            setCarrinho([]);
+            setCliente("");
+            setItemProduto("");
+            setItemQtd(1);
+            setPagamento("pix");
+            setNovoCliente("");
+            setShowNovoClienteForm(false);
+            setModalOpen(true);
+          }}
+        >
           + Registrar venda
         </button>
       </div>
 
-      {/* Barra de busca */}
+      {/* Busca */}
       <div className="search-row">
         <div className="searchbox">
           <span className="icon">🔍</span>
@@ -423,16 +263,17 @@ function Vendas() {
         </div>
       </div>
 
+      {/* Tabela */}
       {loading && <div className="empty">Carregando vendas...</div>}
 
       {!loading && (
         <div className="table">
           <div className="thead">
-            <div className="col">Data da venda</div>
+            <div className="col">Data</div>
             <div className="col">Cliente</div>
             <div className="col">Itens</div>
-            <div className="col right">Valor da venda</div>
-            <div className="col">Método pagamento</div>
+            <div className="col right">Total</div>
+            <div className="col">Pagamento</div>
             <div className="col action">Editar</div>
             <div className="col center">Excluir</div>
           </div>
@@ -446,10 +287,7 @@ function Vendas() {
               <div className="col">{v.metodo_pagamento}</div>
 
               <div className="col action">
-                <button
-                  className="link"
-                  onClick={() => editarVenda(v.id_venda)}
-                >
+                <button className="link" onClick={() => alert("Função futura")}>
                   Editar
                 </button>
               </div>
@@ -464,166 +302,175 @@ function Vendas() {
               </div>
             </div>
           ))}
-
-          {!loading && filtradas.length === 0 && (
-            <div className="empty">Nenhuma venda encontrada.</div>
-          )}
         </div>
       )}
 
-      {/* MODAL NOVA VENDA */}
+      {/* MODAL */}
       {modalOpen && (
         <div className="modal-overlay">
           <div className="modal-box">
-            <h2>Adicionar novo</h2>
+            <h2>Nova Venda</h2>
 
-            {/* linha 1: cliente + método + novo cliente */}
-            <div className="form-grid">
-              <div>
-                <label>Cliente</label>
-                <select
-                  name="id_cliente"
-                  value={formVenda.id_cliente}
-                  onChange={handleChangeVenda}
-                >
-                  <option value="">Selecione...</option>
-                  {clientes.map((c) => (
-                    <option key={c.id_cliente} value={c.id_cliente}>
-                      {c.nome_cliente}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            {/* CLIENTE */}
+            <label>Cliente</label>
+            <select value={cliente} onChange={(e) => setCliente(e.target.value)}>
+              <option value="">Selecione...</option>
+              {clientes.map((c) => (
+                <option key={c.id_cliente} value={c.id_cliente}>
+                  {c.nome_cliente}
+                </option>
+              ))}
+            </select>
 
-              <div>
-                <label>Método de pagamento</label>
-                <select
-                  name="mtd_pagamento"
-                  value={formVenda.mtd_pagamento}
-                  onChange={handleChangeVenda}
-                >
-                  <option value="">Selecione...</option>
-                  <option value="dinheiro">Dinheiro</option>
-                  <option value="cartao">Cartão</option>
-                  <option value="pix">PIX</option>
-                  <option value="outros">Outros</option>
-                </select>
-              </div>
+            {/* Novo cliente */}
+            <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+              <input
+                type="text"
+                placeholder="Novo cliente"
+                value={novoCliente}
+                onChange={(e) => setNovoCliente(e.target.value)}
+              />
 
-              <div>
-                <label>Novo cliente (opcional)</label>
-                <input
-                  placeholder="Nome do novo cliente"
-                  value={novoClienteNome}
-                  onChange={(e) => setNovoClienteNome(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <hr style={{ margin: "16px 0" }} />
-
-            <h3>Itens da venda</h3>
-
-            {/* linha 2: produto existente + quantidade + botão */}
-            <div className="form-grid">
-              <div>
-                <label>Produto existente</label>
-                <select
-                  name="id_produto"
-                  value={novoItem.id_produto}
-                  onChange={handleChangeNovoItem}
-                >
-                  <option value="">Selecione...</option>
-                  {produtos.map((p) => (
-                    <option key={p.id_produto} value={p.id_produto}>
-                      {p.nome_produto}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label>Quantidade</label>
-                <input
-                  type="number"
-                  name="quantidade"
-                  value={novoItem.quantidade}
-                  onChange={handleChangeNovoItem}
-                  min="1"
-                />
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "flex-end",
+              <button
+                className="save-btn"
+                onClick={() => {
+                  if (!novoCliente.trim()) return alert("Digite um nome");
+                  setClienteNome(novoCliente);
+                  setShowNovoClienteForm(true);
                 }}
               >
+                Criar
+              </button>
+            </div>
+
+            {showNovoClienteForm && (
+              <div className="novo-cliente-form">
+                <h3>Novo cliente</h3>
+
+                <input
+                  type="text"
+                  placeholder="Nome"
+                  value={clienteNome}
+                  onChange={(e) => setClienteNome(e.target.value)}
+                />
+
+                <input
+                  type="text"
+                  placeholder="CPF"
+                  value={clienteCpf}
+                  onChange={(e) => setClienteCpf(e.target.value)}
+                />
+
+                <input
+                  type="text"
+                  placeholder="Telefone"
+                  value={clienteTelefone}
+                  onChange={(e) => setClienteTelefone(e.target.value)}
+                />
+
+                <input
+                  type="email"
+                  placeholder="E-mail"
+                  value={clienteEmail}
+                  onChange={(e) => setClienteEmail(e.target.value)}
+                />
+
+                <input
+                  type="text"
+                  placeholder="Endereço"
+                  value={clienteEndereco}
+                  onChange={(e) => setClienteEndereco(e.target.value)}
+                />
+
                 <button
-                  type="button"
                   className="save-btn"
-                  onClick={adicionarItemVenda}
+                  onClick={async () => {
+                    const token = localStorage.getItem("token");
+
+                    try {
+                      const resp = await api.post(
+                        "/clientes",
+                        {
+                          nome_cliente: clienteNome,
+                          cpf: clienteCpf || null,
+                          telefone: clienteTelefone || null,
+                          email: clienteEmail || null,
+                          endereco: clienteEndereco || null,
+                        },
+                        { headers: { Authorization: `Bearer ${token}` } }
+                      );
+
+                      const id = resp.data.id_cliente;
+
+                      await carregarClientes();
+                      setCliente(id);
+                      setShowNovoClienteForm(false);
+                      setNovoCliente("");
+
+                      setClienteNome("");
+                      setClienteCpf("");
+                      setClienteTelefone("");
+                      setClienteEmail("");
+                      setClienteEndereco("");
+                    } catch (err) {
+                      console.error(err);
+                    }
+                  }}
                 >
-                  Adicionar item
+                  Salvar cliente
                 </button>
               </div>
-            </div>
+            )}
 
-            {/* linha 3: cadastro rápido de produto novo */}
-            <div className="form-grid" style={{ marginTop: 12 }}>
-              <div>
-                <label>Novo produto (nome)</label>
-                <input
-                  placeholder="Nome do novo produto"
-                  value={novoProdutoNome}
-                  onChange={(e) => setNovoProdutoNome(e.target.value)}
-                />
-              </div>
+            {/* PRODUTO */}
+            <label style={{ marginTop: "20px", display: "block" }}>Produto</label>
+            <select
+              value={itemProduto}
+              onChange={(e) => setItemProduto(e.target.value)}
+            >
+              <option value="">Selecione...</option>
+              {produtos.map((p) => (
+                <option key={p.id_produto} value={p.id_produto}>
+                  {p.nome_produto}
+                </option>
+              ))}
+            </select>
 
-              <div>
-                <label>Preço unitário (R$)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  placeholder="0,00"
-                  value={novoProdutoPreco}
-                  onChange={(e) => setNovoProdutoPreco(e.target.value)}
-                />
-              </div>
+            {itemProduto && (
+              <p className="estoque-info">
+                Estoque disponível:{" "}
+                {produtos.find((p) => p.id_produto == itemProduto)?.qtdd_atual}
+                {" unidades"}
+              </p>
+            )}
 
-              <div>
-                <label>Estoque inicial</label>
-                <input
-                  type="number"
-                  min="1"
-                  placeholder="Ex.: 100"
-                  value={novoProdutoEstoque}
-                  onChange={(e) => setNovoProdutoEstoque(e.target.value)}
-                />
-              </div>
-            </div>
+            <input
+              type="number"
+              min="1"
+              value={itemQtd}
+              onChange={(e) => setItemQtd(Number(e.target.value))}
+              style={{ marginTop: 8 }}
+            />
 
-            {/* lista de itens adicionados */}
-            {itensVenda.length > 0 && (
-              <ul style={{ marginTop: 12 }}>
-                {itensVenda.map((item, index) => (
-                  <li
-                    key={index}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      marginBottom: 4,
-                      fontSize: 14,
-                    }}
-                  >
-                    <span>
-                      {item.quantidade}x {item.nome_produto}
-                      {item.tipo === "novo" && " (novo produto)"}
-                    </span>
+            <button className="add-btn" style={{ marginTop: 10 }} onClick={adicionarItem}>
+              Adicionar item
+            </button>
+
+            {/* CARRINHO */}
+            <h3 style={{ marginTop: 20 }}>Itens da venda</h3>
+
+            {carrinho.length === 0 && <p>Nenhum item.</p>}
+
+            {carrinho.length > 0 && (
+              <ul className="carrinho-lista">
+                {carrinho.map((i) => (
+                  <li key={i.id_produto}>
+                    {i.quantidade}x {i.nome} — R$
+                    {(i.preco * i.quantidade).toFixed(2)}
                     <button
-                      type="button"
                       className="delete-btn"
-                      onClick={() => removerItemVenda(index)}
+                      onClick={() => removerItem(i.id_produto)}
+                      style={{ marginLeft: 10 }}
                     >
                       ✖
                     </button>
@@ -632,15 +479,28 @@ function Vendas() {
               </ul>
             )}
 
-            <div className="modal-actions">
-              <button
-                className="cancel-btn"
-                onClick={() => setModalOpen(false)}
-              >
+            <p style={{ marginTop: 12, fontWeight: "bold" }}>
+              Total: R$ {totalCarrinho.toFixed(2)}
+            </p>
+
+            {/* PAGAMENTO */}
+            <label>Método de pagamento</label>
+            <select
+              value={pagamento}
+              onChange={(e) => setPagamento(e.target.value)}
+            >
+              <option value="pix">PIX</option>
+              <option value="dinheiro">Dinheiro</option>
+              <option value="cartao">Cartão</option>
+              <option value="outros">Outros</option>
+            </select>
+
+            <div className="modal-actions" style={{ marginTop: 20 }}>
+              <button className="cancel-btn" onClick={() => setModalOpen(false)}>
                 Cancelar
               </button>
               <button className="save-btn" onClick={salvarVenda}>
-                Salvar venda
+                Finalizar venda
               </button>
             </div>
           </div>

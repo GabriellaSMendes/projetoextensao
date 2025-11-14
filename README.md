@@ -60,7 +60,7 @@ Crie a nova pasta e logo após **pode excluir** essa pasta criada
 ### Rodar o frontend
 ```npm run dev```
 
-Abra no navegador o link que aparecer *(http://localhost:5173/)*
+Abra no navegador o link que aparecer *(http://localhost:5173/)*, o back e o front estarão rodando em conjunto.
 
 
 

@@ -62,5 +62,13 @@ Cria a nova pasta e logo após **pode excluir** essa pasta criada
 
 Abre no navegador o link que aparecer *(http://localhost:5173/)*, o back e o front estarão rodando em conjunto.
 
+### Por fim
+Após tudo isso, sempre que quiser rodar tudo junto é só dar: 
+
+```python run.py``` -> em um terminal (se o ambiente virtual estiver ativo, vale lembrar)
+
+```npm run dev``` -> em outro terminal
+
+
 
 

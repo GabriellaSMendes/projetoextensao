@@ -62,14 +62,14 @@ Deixa o backend rodando e abre outro terminal
 Entra na pasta do frontend: ```cd frontend```
 
 ### 4.1 Crie a estrutura do Vite *(somente a primeira vez)*
-``npm create vite@latest`` 
+``npm create vite@latest frontend`` 
 
 Vão aparecer opções para selecionar:
   
 - Selecione ```React``` 
 - Selecione ```Javascript``` 
   
-Cria a nova pasta e logo após **pode excluir** essa pasta criada
+Caso essa etapa crie uma nova pasta, **pode excluí-la**.
 
 ### 4.2 Instalar dependências *(somente a primeira vez)*
 ```npm install axios```

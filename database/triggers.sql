@@ -1,5 +1,3 @@
--- Triggers para o preenchimento e funcionamento adequado das dinamicas das tabelas
-
 -- Venda diminui a quantidade de itens do estoque
 DELIMITER $$
 
@@ -94,5 +92,6 @@ BEGIN
         qtdd_entrada = qtdd_entrada - OLD.qtdd_recebida
     WHERE id_estoque = OLD.id_estoque;
 END$$
+
 
 DELIMITER ;

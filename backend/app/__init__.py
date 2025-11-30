@@ -31,6 +31,9 @@ def create_app(config_name='default'):
     from app.routes.vendas_routes import vendas_bp
     app.register_blueprint(vendas_bp, url_prefix='/api/vendas')
 
+    from app.routes.dashboard_routes import dashboard_bp
+    app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
+
     @app.route('/health')
     def health_check():
         return "API Tropical Mix no ar!", 200

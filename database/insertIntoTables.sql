@@ -228,3 +228,30 @@ INSERT INTO produto (nome_produto, sabor, marca, preco_unitario, id_categoria)
 VALUES
 ('Churros Tradicional Frito', 'Tradicional', NULL, 50.00, 10),
 ('Churros Tradicional Frito', 'Tradicional', NULL, 19.00, 10);
+
+-- FORNECEDORRES
+INSERT INTO fornecedor (razao_social, cnpj, telefone, email) VALUES
+  ('Brigatta Indústria e Comércio de Alimentos Ltda', '08.069.249/0001-65', '+55 18 3701-3825', 'contato@brigatta.com.br'),
+  ('Marvi - Indústria de Embalagens Ltda', '53.408.654/0001-15', '+55 14 3302-4411', NULL),
+  ('Dupon Biscuits do Brasil Alimentos e Embalagens Ltda', '03.138.212/0001-28', NULL, NULL),
+  ('Pro Cascão Indústria e Comércio Ltda', '04.716.732/0001-33', '+55 11 4587-2777', 'contecni@terra.com.br'),
+  ('Du Porto Indústria Alimentícia Ltda', '72.845.068/0001-82', '+55 00 800 771 9244', 'sac@duporto.com.br'),
+  ('Vabene Alimentos', NULL, '+55 14 2105-2108', 'sac@vabenealimentos.com.br'),
+  ('Nut Indústria e Comércio Ltda', '66.095.670/0001-47', '+55 11 3384-4911', 'atendimento@nutbiscoitos.com.br'),
+  ('Dr. Oetker Brasil Ltda', '61.193.496/0001-51', '+55 11 3783-9300', NULL),
+  ('JEB Comércio de Alimentos Ltda', '05.761.350/0001-94', NULL, NULL),
+  ('Kerry do Brasil Ltda', '02.332.686/0001-43', '+55 19 3765-5000', 'cuentas.porpagarbr@kerry.com'),
+  ('Indústria e Comércio de Plásticos Rio Pardo Ltda (Rioplastic)', '60.348.695/0001-29', '+55 19 3682-8200', 'centralvendas@rioplastic.com.br'),
+  ('Altacoppo Indústria e Comércio de Produtos Descartáveis Ltda', '07.711.478/0001-79', '+55 11 2526-4488', 'anderson@altacoppo.com.br'),
+  ('Totalplast Indústria de Embalagens Plásticas Ltda', '38.386.879/0001-24', '+55 48 3046-5700', 'contato@totalplast.com.br'),
+  ('Strawplast Indústria e Comércio Ltda', '02.591.442/0001-85', '+55 48 3657-8028', 'contato@strawplast.com.br'),
+  ('Copobras Indústria e Comércio de Embalagens Ltda', '03.210.400/0001-10', '+55 11 4858-9620', 'dpo@copobras.com.br'),
+  ('Indústria de Embalagens Plásticas Reolon Ltda (KOPU’S)', '00.065.596/0001-08', '+55 45 3262-1630', 'kopus@kopus.com.br'),
+  ('Technoflavor Comércio e Distribuição de Aromas e Ingredientes Ltda', '11.244.095/0001-05', NULL, NULL),
+  ('Alispec Indústria e Comércio de Produtos Alimentícios Ltda', '96.468.079/0001-59', '+55 11 94398-7259', 'sac@alispec.com.br'),
+  ('Pro-Polpa Indústria & Comércio Ltda', '12.450.140/0001-40', '+55 43 3526-1600', 'atendimento@propolpa.com.br'),
+  ('Leitesol Indústria e Comércio S.A.', '65.979.973/0001-60', NULL, NULL),
+  ('Nestlé Brasil', NULL, '+55 00 800 770 2459', 'falecom@nestle.com.br'),
+  ('Ferrero do Brasil Indústria Doceira e Alimentar Ltda', NULL, NULL, 'contato.fiscalbrasil@ferrero.com'),
+  ('Xamego Bom – Fabrica de Laticínios Monte Azul Ltda', '28.811.123/0001-21', '+55 22 3833-9755', 'xamego@xamegobom.com.br'),
+  ('Granolevis Produtos Naturais / Lifenaturis Produtos Naturais Ltda', '18.155.066/0001-16', '+55 11 96997-5352', NULL);

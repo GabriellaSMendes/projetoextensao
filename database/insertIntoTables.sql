@@ -255,3 +255,11 @@ INSERT INTO fornecedor (razao_social, cnpj, telefone, email) VALUES
   ('Ferrero do Brasil Indústria Doceira e Alimentar Ltda', NULL, NULL, 'contato.fiscalbrasil@ferrero.com'),
   ('Xamego Bom – Fabrica de Laticínios Monte Azul Ltda', '28.811.123/0001-21', '+55 22 3833-9755', 'xamego@xamegobom.com.br'),
   ('Granolevis Produtos Naturais / Lifenaturis Produtos Naturais Ltda', '18.155.066/0001-16', '+55 11 96997-5352', NULL);
+
+INSERT INTO estoque (id_produto, qtdd_atual, qtdd_entrada, qtdd_saida)
+SELECT 
+    p.id_produto, 
+    100,
+    100,
+    0
+FROM produto p;

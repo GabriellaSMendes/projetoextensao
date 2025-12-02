@@ -145,6 +145,7 @@ def detalhar_venda(id_venda):
             "subtotal": str(item.preco_unitario * Decimal(item.qtdd_venda))
         })
 
+
     return jsonify({
         "id_venda": venda.id_venda,
         "dt_venda": venda.dt_venda.isoformat(),
@@ -160,3 +161,38 @@ def detalhar_venda(id_venda):
         },
         "itens_vendidos": itens_vendidos_json
     }), 200
+    
+
+@vendas_bp.route("/<int:id_venda>", methods=["DELETE"])
+@jwt_required()
+def deletar_venda(id_venda):
+    """
+    deletar uma venda.
+    """    
+    try:
+        venda = Venda.query.get(id_venda)
+        if not venda:
+            return jsonify({"erro": "Venda não encontrada"}), 404
+
+        itens = VendaEstoque.query.filter_by(id_venda=id_venda).all()
+
+        for item in itens:
+            estoque = Estoque.query.filter_by(id_estoque=item.id_estoque).first()
+
+            if estoque:
+                estoque.qtdd_atual += item.qtdd_venda
+                estoque.qtdd_saida -= item.qtdd_venda
+
+            db.session.delete(item)
+
+        db.session.flush()  
+
+        db.session.delete(venda)
+        db.session.commit()
+
+        return jsonify({"mensagem": "Venda excluída com sucesso!"}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print("ERRO AO EXCLUIR:", e)
+        return jsonify({"erro": str(e)}), 500

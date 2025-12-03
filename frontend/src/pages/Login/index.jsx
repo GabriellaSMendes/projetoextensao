@@ -5,8 +5,35 @@ import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
 
 
+
 function Login() {
   const navigate = useNavigate();
+
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotMessage, setForgotMessage] = useState("");
+
+  //funcao p o esqueci a senha
+  const handleForgotPassword = async () => {
+    if (!forgotEmail.trim()) {
+      setForgotMessage("Informe um e-mail válido.");
+      return;
+    }
+
+    try {
+      await api.post("/auth/redefinir", { email: forgotEmail });
+
+      setForgotMessage("Se o e-mail existir, você receberá instruções.");
+      setForgotEmail("");
+
+    } catch (error) {
+      console.error(error);
+      // mesma mensagem por segurança
+      setForgotMessage("Se o e-mail existir, você receberá instruções.");
+      setForgotEmail("");
+    }
+  };
+
 
   // agora inclui nome_usuario também
   const [formData, setFormData] = useState({
@@ -39,7 +66,7 @@ function Login() {
       }
 
       //Salvar token
-       localStorage.setItem("token", token);
+      localStorage.setItem("token", token);
 
       //Decodificar token JWT
       const payload = JSON.parse(atob(token.split(".")[1]));
@@ -128,12 +155,55 @@ function Login() {
           Entrar
         </button>
 
-        {/* BOTÃO CADASTRAR 
-        <button className="button-register" type="button" onClick={handleRegister}>
-          Cadastrar usuário
+        <button
+          type="button"
+          className="forgot-password"
+          onClick={() => setForgotOpen(true)}
+        >
+          Esqueci minha senha
         </button>
-        */}
       </form>
+
+      {/* modal de esqueci a senha */}
+      {forgotOpen && (
+        <div className="modal-overlay">
+          <div className="modal-box">
+            <h2>Redefinir senha</h2>
+            <p style={{ marginBottom: 12 }}>
+              Informe seu e-mail para enviar o pedido de redefinição.
+            </p>
+
+            <input
+              type="email"
+              placeholder="Seu e-mail"
+              value={forgotEmail}
+              onChange={(e) => setForgotEmail(e.target.value)}
+            />
+            {forgotMessage && (
+              <p className="forgot-info">
+                {forgotMessage}
+              </p>
+            )}
+
+
+            <div className="modal-actions">
+              <button
+                className="cancel-btn" onClick={() => {
+                  setForgotOpen(false);
+                  setForgotMessage("");
+                  setForgotEmail("");
+                }}
+              >
+                Cancelar
+              </button>
+              <button className="save-btn" onClick={handleForgotPassword}>
+                Enviar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

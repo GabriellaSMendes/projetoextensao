@@ -8,6 +8,14 @@ function normalizarDataISO(data) {
   return data.split("T")[0]; // remove T00:00:00 se existir
 }
 
+function formatarDataBR(data) {
+  if (!data) return "-";
+
+  const partes = data.split("-");
+  if (partes.length !== 3) return data;
+
+  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
 
 function Estoque() {
   const [produtos, setProdutos] = useState([]);
@@ -16,6 +24,20 @@ function Estoque() {
   const [produtoEditando, setProdutoEditando] = useState(null);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const [fornecedores, setFornecedores] = useState([]);
+
+  //info de forncedores
+  const carregarFornecedores = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const resp = await api.get("/fornecedores", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setFornecedores(resp.data.fornecedores);
+    } catch (err) {
+      console.error("Erro ao carregar fornecedores", err);
+    }
+  };
 
   //campos do forms
   const [formData, setFormData] = useState({
@@ -26,6 +48,7 @@ function Estoque() {
     data_vencimento: "",
     preco_unitario: "",
     id_categoria: "",
+    id_fornecedor: "",
   });
 
   //carregar produtos
@@ -37,7 +60,13 @@ function Estoque() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setProdutos(response.data.produtos);
+      const produtosNormalizados = response.data.produtos.map(p => ({
+        ...p,
+        data_vencimento: p.data_vencimento ? normalizarDataISO(p.data_vencimento) : ""
+      }));
+
+      setProdutos(produtosNormalizados);
+
     } catch (err) {
       console.error("Erro ao carregar produtos:", err);
     } finally {
@@ -63,11 +92,12 @@ function Estoque() {
   useEffect(() => {
     carregarProdutos();
     carregarCategorias();
+    carregarFornecedores();
   }, []);
 
   //filtro
   const filtrados = produtos.filter((p) =>
-    `${p.nome_produto} ${p.marca} ${p.nome}`
+    `${p.nome_produto} ${p.marca} ${p.nome} ${p.nome_fornecedor}`
       .toLowerCase()
       .includes(busca.toLowerCase())
   );
@@ -106,8 +136,6 @@ function Estoque() {
     }
   };
 
-
-
   // salvar produto
   const salvarProduto = async () => {
     try {
@@ -121,6 +149,7 @@ function Estoque() {
         preco_unitario: Number(formData.preco_unitario),
         id_categoria: Number(formData.id_categoria),
         qtdd_inicial: Number(formData.quantidade),
+        id_fornecedor: formData.id_fornecedor ? Number(formData.id_fornecedor) : null,
       };
 
       await api.post("/estoque/produtos", body, {
@@ -137,18 +166,39 @@ function Estoque() {
     }
   };
 
+  const abastecerProduto = async (produto) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const body = {
+        id_produto: produto.id_produto,
+        qtdd_recebida: Number(formData.quantidade),
+        id_fornecedor: Number(formData.id_fornecedor), // <----- NOVO
+        valor_unitario: Number(formData.preco_unitario) || null
+      };
+
+      await api.post("/estoque/abastecer", body, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      alert("Produto abastecido com sucesso!");
+      carregarProdutos();
+      setModalOpen(false);
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao abastecer o produto.");
+    }
+  };
 
   return (
     <div className="estoque-page">
 
       {/* Título + Botão */}
       <div className="estoque-title-row">
-
         <div className="estoque-title">
           <h1>PRODUTOS</h1>
           <small><strong>{filtrados.length}</strong> itens listados</small>
         </div>
-
         <button className="add-btn" onClick={() => {
           setProdutoEditando(null);
           setFormData({
@@ -159,6 +209,7 @@ function Estoque() {
             data_vencimento: "",
             preco_unitario: "",
             id_categoria: "",
+            id_fornecedor: "",
           });
           setModalOpen(true);
         }}>
@@ -191,7 +242,9 @@ function Estoque() {
           <div className="col">Categoria</div>
           <div className="col">Sabor</div>
           <div className="col">Marca</div>
+          <div className="col">Validade</div>
           <div className="col center">Qtd.</div>
+          <div className="col">Fornecedor</div>
           <div className="col action">Editar</div>
         </div>
 
@@ -207,13 +260,15 @@ function Estoque() {
               {/* Sem imagem ainda */}
               <div className="placeholder-img"></div>
             </div>
-
             <div className="col">{p.nome_produto}</div>
             <div className="col">{p.nome}</div>
             <div className="col">{p.sabor}</div>
             <div className="col">{p.marca}</div>
+            <div className="col">
+              {formatarDataBR(p.data_vencimento)}
+            </div>
             <div className="col center">{p.qtdd_atual}</div>
-
+            <div className="col">{p.nome_fornecedor || "-"}</div>
             <div className="col action">
               <button
                 className="edit-btn"
@@ -245,7 +300,6 @@ function Estoque() {
 
             {/* título dinâmico */}
             <h2>{produtoEditando ? "Editar Produto" : "Novo Produto"}</h2>
-
             <div className="form-grid">
 
               <div>
@@ -256,7 +310,6 @@ function Estoque() {
                   onChange={handleChange}
                 />
               </div>
-
               <div>
                 <label>Sabor</label>
                 <input
@@ -265,7 +318,6 @@ function Estoque() {
                   onChange={handleChange}
                 />
               </div>
-
               <div>
                 <label>Marca</label>
                 <input
@@ -300,13 +352,19 @@ function Estoque() {
               </div>
 
               <div>
-                <label>Data de vencimento</label>
-                <input
-                  type="date"
-                  name="data_vencimento"
-                  value={formData.data_vencimento}
+                <label>Fornecedor</label>
+                <select
+                  name="id_fornecedor"
+                  value={formData.id_fornecedor}
                   onChange={handleChange}
-                />
+                >
+                  <option value="">Selecione...</option>
+                  {fornecedores.map((f) => (
+                    <option key={f.id_fornecedor} value={f.id_fornecedor}>
+                      {f.razao_social}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>
@@ -325,6 +383,16 @@ function Estoque() {
                 </select>
               </div>
 
+              <div>
+                <label>Data de vencimento</label>
+                <input
+                  type="date"
+                  name="data_vencimento"
+                  value={formData.data_vencimento}
+                  onChange={handleChange}
+                />
+              </div>
+
             </div>
 
             <div className="modal-actions">
@@ -335,12 +403,29 @@ function Estoque() {
               <button
                 className="save-btn"
                 onClick={() => {
-                  if (produtoEditando) atualizarProduto();
-                  else salvarProduto();
+                  if (produtoEditando) {
+                    atualizarProduto();
+                  } else {
+
+                    const produtoExistente = produtos.find(p =>
+                      p.nome_produto.toLowerCase() === formData.nome_produto.toLowerCase() &&
+                      (p.marca || "").toLowerCase() === (formData.marca || "").toLowerCase() &&
+                      (p.sabor || "").toLowerCase() === (formData.sabor || "").toLowerCase() &&
+                      (normalizarDataISO(p.data_vencimento) || "") === (formData.data_vencimento || "") &&
+                      (String(p.id_categoria) === String(formData.id_categoria))
+                    );
+
+                    if (produtoExistente) {
+                      abastecerProduto(produtoExistente);
+                    } else {
+                      salvarProduto();
+                    }
+                  }
                 }}
               >
                 Salvar
               </button>
+
             </div>
 
           </div>

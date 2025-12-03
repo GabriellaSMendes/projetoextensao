@@ -2,6 +2,8 @@ import "./style.css";
 import { useState } from "react";
 import api from "../../services/api";
 import { useNavigate } from "react-router-dom";
+import { validarSenha, gerarMensagensErro } from "../../utils/passwordUtils";
+
 
 function Cadastro() {
   const navigate = useNavigate();
@@ -14,6 +16,10 @@ function Cadastro() {
     nivel_acesso: "vendedor", // padrão
   });
 
+  //validaçao da senha
+  const [senhaInvalida, setSenhaInvalida] = useState("");
+
+
   // Atualiza os campos
   const handleChange = (e) => {
     setFormData({
@@ -25,6 +31,19 @@ function Cadastro() {
   // Submeter cadastro
   const handleRegister = async (e) => {
     e.preventDefault();
+
+    const validacao = validarSenha(formData.senha);
+
+    if (!validacao.ok) {
+      setSenhaInvalida(
+        "A senha deve ter no mínimo 8 caracteres sendo 1 letra maiúscula e 1 caractere especial."
+      );
+      return;
+    }
+
+    // limpar erro se estiver tudo certo
+    setSenhaInvalida("");
+
 
     try {
       const token = localStorage.getItem("token");
@@ -90,6 +109,10 @@ function Cadastro() {
           onChange={handleChange}
           required
         />
+
+        {senhaInvalida && (
+          <p className="erro-senha">{senhaInvalida}</p>
+        )}
 
         {/* Checkbox admin */}
         <div className="checkbox-container">

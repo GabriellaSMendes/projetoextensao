@@ -99,12 +99,32 @@
   overflow: hidden;
 }
 
-.thead, .row {
-  display: grid;
-  grid-template-columns: 2fr 1.4fr 1.2fr 0.6fr 0.8fr;
-  padding: 12px;
-  align-items: center;
+.estoque-table .thead,
+.estoque-table .row {
+  display: grid !important;
+  align-items: center !important;
+  grid-template-columns:
+    60px              /* imagem */
+    2.2fr             /* produto */
+    1.4fr             /* categoria */
+    1.2fr             /* sabor */
+    1.2fr             /* marca */
+    1fr               /* validade */
+    0.6fr             /* qtd */
+    1.4fr             /* fornecedor */
+    0.7fr !important; /* editar */
 }
+
+.estoque-table .thead {
+  padding: 1px 0 !important;
+  min-height: 30px !important;
+}
+
+.estoque-table .row {
+  padding: 1px 0 !important;
+  min-height: 30px !important;
+}
+
 
 .thead {
   background: #f3e6ef;

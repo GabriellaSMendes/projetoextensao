@@ -48,6 +48,23 @@ def listar_produtos():
 
     lista_json = []
     for p, e in produtos_com_estoque:
+        
+        # Buscar o último abastecimento deste estoque
+        ultimo_abastecimento = (
+            Abastece.query
+            .filter_by(id_estoque=e.id_estoque)
+            .order_by(Abastece.id_abastecimento.desc())
+            .first()
+        )
+
+        if ultimo_abastecimento:
+            fornecedor = Fornecedor.query.get(ultimo_abastecimento.id_fornecedor)
+            nome_fornecedor = fornecedor.razao_social if fornecedor else None
+            id_fornecedor = fornecedor.id_fornecedor if fornecedor else None
+        else:
+            nome_fornecedor = None
+            id_fornecedor = None
+            
         lista_json.append({
             "id_produto": p.id_produto,
             "id_estoque": e.id_estoque,
@@ -55,9 +72,17 @@ def listar_produtos():
             "sabor": p.sabor,
             "marca": p.marca,
             "preco_unitario": str(p.preco_unitario),
+
+            "data_vencimento": (
+                p.data_vencimento.isoformat() 
+                if p.data_vencimento else None
+            ),
+
             "id_categoria": p.id_categoria,
             "nome": p.categoria.nome if p.categoria else None,
-            "qtdd_atual": e.qtdd_atual
+            "qtdd_atual": e.qtdd_atual,
+            "id_fornecedor": id_fornecedor,
+            "nome_fornecedor": nome_fornecedor
         })
     return jsonify(produtos=lista_json), 200
 
@@ -74,6 +99,15 @@ def criar_produto():
     if dados.get('id_categoria'):
         if not Categoria.query.get(dados.get('id_categoria')):
             return jsonify({"erro": "Categoria não encontrada"}), 404
+    
+    # Extrair fornecedor
+    id_fornecedor = dados.get("id_fornecedor")
+    
+    # Validar fornecedor
+    if id_fornecedor:
+        fornecedor = Fornecedor.query.get(id_fornecedor)
+        if not fornecedor:
+            return jsonify({"erro": "Fornecedor inválido"}), 404
 
     novo_produto = Produto(
         nome_produto=dados.get('nome_produto'),
@@ -96,6 +130,18 @@ def criar_produto():
     try:
         db.session.add(novo_produto)
         db.session.add(novo_estoque)
+        db.session.flush()
+        
+        # Criar abastecimento inicial (se houver fornecedor)
+        if id_fornecedor:
+            abastecimento_inicial = Abastece(
+                id_fornecedor=id_fornecedor,
+                id_estoque=novo_estoque.id_estoque,
+                qtdd_recebida=qtdd_inicial,
+                valor_unitario=dados.get("preco_unitario")
+            )
+            db.session.add(abastecimento_inicial)
+
         db.session.commit()
 
         return jsonify({

@@ -11,3 +11,5 @@ Flask-Migrate
 Flask-CORS
 pymysql
 python-dotenv
+pandas
+matplotlib

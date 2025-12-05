@@ -246,7 +246,6 @@ function Vendas() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      alert("Venda excluída com sucesso.");
       carregarVendas();
     } catch (err) {
       console.error(err);
@@ -309,7 +308,6 @@ function Vendas() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      alert("Venda registrada com sucesso!");
       setModalOpen(false);
       carregarVendas();
     } catch (err) {

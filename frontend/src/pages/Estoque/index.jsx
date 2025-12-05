@@ -125,7 +125,6 @@ function Estoque() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      alert("Produto atualizado!");
       setModalOpen(false);
       carregarProdutos();
       setProdutoEditando(null);
@@ -156,8 +155,6 @@ function Estoque() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      alert("Produto cadastrado!");
-
       setModalOpen(false);
       carregarProdutos();
     } catch (error) {
@@ -181,7 +178,6 @@ function Estoque() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      alert("Produto abastecido com sucesso!");
       carregarProdutos();
       setModalOpen(false);
     } catch (err) {

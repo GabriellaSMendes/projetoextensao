@@ -3,6 +3,7 @@ from app.models import db, Venda, VendaEstoque, Cliente, Produto, Estoque
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.orm import joinedload
 from decimal import Decimal
+from datetime import date
 
 vendas_bp = Blueprint('vendas', __name__)
 
@@ -69,6 +70,10 @@ def criar_venda():
 
             if not produto or not estoque:
                 return jsonify({"erro": f"Produto com ID {id_produto} não encontrado ou sem estoque."}), 404
+
+            if produto.data_vencimento < date.today():
+                raise Exception(
+                    f"Operação bloqueada: O produto '{produto.nome_produto}' está vencido desde {produto.data_vencimento.strftime('%d/%m/%Y')}.")
 
             if estoque.qtdd_atual < qtdd_desejada:
                 raise Exception(

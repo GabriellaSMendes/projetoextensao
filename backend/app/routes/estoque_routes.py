@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, date
 
 from flask import request, jsonify, Blueprint
 from app.models import db, Produto, Categoria, Estoque, Fornecedor, Abastece
@@ -230,6 +230,12 @@ def abastecer_estoque():
     estoque = Estoque.query.filter_by(id_produto=id_produto).first()
     if not estoque:
         return jsonify({"erro": f"Produto com ID {id_produto} não possui entrada de estoque"}), 404
+
+    produto = estoque.produto
+    if produto.data_vencimento < date.today():
+        return jsonify({
+            "erro": f"Abastecimento bloqueado: O produto '{produto.nome_produto}' está vencido desde {produto.data_vencimento.strftime('%d/%m/%Y')}."
+        }), 400
 
     try:
         novo_abastecimento = Abastece(

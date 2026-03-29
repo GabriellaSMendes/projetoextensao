@@ -15,10 +15,10 @@ MySQL Workbench
 ```
 INSERT INTO usuario (nome_usuario, email, senha, nivel_acesso)
 VALUES (
-  'Admin',
-  'admin@tropicalmix.com',
-  '$2b$12$JoCZ3YOUsCrpDI8w/pYzWOzHcvKV46JC8QpunjJAvkoG.qLTR31ja',
-  'admin'
+    'Admin',
+    'admin@tropicalmix.com',
+    '$2b$12J3CZY0UsCrpDI8w/pYzW0zHcvKV46JC8QpunjJAvkoG.qLTR3lja',
+    'admin'
 );
 ```
 

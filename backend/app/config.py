@@ -8,7 +8,7 @@ class Config:
     SECRET_KEY = secrets.token_hex(32)
 
     #SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://admin:Tropicalmix!2025@tropicalmix-db.cx4oewgg880d.us-east-1.rds.amazonaws.com:3306/tropicalmix_db' # ATUALIZAR PARA CONECTAR AO DB
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:root@localhost/tropicalmix_db'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:Judo09041003.@localhost/tropicalmix_db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     JWT_SECRET_KEY = SECRET_KEY

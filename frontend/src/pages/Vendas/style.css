@@ -3,7 +3,7 @@
   min-height: 100vh;
   padding: 24px 20px;
   background: #ffffff;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Poppins", sans-serif;
   color: #222;
 }
 
@@ -15,11 +15,12 @@
   align-items: baseline;
   gap: 8px;
   margin-bottom: 16px;
+  color: #a02020;
 }
 
 
 .title-row h1 {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
   margin: 0;
   color: #4e1633;
@@ -28,8 +29,8 @@
 
 
 .title-row .subtitle {
-  font-size: 15px;
-  color: #555;
+  font-size: 12px;
+  color: #4e1633;
 }
 
 
@@ -113,11 +114,13 @@
 
 /* ===== TABELA ===== */
 .table {
-  margin-top: 4px;
-  border-radius: 10px;
-  border: 1px solid #e3e3e3;
+  border: 1px solid #ddd;
+
+
+  border-radius: 8px;
+
+
   overflow: hidden;
-  background: #ffffff;
 }
 
 
@@ -632,6 +635,8 @@
   padding: 20px;
   z-index: 998;
   transition: transform 0.3s ease;
+
+  height: calc(100vh - 70px);
 }
 
 /* aberto */
@@ -667,7 +672,7 @@
 /* scroll */
 .filtro-scroll-area {
   overflow-y: auto;
-  max-height: 70vh;
+  max-height: calc(100vh - 220px);
 }
 
 /* seção */
@@ -706,7 +711,7 @@
 
 /* actions */
 .filtros-actions {
-  margin-top: 20px;
+  margin-top: 10px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -719,6 +724,7 @@
   border-radius: 6px;
   cursor: pointer;
 }
+
 
 .btn-aplicar {
   background: #4e1633;

@@ -54,7 +54,7 @@ function formatarDataBR(data) {
 function Estoque() {
 
 
-  const [filtrosAbertos, setFiltrosAbertos] = useState(true);
+  const [filtrosAbertos, setFiltrosAbertos] = useState(false);
   const [fornecedores, setFornecedores] = useState([]);
 
   const [filtroCategoria, setFiltroCategoria] = useState([]);
@@ -199,10 +199,13 @@ function Estoque() {
     return produtos.filter((p) => {
 
 
-      const atendeBusca = p.nome_produto.toLowerCase().includes(busca.toLowerCase()) ||
+      const termo = busca.toLowerCase();
 
-
-        p.marca?.toLowerCase().includes(busca.toLowerCase());
+      const atendeBusca =
+        p.nome_produto?.toLowerCase().includes(termo) ||
+        p.marca?.toLowerCase().includes(termo) ||
+        p.sabor?.toLowerCase().includes(termo) ||
+        p.nome_fornecedor?.toLowerCase().includes(termo);
 
 
       const atendeCategoria = filtroCategoria.length === 0 || filtroCategoria.includes(p.nome);
@@ -297,8 +300,8 @@ function Estoque() {
           sabor: formData.sabor,
           marca: formData.marca,
           preco_unitario: formData.preco_unitario
-          ? Number(formData.preco_unitario.replace(",", "."))
-          : 0,
+            ? Number(formData.preco_unitario.replace(",", "."))
+            : 0,
           id_fornecedor: formData.id_fornecedor || null,
           id_categoria: formData.id_categoria || null,
           data_vencimento: formData.data_vencimento || null,
@@ -532,7 +535,6 @@ function Estoque() {
 
         <div className="estoque-title-row">
 
-
           <div className="estoque-title">
 
 
@@ -701,8 +703,8 @@ function Estoque() {
                         id_fornecedor: p.id_fornecedor || "",
                         id_categoria: p.id_categoria || "",
                         data_vencimento: p.data_vencimento
-                        ? p.data_vencimento.split("T")[0]
-                        : ""
+                          ? p.data_vencimento.split("T")[0]
+                          : ""
                       });
 
                       setModalOpen(true);

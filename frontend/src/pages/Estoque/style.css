@@ -214,34 +214,24 @@
 
 
 
+
+
+
 .searchbox {
-
-
   flex: 1;
-
-
   display: flex;
-
-
   align-items: center;
+  gap: 10px;
 
+  background: #ffffff;
+  padding: 10px 14px;
 
-  gap: 8px;
+  border-radius: 10px;
+  border: 1px solid #e5e5e5;
 
-
-  background: #eee;
-
-
-  padding: 10px;
-
-
-  border-radius: 8px;
-
-
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  transition: all 0.2s ease;
 }
-
-
-
 
 
 
@@ -928,22 +918,21 @@
 
 
 .filtros-avancados {
-  width: 280px;
-  background: #f7f7f7;
-  border-right: 1px solid #ddd;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-
-  position: fixed;
+  flex-shrink: 0;
+  position: relative;
+  top: 0;
   left: 0;
-  top: 70px; /* 🔥 CORREÇÃO */
+  width: 350px;
+  min-width: 350px;
+  flex-shrink: 0; /* 🔥 ESSENCIAL */
+  height: 100vh;
+  background: #ffffff;
+  border-right: 1px solid #e3e3e3;
+  padding: 20px;
+  z-index: 998;
+  transition: transform 0.3s ease;
 
-  height: calc(100vh - 70px); /* 🔥 CORREÇÃO */
-
-  z-index: 1000;
-  transform: translateX(0);
+  height: calc(100vh - 70px);
 }
 
 
@@ -1364,8 +1353,14 @@
 
 }
 
+.filtros-avancados.aberto {
+  width: 350px !important;
+  min-width: 350px !important;
+}
 
-
+.search-row {
+  margin-bottom: 16px;
+}
 
 
 .filtros-avancados.fechado {

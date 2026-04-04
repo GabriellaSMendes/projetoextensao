@@ -616,3 +616,162 @@
 .novo-cliente-inline .save-btn:hover {
   background: #701e49;
 }
+
+
+/* ===== SIDEBAR FILTROS (IGUAL ESTOQUE) ===== */
+
+.filtros-avancados {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 260px;
+  min-width: 260px;
+  height: 100vh;
+  background: #ffffff;
+  border-right: 1px solid #e3e3e3;
+  padding: 20px;
+  z-index: 998;
+  transition: transform 0.3s ease;
+}
+
+/* aberto */
+.filtros-avancados.aberto {
+  transform: translateX(0);
+}
+
+/* fechado */
+.filtros-avancados.fechado {
+  transform: translateX(-100%);
+}
+
+/* header */
+.filtros-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.filtros-header h2 {
+  font-size: 18px;
+  color: #4e1633;
+}
+
+.close-btn {
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* scroll */
+.filtro-scroll-area {
+  overflow-y: auto;
+  max-height: 70vh;
+}
+
+/* seção */
+.filtro-secao {
+  margin-bottom: 20px;
+}
+
+.filtro-secao label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #4e1633;
+  margin-bottom: 6px;
+  display: block;
+}
+
+/* input */
+.filtro-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+/* checkbox */
+.checkbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* actions */
+.filtros-actions {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-limpar {
+  background: #eee;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-aplicar {
+  background: #4e1633;
+  color: #fff;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* botão toggle */
+.filter-btn-toggle {
+  border: 1px solid #4e1633;
+  background: #fdf9fc;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #4e1633;
+  transition: 0.2s;
+}
+
+.filter-btn-toggle:hover {
+  background: #f3e3f1;
+}
+
+.filter-btn-toggle.active {
+  background: #4e1633;
+  color: #fff;
+}
+
+/* empurra conteúdo quando sidebar aberta */
+.vendas-page {
+  display: flex;
+}
+
+.vendas-page {
+  display: flex;
+}
+
+.filtros-avancados {
+  width: 260px;
+}
+
+.vendas-main {
+  flex: 1;
+  padding: 20px;
+}
+/* quando fechado */
+.filtros-avancados.fechado ~ * {
+  margin-left: 0 !important;
+}
+
+.vendas-page {
+  display: flex;
+}

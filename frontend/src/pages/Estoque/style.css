@@ -381,35 +381,15 @@
 
 
   grid-template-columns:
-
-
-    60px              /* imagem */
-
-
-    2.2fr             /* produto */
-
-
-    1.4fr             /* categoria */
-
-
-    1.2fr             /* sabor */
-
-
-    1.2fr             /* marca */
-
-
-    1fr               /* validade */
-
-
-    0.6fr             /* qtd */
-
-
-    1.4fr             /* fornecedor */
-
-
-    0.7fr !important; /* editar */
-
-
+    60px
+    3fr   /* produto (mais importante) */
+    1.2fr
+    1fr
+    1fr
+    1fr
+    0.8fr
+    1.2fr
+    0.8fr;
 }
 
 
@@ -935,20 +915,11 @@
 
 
 .estoque-container {
-
-
   display: flex;
-
-
+  width: 100%;
   flex-direction: row; /* Coloca filtro e tabela lado a lado */
-
-
   background-color: #fdfdfd;
-
-
   min-height: 100vh;
-
-
 }
 
 
@@ -957,38 +928,22 @@
 
 
 .filtros-avancados {
-
-
-  width: 280px; /* Largura fixa conforme solicitado */
-
-
-  background: #f7f7f7; /* Cor clara de fundo */
-
-
-  border-right: 1px solid #ddd; /* Borda suave de separação */
-
-
+  width: 280px;
+  background: #f7f7f7;
+  border-right: 1px solid #ddd;
   padding: 24px;
-
-
   display: flex;
-
-
   flex-direction: column;
-
-
   gap: 24px;
 
+  position: fixed;
+  left: 0;
+  top: 70px; /* 🔥 CORREÇÃO */
 
-  height: 100vh;
+  height: calc(100vh - 70px); /* 🔥 CORREÇÃO */
 
-
-  position: sticky;
-
-
-  top: 0;
-
-
+  z-index: 1000;
+  transform: translateX(0);
 }
 
 
@@ -1413,25 +1368,13 @@
 
 
 
-
 .filtros-avancados.fechado {
-
-
   width: 0;
-
-
-  padding: 0;
-
-
+  min-width: 0;
+  transform: translateX(-100%);
   opacity: 0;
-
-
   pointer-events: none;
-
-
-  border: none;
-
-
+  visibility: hidden; /* 🔥 ESSENCIAL */
 }
 
 
@@ -1528,17 +1471,11 @@
 
 
 .estoque-main {
-
-
   flex: 1;
-
-
+  margin-left: 0;
+  transition: all 0.3s ease;
   padding: 40px;
-
-
   background: #ffffff;
-
-
 }
 
 

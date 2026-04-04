@@ -89,9 +89,6 @@ function Estoque() {
 
 
 
-
-
-
   const carregarProdutos = async () => {
 
 
@@ -156,27 +153,27 @@ function Estoque() {
   };
 
   const carregarFornecedores = async () => {
-  try {
-    const token = localStorage.getItem("token");
-    const response = await api.get("/fornecedores", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    setFornecedores(response.data.fornecedores || []);
-  } catch (err) {
-    console.error(err);
-  }
-};
+    try {
+      const token = localStorage.getItem("token");
+      const response = await api.get("/fornecedores", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setFornecedores(response.data.fornecedores || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
 
 
 
 
 
-useEffect(() => {
-  carregarProdutos();
-  carregarCategorias();
-  carregarFornecedores(); // 👈 ADD AQUI
-}, []);
+  useEffect(() => {
+    carregarProdutos();
+    carregarCategorias();
+    carregarFornecedores(); // 👈 ADD AQUI
+  }, []);
 
 
 
@@ -245,79 +242,83 @@ useEffect(() => {
   };
 
   const salvarProduto = async () => {
-  try {
-    const token = localStorage.getItem("token");
+    try {
+      const token = localStorage.getItem("token");
 
-    await api.post(
-      "/estoque/produtos",
-      {
-        nome_produto: formData.nome_produto,
-        sabor: formData.sabor,
-        marca: formData.marca,
-        qtdd_entrada: Number(formData.quantidade),
-        preco_unitario: Number(formData.preco_unitario),
-        id_fornecedor: formData.id_fornecedor,
-        id_categoria: formData.id_categoria,
-        data_vencimento: formData.data_vencimento || null,
-      },
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+      await api.post(
+        "/estoque/produtos",
+        {
+          nome_produto: formData.nome_produto,
+          sabor: formData.sabor,
+          marca: formData.marca,
+          qtdd_entrada: Number(formData.quantidade),
+          preco_unitario: Number(formData.preco_unitario.replace(",", ".")),
+          id_fornecedor: formData.id_fornecedor || null,
+          id_categoria: formData.id_categoria || null,
+          data_vencimento: formData.data_vencimento || null,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-    // 🔄 Atualiza lista
-    carregarProdutos();
+      // 🔄 Atualiza lista
+      carregarProdutos();
 
-    // 🔒 Fecha modal
-    setModalOpen(false);
+      // 🔒 Fecha modal
+      setModalOpen(false);
 
-    // 🧹 Limpa form
-    setFormData({
-      nome_produto: "",
-      sabor: "",
-      marca: "",
-      quantidade: "",
-      preco_unitario: "",
-      id_fornecedor: "",
-      id_categoria: "",
-      data_vencimento: ""
-    });
+      // 🧹 Limpa form
+      setFormData({
+        nome_produto: "",
+        sabor: "",
+        marca: "",
+        quantidade: "",
+        preco_unitario: "",
+        id_fornecedor: "",
+        id_categoria: "",
+        data_vencimento: ""
+      });
 
-  } catch (error) {
-    console.error(error);
-    alert("Erro ao salvar produto");
-  }
-};
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao salvar produto");
+    }
+  };
 
-const atualizarProduto = async () => {
-  try {
-    const token = localStorage.getItem("token");
+  const atualizarProduto = async () => {
+    try {
+      const token = localStorage.getItem("token");
 
-    await api.put(
-      `/estoque/produtos/${produtoEditando.id_produto}`,
-      {
-        nome_produto: formData.nome_produto,
-        sabor: formData.sabor,
-        marca: formData.marca,
-        preco_unitario: Number(formData.preco_unitario),
-        id_fornecedor: formData.id_fornecedor,
-        id_categoria: formData.id_categoria,
-        data_vencimento: formData.data_vencimento || null,
-      },
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+      await api.put(
+        `/estoque/produtos/${produtoEditando.id_produto}`,
+        {
+          nome_produto: formData.nome_produto,
+          sabor: formData.sabor,
+          marca: formData.marca,
+          preco_unitario: formData.preco_unitario
+          ? Number(formData.preco_unitario.replace(",", "."))
+          : 0,
+          id_fornecedor: formData.id_fornecedor || null,
+          id_categoria: formData.id_categoria || null,
+          data_vencimento: formData.data_vencimento || null,
 
-    carregarProdutos();
-    setModalOpen(false);
-    setProdutoEditando(null);
+          qtdd_atual: Number(formData.quantidade) || produtoEditando.qtdd_atual
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-  } catch (error) {
-    console.error(error);
-    alert("Erro ao atualizar produto");
-  }
-};
+      carregarProdutos();
+      setModalOpen(false);
+      setProdutoEditando(null);
+
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao atualizar produto");
+    }
+  };
 
 
   return (
@@ -565,7 +566,27 @@ const atualizarProduto = async () => {
             </button>
 
 
-            <button className="add-btn" onClick={() => setModalOpen(true)}>+ Adicionar novo</button>
+            <button
+              className="add-btn"
+              onClick={() => {
+                setProdutoEditando(null);
+
+                setFormData({
+                  nome_produto: "",
+                  sabor: "",
+                  marca: "",
+                  quantidade: "",
+                  preco_unitario: "",
+                  id_fornecedor: "",
+                  id_categoria: "",
+                  data_vencimento: ""
+                });
+
+                setModalOpen(true);
+              }}
+            >
+              + Adicionar novo
+            </button>
 
 
           </div>
@@ -666,7 +687,29 @@ const atualizarProduto = async () => {
                 <div className="col action">
 
 
-                  <button className="edit-btn">Editar</button>
+                  <button
+                    className="edit-btn"
+                    onClick={() => {
+                      setProdutoEditando(p);
+
+                      setFormData({
+                        nome_produto: p.nome_produto || "",
+                        sabor: p.sabor || "",
+                        marca: p.marca || "",
+                        quantidade: p.qtdd_atual || "",
+                        preco_unitario: p.preco_unitario || "",
+                        id_fornecedor: p.id_fornecedor || "",
+                        id_categoria: p.id_categoria || "",
+                        data_vencimento: p.data_vencimento
+                        ? p.data_vencimento.split("T")[0]
+                        : ""
+                      });
+
+                      setModalOpen(true);
+                    }}
+                  >
+                    Editar
+                  </button>
 
 
                 </div>
@@ -748,8 +791,7 @@ const atualizarProduto = async () => {
               <div>
                 <label>Preço unitário</label>
                 <input
-                  type="number"
-                  step="0.01"
+                  type="text"
                   name="preco_unitario"
                   value={formData.preco_unitario}
                   onChange={handleChange}
@@ -803,7 +845,10 @@ const atualizarProduto = async () => {
             <div className="modal-actions">
               <button
                 className="cancel-btn"
-                onClick={() => setModalOpen(false)}
+                onClick={() => {
+                  setModalOpen(false);
+                  setProdutoEditando(null);
+                }}
               >
                 Cancelar
               </button>

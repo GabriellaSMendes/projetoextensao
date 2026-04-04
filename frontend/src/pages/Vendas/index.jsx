@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import api from "../../services/api";
 import "./style.css";
 
@@ -45,8 +45,10 @@ function normalizarData(d) {
 
 function Vendas() {
   // --------------------- ESTADOS ---------------------
-  const [vendas, setVendas] = useState([]);
+  const [filtrosAbertos, setFiltrosAbertos] = useState(true);
   const [busca, setBusca] = useState("");
+  const [filtroPagamento, setFiltroPagamento] = useState([]);
+  const [vendas, setVendas] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -84,6 +86,32 @@ function Vendas() {
   const [selectNome, setSelectNome] = useState("");
   const [selectSabor, setSelectSabor] = useState("");
   const [selectMarca, setSelectMarca] = useState("");
+
+const toggleFiltro = (lista, item, setLista) => {
+  setLista(lista.includes(item)
+    ? lista.filter(i => i !== item)
+    : [...lista, item]
+  );
+};
+
+const filtrados = useMemo(() => {
+  return vendas.filter((v) => {
+
+    const atendeBusca =
+      v.nome_cliente?.toLowerCase().includes(busca.toLowerCase()) ||
+      v.nome_vendedor?.toLowerCase().includes(busca.toLowerCase());
+
+    const atendePagamento =
+      filtroPagamento.length === 0 ||
+      filtroPagamento.includes(
+      (v.metodo_pagamento || "").toLowerCase()
+      )
+
+    return atendeBusca && atendePagamento;
+
+  });
+}, [vendas, busca, filtroPagamento]);
+  
 
   //lista derivadas pros produtos  
   const nomesUnicos = [...new Set(produtos.map(p => p.nome_produto))];
@@ -223,11 +251,6 @@ function Vendas() {
   }, []);
 
   // ------------------ FILTRO ------------------
-  const filtradas = vendas.filter((v) =>
-    `${v.nome_cliente} ${v.itens} ${v.metodo_pagamento}`
-      .toLowerCase()
-      .includes(busca.toLowerCase())
-  );
 
   const formatR$ = (v) =>
     (Number(v) || 0).toLocaleString("pt-BR", {
@@ -330,36 +353,114 @@ function Vendas() {
     );
   });
 
-  console.log("data_venda recebida:", vendas.map(v => v.data_venda));
+  console.log("data_venda recebida:", filtrados.map(v => v.dt_venda));
 
   // ------------------ RENDER ------------------
   return (
     <div className="vendas-page">
-      {/* Título */}
-      <div className="title-row" style={{ justifyContent: "space-between" }}>
-        <div style={{ display: "flex", gap: 8, alignItems: "baseline" }}>
-          <h1>VENDAS</h1>
-          <span className="subtitle">{vendasDoMes.length} venda(s) no mês atual</span>
-        </div>
 
-        <button
-          className="add-btn"
-          onClick={() => {
-            carregarClientes();
-            carregarProdutos();
-            setCarrinho([]);
-            setCliente("");
-            setItemProduto("");
-            setItemQtd(1);
-            setPagamento("pix");
-            setNovoCliente("");
-            setShowNovoClienteForm(false);
-            setModalOpen(true);
-          }}
-        >
-          + Registrar venda
-        </button>
+
+      <aside className={`filtros-avancados ${filtrosAbertos ? "aberto" : "fechado"}`}>
+
+  <div className="filtros-header">
+    <h2>Filtros Avançados</h2>
+    <button className="close-btn" onClick={() => setFiltrosAbertos(false)}>×</button>
+  </div>
+
+  <div className="filtro-scroll-area">
+
+    {/* BUSCA */}
+    <div className="filtro-secao">
+      <label>Pesquisar</label>
+      <input
+        type="text"
+        className="filtro-input"
+        placeholder="Cliente ou vendedor..."
+        value={busca}
+        onChange={(e) => setBusca(e.target.value)}
+      />
+    </div>
+
+    {/* PAGAMENTO */}
+    <div className="filtro-secao">
+      <label>Forma de pagamento</label>
+      <div className="checkbox-list">
+        {["dinheiro", "cartao", "pix", "outros"].map((tipo) => (
+          <div key={tipo} className="checkbox-item">
+            <input
+              type="checkbox"
+              id={tipo}
+              checked={filtroPagamento.includes(tipo)}
+              onChange={() => toggleFiltro(filtroPagamento, tipo, setFiltroPagamento)}
+            />
+            <label htmlFor={tipo}>{tipo}</label>
+          </div>
+        ))}
       </div>
+    </div>
+
+  </div>
+
+  <div className="filtros-actions">
+    <button
+      className="btn-limpar"
+      onClick={() => {
+        setBusca("");
+        setFiltroPagamento([]);
+      }}
+    >
+      Limpar Filtros
+    </button>
+
+    <button
+      className="btn-aplicar"
+      onClick={() => setFiltrosAbertos(false)}
+    >
+      Aplicar Filtros
+    </button>
+  </div>
+
+</aside>
+
+
+<div className="vendas-main">
+      {/* Título */}
+<div className="title-row" style={{ justifyContent: "space-between" }}>
+
+  <div style={{ display: "flex", gap: 8, alignItems: "baseline" }}>
+    <h1>VENDAS</h1>
+    <span className="subtitle">{vendasDoMes.length} venda(s) no mês atual</span>
+  </div>
+<div style={{ display: "flex", gap: 10 }}>
+
+  <button
+    className={`filter-btn-toggle ${filtrosAbertos ? 'active' : ''}`}
+    onClick={() => setFiltrosAbertos(!filtrosAbertos)}
+  >
+    {filtrosAbertos ? "Ocultar Filtros" : "Filtrar"}
+  </button>
+
+  <button
+    className="add-btn"
+    onClick={() => {
+      carregarClientes();
+      carregarProdutos();
+      setCarrinho([]);
+      setCliente("");
+      setItemProduto("");
+      setItemQtd(1);
+      setPagamento("pix");
+      setNovoCliente("");
+      setShowNovoClienteForm(false);
+      setModalOpen(true);
+    }}
+  >
+    + Registrar venda
+  </button>
+
+</div>
+
+  </div>
 
       {/* Busca */}
       <div className="search-row">
@@ -394,7 +495,7 @@ function Vendas() {
             <div className="col center"></div>
           </div>
 
-          {filtradas.map((v) => (
+          {filtrados.map((v) => (
             <div className="row" key={v.id_venda}>
               <div className="col">{v.dataFormatada}</div>
               <div className="col">{v.nome_cliente}</div>
@@ -759,7 +860,7 @@ function Vendas() {
           </div>
         )
       }
-
+    </div >
     </div >
   );
 }

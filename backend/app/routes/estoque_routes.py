@@ -119,7 +119,7 @@ def criar_produto():
     )
 
     # Criar a entrada de Estoque para o produto
-    qtdd_inicial = dados.get('qtdd_entrada', 0)
+    qtdd_inicial = dados.get('qtdd_entrada', 0) 
 
     novo_estoque = Estoque(
         qtdd_atual=qtdd_inicial,

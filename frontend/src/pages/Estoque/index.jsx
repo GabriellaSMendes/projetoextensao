@@ -244,10 +244,26 @@ function Estoque() {
     });
   };
 
+  function dataEhValida(data) {
+    if (!data) return true; // permite vazio (igual backend)
+
+    const hoje = new Date();
+    const vencimento = new Date(data);
+
+    hoje.setHours(0, 0, 0, 0);
+    vencimento.setHours(0, 0, 0, 0);
+
+    return vencimento >= hoje;
+  }
+
   const salvarProduto = async () => {
     try {
       const token = localStorage.getItem("token");
 
+      if (!dataEhValida(formData.data_vencimento)) {
+        alert("Produto vencido não pode ser cadastrado");
+        return;
+      }
       await api.post(
         "/estoque/produtos",
         {
@@ -293,6 +309,11 @@ function Estoque() {
     try {
       const token = localStorage.getItem("token");
 
+      if (!dataEhValida(formData.data_vencimento)) {
+        alert("Produto vencido não pode ser atualizado");
+        return;
+      }
+
       await api.put(
         `/estoque/produtos/${produtoEditando.id_produto}`,
         {
@@ -306,7 +327,7 @@ function Estoque() {
           id_categoria: formData.id_categoria || null,
           data_vencimento: formData.data_vencimento || null,
 
-          qtdd_atual: Number(formData.quantidade) || produtoEditando.qtdd_atual
+          // qtdd_atual: Number(formData.quantidade) || produtoEditando.qtdd_atual
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -839,6 +860,7 @@ function Estoque() {
                   name="data_vencimento"
                   value={formData.data_vencimento}
                   onChange={handleChange}
+                  min={new Date().toISOString().split("T")[0]}
                 />
               </div>
 

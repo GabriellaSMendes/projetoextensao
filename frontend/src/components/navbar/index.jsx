@@ -50,7 +50,7 @@ function Navbar() {
             <nav className="navbar-menu">
                 <Link to="/home" className="nav-link">Home</Link>
                 <Link to="/estoque" className="nav-link">Estoque</Link>
-
+                <Link to="/clientes" className="nav-link">Clientes</Link>
                 <Link to="/home">
                     <img src={iconLogo} alt="Home" className="navbar-sun" />
                 </Link>

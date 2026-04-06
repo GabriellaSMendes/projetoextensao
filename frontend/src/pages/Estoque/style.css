@@ -359,17 +359,9 @@
 
 
 .estoque-table .thead,
-
-
 .estoque-table .row {
-
-
   display: grid !important;
-
-
   align-items: center !important;
-
-
   grid-template-columns:
     60px
     3fr   /* produto (mais importante) */
@@ -555,12 +547,6 @@
 
 
 }
-
-
-
-
-
-
 
 
 

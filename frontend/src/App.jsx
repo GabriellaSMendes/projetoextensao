@@ -3,6 +3,7 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Estoque from "./pages/Estoque";
 import Vendas from "./pages/Vendas";
+import Clientes from "./pages/Clientes";
 import Perfil from "./pages/Perfil";
 import Fornecedores from "./pages/Fornecedores";
 import Cadastro from "./pages/Cadastro";
@@ -78,6 +79,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Fornecedores />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/clientes"
+          element={
+            <ProtectedRoute>
+              <Clientes />
             </ProtectedRoute>
           }
         />

@@ -54,6 +54,7 @@ function Navbar() {
                 <Link to="/home">
                     <img src={iconLogo} alt="Home" className="navbar-sun" />
                 </Link>
+                <Link to="/fornecedores" className="nav-link">Fornecedores</Link>
                 <Link to="/vendas" className="nav-link">Vendas</Link>
 
                 <Link to="/relatorio" className="nav-link">Relatório</Link>

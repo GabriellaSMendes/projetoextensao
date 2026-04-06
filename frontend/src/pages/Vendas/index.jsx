@@ -52,7 +52,7 @@ function Vendas() {
   const [loading, setLoading] = useState(true);
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [filtroItens, setFiltroItens] = useState([]);
+  const [filtroItens, setFiltroItens] = useState("");
 
   const [clientes, setClientes] = useState([]);
   const [produtos, setProdutos] = useState([]);
@@ -116,10 +116,8 @@ function Vendas() {
         )
 
       const atendeItens =
-        filtroItens.length === 0 ||
-        filtroItens.some(item =>
-          v.itemPrincipal?.toLowerCase() === item.toLowerCase()
-        );
+        !filtroItens ||
+        v.itemPrincipal?.toLowerCase().includes(filtroItens.toLowerCase());
 
       return atendeBusca && atendePagamento && atendeItens;
 
@@ -440,19 +438,13 @@ function Vendas() {
           <div className="filtro-secao">
             <label>Itens</label>
 
-            <div className="checkbox-list">
-              {itensUnicos.map((item, i) => (
-                <div key={i} className="checkbox-item">
-                  <input
-                    type="checkbox"
-                    id={`item-${i}`}
-                    checked={filtroItens.includes(item)}
-                    onChange={() => toggleFiltro(filtroItens, item, setFiltroItens)}
-                  />
-                  <label htmlFor={`item-${i}`}>{item}</label>
-                </div>
-              ))}
-            </div>
+            <input
+              type="text"
+              className="filtro-input"
+              placeholder="Digite o nome do item..."
+              value={filtroItens}
+              onChange={(e) => setFiltroItens(e.target.value)}
+            />
           </div>
 
         </div>
@@ -463,7 +455,7 @@ function Vendas() {
             onClick={() => {
               setBusca("");
               setFiltroPagamento([]);
-              setFiltroItens([]);
+              setFiltroItens("");
             }}
           >
             Limpar Filtros

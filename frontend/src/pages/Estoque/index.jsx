@@ -60,7 +60,7 @@ function Estoque() {
   const [filtroCategoria, setFiltroCategoria] = useState([]);
 
 
-  const [filtroSabor, setFiltroSabor] = useState([]);
+  const [filtroSabor, setFiltroSabor] = useState("");
 
 
   const [produtos, setProdutos] = useState([]);
@@ -211,7 +211,9 @@ function Estoque() {
       const atendeCategoria = filtroCategoria.length === 0 || filtroCategoria.includes(p.nome);
 
 
-      const atendeSabor = filtroSabor.length === 0 || filtroSabor.includes(p.sabor);
+      const atendeSabor =
+        !filtroSabor ||
+        p.sabor?.toLowerCase().includes(filtroSabor.toLowerCase());
 
 
 
@@ -466,50 +468,15 @@ function Estoque() {
 
 
           <div className="filtro-secao">
+            <label>Sabor</label>
 
-
-            <label>Sabores</label>
-
-
-            <div className="checkbox-list">
-
-
-              {[...new Set(produtos.map((p) => p.sabor))].filter(Boolean).map((s) => (
-
-
-                <div key={s} className="checkbox-item">
-
-
-                  <input
-
-
-                    type="checkbox"
-
-
-                    id={`sabor-${s}`}
-
-
-                    checked={filtroSabor.includes(s)}
-
-
-                    onChange={() => toggleFiltro(filtroSabor, s, setFiltroSabor)}
-
-
-                  />
-
-
-                  <label htmlFor={`sabor-${s}`}>{s}</label>
-
-
-                </div>
-
-
-              ))}
-
-
-            </div>
-
-
+            <input
+              type="text"
+              className="filtro-input"
+              placeholder="Digite o sabor..."
+              value={filtroSabor}
+              onChange={(e) => setFiltroSabor(e.target.value)}
+            />
           </div>
 
 
@@ -523,7 +490,7 @@ function Estoque() {
         <div className="filtros-actions">
 
 
-          <button className="btn-limpar" onClick={() => { setFiltroCategoria([]); setFiltroSabor([]); setBusca(""); }}>
+          <button className="btn-limpar" onClick={() => { setFiltroCategoria([]); setFiltroSabor(""); setBusca(""); }}>
 
 
             Limpar Filtros

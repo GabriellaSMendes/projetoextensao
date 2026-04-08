@@ -42,6 +42,12 @@ function Home() {
             <p>Veja e atualize os produtos disponíveis para venda.</p>
           </Link>
 
+          <Link to="/clientes" className="home-card">
+            <div className="home-card-icon">👥</div>
+            <h2>Clientes</h2>
+            <p>Gerencie os clientes cadastrados no sistema.</p>
+          </Link>
+
           <Link to="/fornecedores" className="home-card">
             <div className="home-card-icon">🏭</div>
             <h2>Fornecedores</h2>

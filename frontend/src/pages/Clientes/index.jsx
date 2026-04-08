@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import api from "../../services/api";
 import "./style.css";
 
@@ -7,6 +7,8 @@ function Clientes() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [clienteEditando, setClienteEditando] = useState(null);
+  const [filtrosAbertos, setFiltrosAbertos] = useState(false);
+  const [busca, setBusca] = useState("");
 
   const [formData, setFormData] = useState({
     nome_cliente: "",
@@ -102,65 +104,150 @@ function Clientes() {
     });
   };
 
+  const clientesFiltrados = useMemo(() => {
+    return clientes.filter((c) => {
+      const termo = busca.toLowerCase();
+
+      return (
+        c.nome_cliente?.toLowerCase().includes(termo) ||
+        c.cpf?.toLowerCase().includes(termo) ||
+        c.telefone?.toLowerCase().includes(termo) ||
+        c.email?.toLowerCase().includes(termo) ||
+        c.endereco?.toLowerCase().includes(termo)
+      );
+    });
+  }, [clientes, busca]);
+
   return (
     <div className="clientes-container">
-      <div className="clientes-header">
-        <h1>CLIENTES</h1>
 
-        <button
-          className="add-btn"
-          onClick={() => {
-            setClienteEditando(null);
-            limparForm();
-            setModalOpen(true);
-          }}
-        >
-          + Novo Cliente
-        </button>
-      </div>
 
-      <div className="clientes-table">
-        <div className="thead">
-          <div>Nome</div>
-          <div>CPF</div>
-          <div>Telefone</div>
-          <div>Email</div>
-          <div>Endereço</div>
-          <div>Ações</div>
+
+      <aside className={`filtros-avancados ${filtrosAbertos ? "aberto" : "fechado"}`}>
+        <div className="filtros-header">
+          <h2>Filtros Avançados</h2>
+          <button className="close-btn" onClick={() => setFiltrosAbertos(false)}>×</button>
         </div>
 
-        {loading ? (
-          <div className="loading">Carregando...</div>
-        ) : clientes.length === 0 ? (
-          <div className="empty">Nenhum cliente cadastrado</div>
-        ) : (
-          clientes.map((c) => (
-            <div className="row" key={c.id_cliente}>
-              <div>{c.nome_cliente}</div>
-              <div>{c.cpf}</div>
-              <div>{c.telefone}</div>
-              <div>{c.email}</div>
-              <div>{c.endereco}</div>
+        <div className="filtro-scroll-area">
+          <div className="filtro-secao">
+            <label>Pesquisar</label>
+            <input
+              type="text"
+              className="filtro-input"
+              placeholder="Nome, CPF, telefone..."
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+            />
+          </div>
+        </div>
 
-              <div className="actions">
-                <button
-                  onClick={() => {
-                    setClienteEditando(c);
-                    setFormData(c);
-                    setModalOpen(true);
-                  }}
-                >
-                  Editar
-                </button>
+        <div className="filtros-actions">
+          <button
+            className="btn-limpar"
+            onClick={() => setBusca("")}
+          >
+            Limpar Filtros
+          </button>
 
-                <button onClick={() => deletarCliente(c.id_cliente)}>
-                  Excluir
-                </button>
+          <button
+            className="btn-aplicar"
+            onClick={() => setFiltrosAbertos(false)}
+          >
+            Aplicar Filtros
+          </button>
+        </div>
+      </aside>
+
+
+
+
+
+      <main className="clientes-main">
+
+
+
+        <div className="clientes-header">
+
+          <div className="clientes-title">
+            <h1>CLIENTES</h1>
+            <small>
+              <strong>{clientesFiltrados.length}</strong> clientes encontrados
+            </small>
+          </div>
+
+          <div className="clientes-actions">
+            <button
+              className="filter-btn-toggle"
+              onClick={() => setFiltrosAbertos(!filtrosAbertos)}
+            >
+              Filtrar
+            </button>
+
+            <button
+              className="add-btn"
+              onClick={() => {
+                setClienteEditando(null);
+                limparForm();
+                setModalOpen(true);
+              }}
+            >
+              + Novo Cliente
+            </button>
+          </div>
+
+        </div>
+
+
+
+
+        <div className="clientes-table">
+          <div className="thead">
+            <div>Nome</div>
+            <div>CPF</div>
+            <div>Telefone</div>
+            <div>Email</div>
+            <div>Endereço</div>
+            <div>Ações</div>
+          </div>
+
+          {loading ? (
+            <div className="loading">Carregando...</div>
+          ) : clientes.length === 0 ? (
+            <div className="empty">Nenhum cliente cadastrado</div>
+          ) : (
+            clientesFiltrados.map((c) => (
+              <div className="row" key={c.id_cliente}>
+                <div>{c.nome_cliente}</div>
+                <div>{c.cpf}</div>
+                <div>{c.telefone}</div>
+                <div>{c.email}</div>
+                <div>{c.endereco}</div>
+
+                <div className="actions">
+                  <button
+                    onClick={() => {
+                      setClienteEditando(c);
+                      setFormData(c);
+                      setModalOpen(true);
+                    }}
+                  >
+                    Editar
+                  </button>
+
+                  <button onClick={() => deletarCliente(c.id_cliente)}>
+                    Excluir
+                  </button>
+                </div>
               </div>
-            </div>
-          ))
-        )}
-      </div>
+            ))
+          )}
+        </div>
+
+
+
+      </main>
+
 
       {modalOpen && (
         <div className="modal">

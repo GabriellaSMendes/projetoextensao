@@ -476,10 +476,14 @@ function Vendas() {
         {/* Título */}
         <div className="title-row" style={{ justifyContent: "space-between" }}>
 
-          <div style={{ display: "flex", gap: 8, alignItems: "baseline" }}>
+
+          <div className="vendas-title"> 
             <h1>VENDAS</h1>
-            <span className="subtitle">{vendasDoMes.length} venda(s) no mês atual</span>
+            <small>
+              <strong>{vendasDoMes.length}</strong> venda(s) no mês atual
+            </small>
           </div>
+
           <div style={{ display: "flex", gap: 10 }}>
 
             <button
@@ -490,7 +494,7 @@ function Vendas() {
             </button>
 
             <button className="add-btn" onClick={abrirModalVenda}>
-              + Nova Venda
+              + Adicionar novo
             </button>
 
           </div>

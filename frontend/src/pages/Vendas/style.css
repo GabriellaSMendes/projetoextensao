@@ -11,11 +11,9 @@
 /* ===== TÍTULO / CONTADOR ===== */
 .title-row {
   display: flex;
-  justify-content: left;
-  align-items: baseline;
-  gap: 8px;
-  margin-bottom: 16px;
-  color: #a02020;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
 }
 
 
@@ -31,6 +29,17 @@
 .title-row .subtitle {
   font-size: 12px;
   color: #4e1633;
+}
+
+.vendas-title small {
+  color: #7b1f50;
+  font-weight: 500;
+}
+
+.vendas-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
 }
 
 

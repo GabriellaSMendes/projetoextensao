@@ -8,7 +8,9 @@ function Clientes() {
   const [modalOpen, setModalOpen] = useState(false);
   const [clienteEditando, setClienteEditando] = useState(null);
   const [filtrosAbertos, setFiltrosAbertos] = useState(false);
-  const [busca, setBusca] = useState("");
+  const [filtroNomeCpf, setFiltroNomeCpf] = useState("");
+  const [filtroTelefone, setFiltroTelefone] = useState("");
+  const [filtroEmail, setFiltroEmail] = useState("");
 
   const [formData, setFormData] = useState({
     nome_cliente: "",
@@ -106,17 +108,31 @@ function Clientes() {
 
   const clientesFiltrados = useMemo(() => {
     return clientes.filter((c) => {
-      const termo = busca.toLowerCase();
+
+      const nomeCpf = filtroNomeCpf.toLowerCase();
+      const telefone = filtroTelefone.toLowerCase();
+      const email = filtroEmail.toLowerCase();
+
+      const filtroNomeCpfOk =
+        !nomeCpf ||
+        c.nome_cliente?.toLowerCase().includes(nomeCpf) ||
+        c.cpf?.toLowerCase().includes(nomeCpf);
+
+      const filtroTelefoneOk =
+        !telefone ||
+        c.telefone?.toLowerCase().includes(telefone);
+
+      const filtroEmailOk =
+        !email ||
+        c.email?.toLowerCase().includes(email);
 
       return (
-        c.nome_cliente?.toLowerCase().includes(termo) ||
-        c.cpf?.toLowerCase().includes(termo) ||
-        c.telefone?.toLowerCase().includes(termo) ||
-        c.email?.toLowerCase().includes(termo) ||
-        c.endereco?.toLowerCase().includes(termo)
+        filtroNomeCpfOk &&
+        filtroTelefoneOk &&
+        filtroEmailOk
       );
     });
-  }, [clientes, busca]);
+  }, [clientes, filtroNomeCpf, filtroTelefone, filtroEmail]);
 
   return (
     <div className="clientes-container">
@@ -131,13 +147,35 @@ function Clientes() {
 
         <div className="filtro-scroll-area">
           <div className="filtro-secao">
-            <label>Pesquisar</label>
+            <label>Nome ou CPF</label>
             <input
               type="text"
               className="filtro-input"
-              placeholder="Nome, CPF, telefone..."
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
+              placeholder="Digite nome ou CPF..."
+              value={filtroNomeCpf}
+              onChange={(e) => setFiltroNomeCpf(e.target.value)}
+            />
+          </div>
+
+          <div className="filtro-secao">
+            <label>Telefone</label>
+            <input
+              type="text"
+              className="filtro-input"
+              placeholder="Digite o telefone..."
+              value={filtroTelefone}
+              onChange={(e) => setFiltroTelefone(e.target.value)}
+            />
+          </div>
+
+          <div className="filtro-secao">
+            <label>Email</label>
+            <input
+              type="text"
+              className="filtro-input"
+              placeholder="Digite o email..."
+              value={filtroEmail}
+              onChange={(e) => setFiltroEmail(e.target.value)}
             />
           </div>
         </div>
@@ -145,7 +183,11 @@ function Clientes() {
         <div className="filtros-actions">
           <button
             className="btn-limpar"
-            onClick={() => setBusca("")}
+            onClick={() => {
+              setFiltroNomeCpf("");
+              setFiltroTelefone("");
+              setFiltroEmail("");
+            }}
           >
             Limpar Filtros
           </button>
@@ -192,7 +234,7 @@ function Clientes() {
                 setModalOpen(true);
               }}
             >
-              + Novo Cliente
+              + Adicionar novo
             </button>
           </div>
 

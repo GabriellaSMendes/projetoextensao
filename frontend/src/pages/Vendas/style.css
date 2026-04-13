@@ -8,6 +8,8 @@
 }
 
 
+
+
 /* ===== TÍTULO / CONTADOR ===== */
 .title-row {
   display: flex;
@@ -15,6 +17,8 @@
   align-items: center;
   margin-bottom: 24px;
 }
+
+
 
 
 .title-row h1 {
@@ -26,21 +30,27 @@
 }
 
 
+
+
 .title-row .subtitle {
   font-size: 12px;
   color: #4e1633;
 }
+
 
 .vendas-title small {
   color: #7b1f50;
   font-weight: 500;
 }
 
+
 .vendas-title {
   display: flex;
   align-items: baseline;
   gap: 10px;
 }
+
+
 
 
 /* ===== BARRA DE BUSCA + FILTRO ===== */
@@ -50,6 +60,8 @@
   gap: 12px;
   margin-bottom: 20px;
 }
+
+
 
 
 .searchbox {
@@ -64,10 +76,14 @@
 }
 
 
+
+
 .searchbox .icon {
   opacity: 0.8;
   color: #4e1633;
 }
+
+
 
 
 .searchbox input {
@@ -77,6 +93,8 @@
   background: transparent;
   font-size: 14px;
 }
+
+
 
 
 .searchbox .clear {
@@ -91,6 +109,8 @@
   justify-content: center;
   font-weight: 700;
 }
+
+
 
 
 /* Botão "Filtrar por" à direita */
@@ -110,9 +130,13 @@
 }
 
 
+
+
 .filter-btn .icon {
   font-size: 15px;
 }
+
+
 
 
 .filter-btn:hover {
@@ -121,16 +145,24 @@
 }
 
 
+
+
 /* ===== TABELA ===== */
 .table {
   border: 1px solid #ddd;
 
 
+
+
   border-radius: 8px;
+
+
 
 
   overflow: hidden;
 }
+
+
 
 
 /* Cabeçalho e linhas usam grid */
@@ -142,6 +174,8 @@
 }
 
 
+
+
 .thead {
   display: grid;
   grid-template-columns: 0.9fr 1.3fr 1.7fr 1fr 1fr 1.2fr 0.7fr 0.4fr;
@@ -151,13 +185,19 @@
   font-size: 14px;
 
 
+
+
   border-bottom: 2px solid #c36196;  /* linha de destaque */
 }
+
+
 
 
 .thead .col {
   padding: 12px 16px;
 }
+
+
 
 
 /* Linhas */
@@ -168,9 +208,13 @@
 }
 
 
+
+
 .row:nth-child(even) {
   background: #fdfdfd;
 }
+
+
 
 
 .row:last-child {
@@ -178,9 +222,13 @@
 }
 
 
+
+
 .row .col {
   padding: 14px 16px;
 }
+
+
 
 
 /* hover da linha */
@@ -189,10 +237,14 @@
 }
 
 
+
+
 /* alinhamentos especiais */
 .col.right {
   text-align: center;
 }
+
+
 
 
 .col.center {
@@ -200,9 +252,13 @@
 }
 
 
+
+
 .col.action {
   text-align: center;
 }
+
+
 
 
 /* "Acessar nota fiscal" e "Editar" */
@@ -219,9 +275,13 @@
 }
 
 
+
+
 .link:hover {
   text-decoration-thickness: 2px;
 }
+
+
 
 
 /* Botão de excluir (X) */
@@ -241,10 +301,14 @@
 }
 
 
+
+
 .delete-btn:hover {
   background: #4e1633;
   color: #ffffff;
 }
+
+
 
 
 /* Mensagem de tabela vazia */
@@ -256,11 +320,15 @@
 }
 
 
+
+
 /* ===== RESPONSIVO BÁSICO ===== */
 @media (max-width: 900px) {
   .title-row h1 {
     font-size: 24px;
   }
+
+
 
 
   .thead,
@@ -269,10 +337,29 @@
   }
 
 
+
+
   .thead .col,
   .row .col {
     padding: 10px 8px;
   }
+}
+
+.modal-box {
+  background: #ffffff;
+
+  width: 100%;
+  max-width: 720px; /* MAIS EQUILIBRADO */
+  max-height: 90vh;
+
+  padding: 28px 32px;
+  border-radius: 16px;
+
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  animation: fadeInModal 0.25s ease;
+
+  overflow-y: auto;
+  color: #4e1633;
 }
 
 
@@ -289,10 +376,14 @@
 }
 
 
+
+
 .modal-box input:focus,
 .modal-box select:focus {
   border-color: #7b1f50;
 }
+
+
 
 
 .carrinho-lista {
@@ -300,6 +391,8 @@
   padding: 0;
   margin-top: 8px;
 }
+
+
 
 
 .carrinho-lista li {
@@ -310,10 +403,14 @@
   margin-bottom: 8px;
 
 
+
+
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+
+
 
 
 .estoque-info {
@@ -322,6 +419,8 @@
   font-size: 14px;
   font-weight: 600;
 }
+
+
 
 
 .qtd-produto {
@@ -333,11 +432,15 @@
 }
 
 
+
+
 .modal-actions {
   display: flex;
   gap: 12px;
   margin-top: 28px;
 }
+
+
 
 
 .modal-actions button {
@@ -355,6 +458,7 @@
   cursor: pointer;
 }
 
+
 /* Cancelar */
 .cancel-btn {
   background: #d13a3a;
@@ -364,6 +468,7 @@
   background: #b73333;
 }
 
+
 /* Finalizar */
 .save-btn {
   background: #4e1633;
@@ -371,9 +476,11 @@
   margin-top: 20px;
 }
 
+
 .save-btn:hover {
   background: #701e49;
 }
+
 
 .novo-cliente-form {
   margin-top: 16px;
@@ -385,6 +492,8 @@
   flex-direction: column;
   gap: 10px;
 }
+
+
 
 
 .add-btn {
@@ -400,10 +509,14 @@
 }
 
 
+
+
 .add-btn:hover {
   background: #ffca40;
   transform: translateY(-2px);
 }
+
+
 
 
 .carrinho-lista .delete-btn {
@@ -424,10 +537,16 @@
 
 
 
+
+
+
+
 .carrinho-lista .delete-btn:hover {
   background: #4e1633;
   color: #fff;
 }
+
+
 
 
 @keyframes fadeIn {
@@ -437,11 +556,15 @@
   }
 
 
+
+
   to {
     opacity: 1;
     transform: scale(1);
   }
 }
+
+
 
 
 /* --- FUNDO ESCURO DO MODAL --- */
@@ -459,6 +582,8 @@
 }
 
 
+
+
 /* --- CAIXA PRINCIPAL DO MODAL --- */
 .modal-box {
   background: #ffffff;
@@ -474,6 +599,8 @@
 }
 
 
+
+
 /* Animação de entrada suave */
 @keyframes fadeInModal {
   from {
@@ -482,11 +609,15 @@
   }
 
 
+
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
+
+
 
 
 /* TÍTULOS */
@@ -498,6 +629,8 @@
 }
 
 
+
+
 .modal-box h3 {
   font-size: 18px;
   margin-top: 18px;
@@ -505,6 +638,8 @@
   color: #4a0f35;
  
 }
+
+
 
 
 /* TEXTOS */
@@ -517,12 +652,16 @@
 }
 
 
+
+
 /* LISTA DE ITENS */
 .modal-box ul {
   list-style: none;
   padding-left: 0;
   margin-top: 10px;
 }
+
+
 
 
 .modal-box ul li {
@@ -533,6 +672,8 @@
   font-size: 14px;
   color: #333;
 }
+
+
 
 
 /* BOTÃO FECHAR */
@@ -550,9 +691,13 @@
 }
 
 
+
+
 .modal-box .cancel-btn:hover {
   background: #a02020;
 }
+
+
 
 
 /* SCROLL BONITO */
@@ -561,15 +706,21 @@
 }
 
 
+
+
 .modal-box::-webkit-scrollbar-thumb {
   background: #c7c7c7;
   border-radius: 8px;
 }
 
 
+
+
 .modal-box::-webkit-scrollbar-thumb:hover {
   background: #b4b4b4;
 }
+
+
 
 
 .item-nome {
@@ -579,20 +730,48 @@
 }
 
 
-.modal-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 28px;
-  margin-top: 10px;
+.modal-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
+.modal-grid {
+  gap: 24px 32px;
+}
+.resumo-venda {
+  background: #faf5f9;
+  border: 1px solid #eed9e9;
+  border-radius: 12px;
+  padding: 16px;
+}
+.total {
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 10px;
+  color: #4e1633;
+}
+.criar-btn {
+  background: #4e1633;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.criar-btn:hover {
+  background: #701e49;
+}
 
 /* Para telas pequenas */
 @media (max-width: 900px) {
   .modal-grid {
     grid-template-columns: 1fr;
   }
-} 
+}
+
 
 /* Remover inline, adicionar essa classe */
 .novo-cliente-inline {
@@ -602,9 +781,11 @@
   align-items: center;
 }
 
+
 .novo-cliente-inline input {
   flex: 1; /* garante que o input ocupe o espaço correto */
 }
+
 
 .novo-cliente-inline .save-btn {
   all: unset;                 /* zera TODAS as regras herdadas */
@@ -616,13 +797,15 @@
   font-size: 14px;
   font-weight: 600;
 
+
   display: flex;
   align-items: center;
   justify-content: center;
   white-space: nowrap;
   height: 34px;
-  padding: 0 16px; 
+  padding: 0 16px;
 }
+
 
 /* hover */
 .novo-cliente-inline .save-btn:hover {
@@ -630,7 +813,10 @@
 }
 
 
+
+
 /* ===== SIDEBAR FILTROS (IGUAL ESTOQUE) ===== */
+
 
 .filtros-avancados {
   position: relative;
@@ -645,18 +831,22 @@
   z-index: 998;
   transition: transform 0.3s ease;
 
+
   height: calc(100vh - 70px);
 }
+
 
 /* aberto */
 .filtros-avancados.aberto {
   transform: translateX(0);
 }
 
+
 /* fechado */
 .filtros-avancados.fechado {
   transform: translateX(-100%);
 }
+
 
 /* header */
 .filtros-header {
@@ -666,10 +856,12 @@
   margin-bottom: 20px;
 }
 
+
 .filtros-header h2 {
   font-size: 18px;
   color: #4e1633;
 }
+
 
 .close-btn {
   border: none;
@@ -678,16 +870,19 @@
   cursor: pointer;
 }
 
+
 /* scroll */
 .filtro-scroll-area {
   overflow-y: auto;
   max-height: calc(100vh - 220px);
 }
 
+
 /* seção */
 .filtro-secao {
   margin-bottom: 20px;
 }
+
 
 .filtro-secao label {
   font-weight: 600;
@@ -697,6 +892,7 @@
   display: block;
 }
 
+
 /* input */
 .filtro-input {
   width: 100%;
@@ -705,6 +901,7 @@
   border-radius: 6px;
 }
 
+
 /* checkbox */
 .checkbox-list {
   display: flex;
@@ -712,11 +909,13 @@
   gap: 6px;
 }
 
+
 .checkbox-item {
   display: flex;
   align-items: center;
   gap: 6px;
 }
+
 
 /* actions */
 .filtros-actions {
@@ -725,6 +924,7 @@
   flex-direction: column;
   gap: 10px;
 }
+
 
 .btn-limpar {
   background: #eee;
@@ -735,6 +935,8 @@
 }
 
 
+
+
 .btn-aplicar {
   background: #4e1633;
   color: #fff;
@@ -743,6 +945,7 @@
   border-radius: 6px;
   cursor: pointer;
 }
+
 
 /* botão toggle */
 .filter-btn-toggle {
@@ -756,27 +959,33 @@
   transition: 0.2s;
 }
 
+
 .filter-btn-toggle:hover {
   background: #f3e3f1;
 }
+
 
 .filter-btn-toggle.active {
   background: #4e1633;
   color: #fff;
 }
 
+
 /* empurra conteúdo quando sidebar aberta */
 .vendas-page {
   display: flex;
 }
 
+
 .vendas-page {
   display: flex;
 }
 
+
 .filtros-avancados {
   width: 260px;
 }
+
 
 .vendas-main {
   flex: 1;
@@ -786,6 +995,7 @@
 .filtros-avancados.fechado ~ * {
   margin-left: 0 !important;
 }
+
 
 .vendas-page {
   display: flex;

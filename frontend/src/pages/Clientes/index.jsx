@@ -220,10 +220,10 @@ function Clientes() {
 
           <div className="clientes-actions">
             <button
-              className="filter-btn-toggle"
+              className={`filter-btn-toggle ${filtrosAbertos ? "ativo" : ""}`}
               onClick={() => setFiltrosAbertos(!filtrosAbertos)}
             >
-              Filtrar
+              {filtrosAbertos ? "Ocultar Filtros" : "Filtrar"}
             </button>
 
             <button

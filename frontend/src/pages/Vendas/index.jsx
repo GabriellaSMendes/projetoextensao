@@ -477,7 +477,7 @@ function Vendas() {
         <div className="title-row" style={{ justifyContent: "space-between" }}>
 
 
-          <div className="vendas-title"> 
+          <div className="vendas-title">
             <h1>VENDAS</h1>
             <small>
               <strong>{vendasDoMes.length}</strong> venda(s) no mês atual
@@ -595,7 +595,7 @@ function Vendas() {
                     />
 
                     <button
-                      className="save-btn"
+                      className="criar-btn"
                       onClick={() => {
                         if (!novoCliente.trim()) return alert("Digite um nome");
                         setClienteNome(novoCliente);
@@ -790,27 +790,33 @@ function Vendas() {
                   </button>
 
                   {/* CARRINHO */}
-                  <h3 style={{ marginTop: 20 }}>Itens da venda</h3>
+                  <div className="resumo-venda">
+                    <h3>Itens da venda</h3>
 
-                  {carrinho.length === 0 && <p>Nenhum item.</p>}
+                    {carrinho.length === 0 && <p>Nenhum item.</p>}
 
-                  {carrinho.length > 0 && (
-                    <ul className="carrinho-lista">
-                      {carrinho.map((i) => (
-                        <li key={i.id_produto}>
-                          {i.quantidade}x {i.nome} — R$
-                          {(i.preco * i.quantidade).toFixed(2)}
-                          <button
-                            className="delete-btn"
-                            onClick={() => removerItem(i.id_produto)}
-                            style={{ marginLeft: 10 }}
-                          >
-                            ✖
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                    {carrinho.length > 0 && (
+                      <ul className="carrinho-lista">
+                        {carrinho.map((i) => (
+                          <li key={i.id_produto}>
+                            {i.quantidade}x {i.nome} — R$
+                            {(i.preco * i.quantidade).toFixed(2)}
+                            <button
+                              className="delete-btn"
+                              onClick={() => removerItem(i.id_produto)}
+                              style={{ marginLeft: 10 }}
+                            >
+                              ✖
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    <p className="total">
+                      Total: R$ {totalCarrinho.toFixed(2)}
+                    </p>
+                  </div>
 
                   <p style={{ marginTop: 12, fontWeight: "bold" }}>
                     Total: R$ {totalCarrinho.toFixed(2)}

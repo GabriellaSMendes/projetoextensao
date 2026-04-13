@@ -65,6 +65,11 @@
 
 }
 
+.filter-btn-toggle.ativo {
+  background: #4e1633;
+  color: #fff;
+}
+
 .clientes-header h1 {
   font-size: 32px;
   color: #4e1633;

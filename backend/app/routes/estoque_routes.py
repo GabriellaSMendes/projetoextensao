@@ -1,9 +1,8 @@
-import datetime
-
 from flask import request, jsonify, Blueprint
-from app.models import db, Produto, Categoria, Estoque, Fornecedor, Abastece
-
+from app.models import db, Produto, Categoria, Fornecedor, Abastece
 from flask_jwt_extended import jwt_required
+from sqlalchemy.exc import IntegrityError
+from datetime import date
 
 estoque_bp = Blueprint('estoque', __name__)
 
@@ -42,17 +41,16 @@ def criar_categoria():
 @jwt_required()
 def listar_produtos():
     """
-    Lista todos os produtos e suas quantidades de estoque (JOIN).
+    Lista todos os produtos, incluindo o fornecedor do último abastecimento.
     """
-    produtos_com_estoque = db.session.query(Produto, Estoque).join(Estoque).all()
-
+    produtos = Produto.query.all()
     lista_json = []
-    for p, e in produtos_com_estoque:
-        
-        # Buscar o último abastecimento deste estoque
+    
+    for p in produtos:
+        # Buscar o último abastecimento para descobrir o fornecedor recente
         ultimo_abastecimento = (
             Abastece.query
-            .filter_by(id_estoque=e.id_estoque)
+            .filter_by(id_produto=p.id_produto)
             .order_by(Abastece.id_abastecimento.desc())
             .first()
         )
@@ -67,127 +65,83 @@ def listar_produtos():
             
         lista_json.append({
             "id_produto": p.id_produto,
-            "id_estoque": e.id_estoque,
             "nome_produto": p.nome_produto,
             "sabor": p.sabor,
             "marca": p.marca,
+            "qtdd_atual": p.qtdd_atual, # v2: direto da tabela produto
+            "data_vencimento": p.data_vencimento.isoformat() if p.data_vencimento else None,
             "preco_unitario": str(p.preco_unitario),
-
-            "data_vencimento": (
-                p.data_vencimento.isoformat() 
-                if p.data_vencimento else None
-            ),
-
             "id_categoria": p.id_categoria,
-            "nome": p.categoria.nome if p.categoria else None,
-            "qtdd_atual": e.qtdd_atual,
+            "nome_categoria": p.categoria.nome if p.categoria else None,
             "id_fornecedor": id_fornecedor,
             "nome_fornecedor": nome_fornecedor
         })
     return jsonify(produtos=lista_json), 200
 
+
 @estoque_bp.route('/produtos', methods=['POST'])
 @jwt_required()
 def criar_produto():
     """
-    Cria um novo PRODUTO e sua entrada no ESTOQUE.
+    Cria um novo PRODUTO e (opcionalmente) regista o seu abastecimento inicial.
     """
     dados = request.get_json()
-    if not dados.get('nome_produto') or not dados.get('preco_unitario'):
-        return jsonify({"erro": "Nome e Preço Unitário são obrigatórios"}), 400
 
-    if dados.get('id_categoria'):
-        if not Categoria.query.get(dados.get('id_categoria')):
-            return jsonify({"erro": "Categoria não encontrada"}), 404
+    if not dados.get('nome_produto') or not dados.get('preco_unitario') or not dados.get('id_categoria'):
+        return jsonify({"erro": "Nome, Preço Unitário e Categoria são obrigatórios"}), 400
+
+    if not Categoria.query.get(dados.get('id_categoria')):
+        return jsonify({"erro": "Categoria não encontrada"}), 404
     
-    # Extrair fornecedor
+    # Extrair fornecedor e quantidade inicial
     id_fornecedor = dados.get("id_fornecedor")
+    qtdd_inicial = dados.get('qtdd_entrada', dados.get('qtdd_atual', 0))
     
-    # Validar fornecedor
     if id_fornecedor:
         fornecedor = Fornecedor.query.get(id_fornecedor)
         if not fornecedor:
             return jsonify({"erro": "Fornecedor inválido"}), 404
 
+    nova_qtdd_atual = 0 if id_fornecedor else qtdd_inicial
+
     novo_produto = Produto(
         nome_produto=dados.get('nome_produto'),
         sabor=dados.get('sabor'),
         marca=dados.get('marca'),
+        qtdd_atual=nova_qtdd_atual,
         data_vencimento=dados.get('data_vencimento'),
         preco_unitario=dados.get('preco_unitario'),
         id_categoria=dados.get('id_categoria')
     )
 
-    # Criar a entrada de Estoque para o produto
-    qtdd_inicial = dados.get('qtdd_entrada', 0) 
-
-    novo_estoque = Estoque(
-        qtdd_atual=qtdd_inicial,
-        qtdd_entrada=qtdd_inicial,
-        produto=novo_produto
-    )
-
     try:
         db.session.add(novo_produto)
-        db.session.add(novo_estoque)
         db.session.flush()
         
         # Criar abastecimento inicial (se houver fornecedor)
-        if id_fornecedor:
+        if id_fornecedor and qtdd_inicial > 0:
             abastecimento_inicial = Abastece(
                 id_fornecedor=id_fornecedor,
-                id_estoque=novo_estoque.id_estoque,
+                id_produto=novo_produto.id_produto,
                 qtdd_recebida=qtdd_inicial,
                 valor_unitario=dados.get("preco_unitario")
             )
             db.session.add(abastecimento_inicial)
 
         db.session.commit()
+        
+        # Atualiza a variável com o valor real após os triggers do banco de dados rodarem
+        db.session.refresh(novo_produto)
 
         return jsonify({
-            "mensagem": "Produto e entrada de estoque criados com sucesso!",
+            "mensagem": "Produto criado com sucesso!",
             "id_produto": novo_produto.id_produto,
-            "id_estoque": novo_estoque.id_estoque,
-            "qtdd_atual": novo_estoque.qtdd_atual
+            "qtdd_atual": novo_produto.qtdd_atual
         }), 201
-
+        
     except Exception as e:
         db.session.rollback()
         return jsonify({"erro": "Erro ao criar produto", "detalhes": str(e)}), 500
-
-
-@estoque_bp.route('/produtos/<int:id_produto>', methods=['GET'])
-@jwt_required()
-def detalhar_produto(id_produto):
-    """
-    Detalha um produto e seu estoque.
-    """
-
-    resultado = db.session.query(Produto, Estoque).join(Estoque).filter(Produto.id_produto == id_produto).first()
-
-    if not resultado:
-        return jsonify({"erro": "Produto não encontrado ou sem entrada de estoque"}), 404
-
-    p, e = resultado
-
-    return jsonify({
-        "id_produto": p.id_produto,
-        "id_estoque": e.id_estoque,
-        "nome_produto": p.nome_produto,
-        "sabor": p.sabor,
-        "marca": p.marca,
-        "data_vencimento": p.data_vencimento.isoformat() if p.data_vencimento else None,
-        "preco_unitario": str(p.preco_unitario),
-        "dt_cadastro": p.dt_cadastro.isoformat() if p.dt_cadastro else None,
-        "id_categoria": p.id_categoria,
-        "nome_categoria": p.categoria.nome if p.categoria else None,
-        # Dados do Estoque:
-        "qtdd_atual": e.qtdd_atual,
-        "qtdd_entrada_total": e.qtdd_entrada,
-        "qtdd_saida_total": e.qtdd_saida,
-        "ultima_atualizacao": e.ultima_atualizacao.isoformat()
-    }), 200
-
 
 @estoque_bp.route('/produtos/<int:id_produto>', methods=['PUT'])
 @jwt_required()
@@ -210,15 +164,14 @@ def atualizar_produto(id_produto):
             return jsonify({"erro": "Categoria não encontrada"}), 404
         p.id_categoria = dados.get('id_categoria')
 
-    # ATUALIZAR ESTOQUE deve ser em outra rota
     if 'qtdd_atual' in dados:
         return jsonify({
-            "erro": "Não é permitido atualizar a quantidade por esta rota."
+            "erro": "Não é permitido atualizar a quantidade do estoque por esta rota. Realize um abastecimento."
         }), 400
 
     try:
         db.session.commit()
-        return jsonify({"mensagem": f"Produto (Catálogo) {id_produto} atualizado com sucesso!"}), 200
+        return jsonify({"mensagem": f"Catálogo do produto {id_produto} atualizado com sucesso!"}), 200
     except Exception as e:
         db.session.rollback()
         return jsonify({"erro": "Erro ao atualizar produto", "detalhes": str(e)}), 500
@@ -229,22 +182,20 @@ def atualizar_produto(id_produto):
 def deletar_produto(id_produto):
     """
     Deleta o Produto e sua entrada de Estoque,
-    Falha se houver vendas registradas.
+    Falha se houver histórico.
     """
     p = Produto.query.get_or_404(id_produto)
-    e = Estoque.query.filter_by(id_produto=id_produto).first()
 
     try:
-        # Deletar o estoque
-        if e:
-            db.session.delete(e)
-        # Deletar o produto
         db.session.delete(p)
         db.session.commit()
-        return jsonify({"mensagem": f"Produto {id_produto} e seu estoque foram deletados!"}), 200
+        return jsonify({"mensagem": f"Produto {id_produto} deletado com sucesso!"}), 200
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({"erro": "Erro ao deletar. O produto possui histórico de movimentação ou pedidos."}), 400
     except Exception as e:
         db.session.rollback()
-        return jsonify({"erro": "Erro ao deletar. Produto pode estar associado a vendas.", "detalhes": str(e)}), 500
+        return jsonify({"erro": "Erro ao deletar produto", "detalhes": str(e)}), 500
 
 
 # ROTAS DE MOVIMENTAÇÃO DE ESTOQUE
@@ -252,7 +203,7 @@ def deletar_produto(id_produto):
 @jwt_required()
 def abastecer_estoque():
     """
-    Regista entrada de produtos de um fornecedor, atualizando o estoque
+    Regista entrada de produtos de um fornecedor, atualizando o estoque por triggers
     """
     dados = request.get_json()
     id_produto = dados.get('id_produto')
@@ -262,78 +213,70 @@ def abastecer_estoque():
     if not id_produto or not id_fornecedor or not qtdd_recebida:
         return jsonify({"erro": "id_produto, id_fornecedor e qtdd_recebida são obrigatórios"}), 400
 
-    try:
-        qtdd_recebida = int(qtdd_recebida)
-        if qtdd_recebida <= 0:
-            raise ValueError
-    except (ValueError, TypeError):
-        return jsonify({"erro": "Quantidade recebida deve ser um número inteiro positivo"}), 400
+    if not Fornecedor.query.get(id_fornecedor):
+        return jsonify({"erro": f"Fornecedor não encontrado"}), 404
 
-    fornecedor = Fornecedor.query.get(id_fornecedor)
-    if not fornecedor:
-        return jsonify({"erro": f"Fornecedor com ID {id_fornecedor} não encontrado"}), 404
+    produto = Produto.query.get(id_produto)
+    if not produto:
+        return jsonify({"erro": f"Produto não encontrado"}), 404
 
-    estoque = Estoque.query.filter_by(id_produto=id_produto).first()
-    if not estoque:
-        return jsonify({"erro": f"Produto com ID {id_produto} não possui entrada de estoque"}), 404
+    # Validação de Vencimento
+    if produto.data_vencimento and produto.data_vencimento < date.today():
+        return jsonify({
+            "erro": f"Abastecimento bloqueado: O produto '{produto.nome_produto}' está vencido desde {produto.data_vencimento.strftime('%d/%m/%Y')}."
+        }), 400
 
     try:
         novo_abastecimento = Abastece(
             id_fornecedor=id_fornecedor,
-            id_estoque=estoque.id_estoque,
+            id_produto=id_produto,
             qtdd_recebida=qtdd_recebida,
             valor_unitario=dados.get('valor_unitario')
         )
-
-        estoque.qtdd_atual = Estoque.qtdd_atual + qtdd_recebida
-        estoque.qtdd_entrada = Estoque.qtdd_entrada + qtdd_recebida
 
         db.session.add(novo_abastecimento)
         db.session.commit()
 
         return jsonify({
-            "mensagem": "Estoque abastecido com sucesso!",
-            "id_estoque": estoque.id_estoque,
-            "produto": estoque.produto.nome_produto,
-            "nova_quantidade_atual": estoque.qtdd_atual
-        }), 200
+            "mensagem": "Abastecimento registrado com sucesso! Estoque atualizado automaticamente.",
+            "id_abastecimento": novo_abastecimento.id_abastecimento
+        }), 201
 
     except Exception as e:
         db.session.rollback()
         return jsonify({"erro": "Erro ao abastecer estoque", "detalhes": str(e)}), 500
 
-
-@estoque_bp.route('/ajuste/<int:id_estoque>', methods=['PUT'])
-@jwt_required()
-def ajustar_estoque(id_estoque):
-    """
-    Ajusta a quantidade de um item no estoque
-    """
-    dados = request.get_json()
-
-    if 'nova_quantidade' not in dados:
-        return jsonify({"erro": "'nova_quantidade' é obrigatória"}), 400
-
-    try:
-        nova_quantidade = int(dados.get('nova_quantidade'))
-        if nova_quantidade < 0:
-            raise ValueError
-    except (ValueError, TypeError):
-        return jsonify({"erro": "Nova quantidade deve ser um número inteiro não-negativo"}), 400
-
-    estoque = Estoque.query.get_or_404(id_estoque)
-
-    try:
-        estoque.qtdd_atual = nova_quantidade
-        db.session.commit()
-
-        return jsonify({
-            "mensagem": "Estoque ajustado com sucesso!",
-            "id_estoque": estoque.id_estoque,
-            "produto": estoque.produto.nome_produto,
-            "nova_quantidade_atual": estoque.qtdd_atual
-        }), 200
-
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"erro": "Erro ao ajustar estoque", "detalhes": str(e)}), 500
+# @estoque_bp.route('/ajuste/<int:id_estoque>', methods=['PUT'])
+# @jwt_required()
+# def ajustar_estoque(id_estoque):
+#     """
+#     Ajusta a quantidade de um item no estoque
+#     """
+#     dados = request.get_json()
+#
+#     if 'nova_quantidade' not in dados:
+#         return jsonify({"erro": "'nova_quantidade' é obrigatória"}), 400
+#
+#     try:
+#         nova_quantidade = int(dados.get('nova_quantidade'))
+#         if nova_quantidade < 0:
+#             raise ValueError
+#     except (ValueError, TypeError):
+#         return jsonify({"erro": "Nova quantidade deve ser um número inteiro não-negativo"}), 400
+#
+#     estoque = Estoque.query.get_or_404(id_estoque)
+#
+#     try:
+#         estoque.qtdd_atual = nova_quantidade
+#         db.session.commit()
+#
+#         return jsonify({
+#             "mensagem": "Estoque ajustado com sucesso!",
+#             "id_estoque": estoque.id_estoque,
+#             "produto": estoque.produto.nome_produto,
+#             "nova_quantidade_atual": estoque.qtdd_atual
+#         }), 200
+#
+#     except Exception as e:
+#         db.session.rollback()
+#         return jsonify({"erro": "Erro ao ajustar estoque", "detalhes": str(e)}), 500

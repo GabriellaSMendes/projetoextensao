@@ -28,8 +28,8 @@ def create_app(config_name='default'):
     from app.routes.cliente_routes import cliente_bp
     app.register_blueprint(cliente_bp, url_prefix='/api/clientes')
 
-    from app.routes.vendas_routes import vendas_bp
-    app.register_blueprint(vendas_bp, url_prefix='/api/vendas')
+    from app.routes.pedido_routes import pedido_bp
+    app.register_blueprint(pedido_bp, url_prefix='/api/pedidos')
 
     from app.routes.dashboard_routes import dashboard_bp
     app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')

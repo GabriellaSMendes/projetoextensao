@@ -41,21 +41,40 @@ def criar_categoria():
 @jwt_required()
 def listar_produtos():
     """
-    Lista todos os produtos e suas quantidades de estoque.
+    Lista todos os produtos, incluindo o fornecedor do último abastecimento.
     """
     produtos = Produto.query.all()
     lista_json = []
+    
     for p in produtos:
+        # Buscar o último abastecimento para descobrir o fornecedor recente
+        ultimo_abastecimento = (
+            Abastece.query
+            .filter_by(id_produto=p.id_produto)
+            .order_by(Abastece.id_abastecimento.desc())
+            .first()
+        )
+
+        if ultimo_abastecimento:
+            fornecedor = Fornecedor.query.get(ultimo_abastecimento.id_fornecedor)
+            nome_fornecedor = fornecedor.razao_social if fornecedor else None
+            id_fornecedor = fornecedor.id_fornecedor if fornecedor else None
+        else:
+            nome_fornecedor = None
+            id_fornecedor = None
+            
         lista_json.append({
             "id_produto": p.id_produto,
             "nome_produto": p.nome_produto,
             "sabor": p.sabor,
             "marca": p.marca,
-            "qtdd_atual": p.qtdd_atual,
+            "qtdd_atual": p.qtdd_atual, # v2: direto da tabela produto
             "data_vencimento": p.data_vencimento.isoformat() if p.data_vencimento else None,
             "preco_unitario": str(p.preco_unitario),
             "id_categoria": p.id_categoria,
-            "nome_categoria": p.categoria.nome if p.categoria else None
+            "nome_categoria": p.categoria.nome if p.categoria else None,
+            "id_fornecedor": id_fornecedor,
+            "nome_fornecedor": nome_fornecedor
         })
     return jsonify(produtos=lista_json), 200
 
@@ -64,7 +83,7 @@ def listar_produtos():
 @jwt_required()
 def criar_produto():
     """
-    Cria um novo PRODUTO e sua entrada no ESTOQUE.
+    Cria um novo PRODUTO e (opcionalmente) regista o seu abastecimento inicial.
     """
     dados = request.get_json()
 
@@ -73,12 +92,23 @@ def criar_produto():
 
     if not Categoria.query.get(dados.get('id_categoria')):
         return jsonify({"erro": "Categoria não encontrada"}), 404
+    
+    # Extrair fornecedor e quantidade inicial
+    id_fornecedor = dados.get("id_fornecedor")
+    qtdd_inicial = dados.get('qtdd_entrada', dados.get('qtdd_atual', 0))
+    
+    if id_fornecedor:
+        fornecedor = Fornecedor.query.get(id_fornecedor)
+        if not fornecedor:
+            return jsonify({"erro": "Fornecedor inválido"}), 404
+
+    nova_qtdd_atual = 0 if id_fornecedor else qtdd_inicial
 
     novo_produto = Produto(
         nome_produto=dados.get('nome_produto'),
         sabor=dados.get('sabor'),
         marca=dados.get('marca'),
-        qtdd_atual=dados.get('qtdd_atual', 0),
+        qtdd_atual=nova_qtdd_atual,
         data_vencimento=dados.get('data_vencimento'),
         preco_unitario=dados.get('preco_unitario'),
         id_categoria=dados.get('id_categoria')
@@ -86,36 +116,32 @@ def criar_produto():
 
     try:
         db.session.add(novo_produto)
+        db.session.flush()
+        
+        # Criar abastecimento inicial (se houver fornecedor)
+        if id_fornecedor and qtdd_inicial > 0:
+            abastecimento_inicial = Abastece(
+                id_fornecedor=id_fornecedor,
+                id_produto=novo_produto.id_produto,
+                qtdd_recebida=qtdd_inicial,
+                valor_unitario=dados.get("preco_unitario")
+            )
+            db.session.add(abastecimento_inicial)
+
         db.session.commit()
+        
+        # Atualiza a variável com o valor real após os triggers do banco de dados rodarem
+        db.session.refresh(novo_produto)
+
         return jsonify({
             "mensagem": "Produto criado com sucesso!",
             "id_produto": novo_produto.id_produto,
             "qtdd_atual": novo_produto.qtdd_atual
         }), 201
+        
     except Exception as e:
         db.session.rollback()
         return jsonify({"erro": "Erro ao criar produto", "detalhes": str(e)}), 500
-
-@estoque_bp.route('/produtos/<int:id_produto>', methods=['GET'])
-@jwt_required()
-def detalhar_produto(id_produto):
-    """
-    Detalha um produto e seu estoque.
-    """
-    p = Produto.query.get_or_404(id_produto)
-    return jsonify({
-        "id_produto": p.id_produto,
-        "nome_produto": p.nome_produto,
-        "sabor": p.sabor,
-        "marca": p.marca,
-        "qtdd_atual": p.qtdd_atual,
-        "data_vencimento": p.data_vencimento.isoformat() if p.data_vencimento else None,
-        "preco_unitario": str(p.preco_unitario),
-        "dt_cadastro": p.dt_cadastro.isoformat() if p.dt_cadastro else None,
-        "id_categoria": p.id_categoria,
-        "nome_categoria": p.categoria.nome if p.categoria else None
-    }), 200
-
 
 @estoque_bp.route('/produtos/<int:id_produto>', methods=['PUT'])
 @jwt_required()

@@ -1,0 +1,15 @@
+flask
+flask_sqlalchemy
+Flask-Bcrypt
+pymysql
+Flask-Migrate
+Flask-JWT-Extended
+Flask_SQLAlchemy
+Flask-Bcrypt
+Flask-JWT-Extended
+Flask-Migrate
+Flask-CORS
+pymysql
+python-dotenv
+pandas
+matplotlib

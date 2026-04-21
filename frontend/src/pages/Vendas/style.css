@@ -1,0 +1,1002 @@
+/* ===== PÁGINA GERAL ===== */
+.vendas-page {
+  min-height: 100vh;
+  padding: 24px 20px;
+  background: #ffffff;
+  font-family: "Poppins", sans-serif;
+  color: #222;
+}
+
+
+
+
+/* ===== TÍTULO / CONTADOR ===== */
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+
+
+
+.title-row h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0;
+  color: #4e1633;
+  /* roxo-vinho */
+}
+
+
+
+
+.title-row .subtitle {
+  font-size: 12px;
+  color: #4e1633;
+}
+
+
+.vendas-title small {
+  color: #7b1f50;
+  font-weight: 500;
+}
+
+
+.vendas-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+
+
+
+/* ===== BARRA DE BUSCA + FILTRO ===== */
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+
+
+
+.searchbox {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f5f4f6;
+  border-radius: 12px;
+  padding: 10px 16px;
+  border: 1px solid #e1d6e3;
+}
+
+
+
+
+.searchbox .icon {
+  opacity: 0.8;
+  color: #4e1633;
+}
+
+
+
+
+.searchbox input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+}
+
+
+
+
+.searchbox .clear {
+  border: none;
+  background: #e3dde7;
+  border-radius: 999px;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+
+
+
+/* Botão "Filtrar por" à direita */
+.filter-btn {
+  border: 1px solid #4e1633;
+  background: #fdf9fc;
+  border-radius: 10px;
+  padding: 9px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #4e1633;
+  font-weight: 600;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+
+
+
+.filter-btn .icon {
+  font-size: 15px;
+}
+
+
+
+
+.filter-btn:hover {
+  background: #f3e3f1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.07);
+}
+
+
+
+
+/* ===== TABELA ===== */
+.table {
+  border: 1px solid #ddd;
+
+
+
+
+  border-radius: 8px;
+
+
+
+
+  overflow: hidden;
+}
+
+
+
+
+/* Cabeçalho e linhas usam grid */
+.thead,
+.row {
+  display: grid;
+  grid-template-columns: 0.9fr 1.3fr 1.7fr 1fr 1fr 1.2fr 0.7fr 0.4fr;
+  align-items: center;
+}
+
+
+
+
+.thead {
+  display: grid;
+  grid-template-columns: 0.9fr 1.3fr 1.7fr 1fr 1fr 1.2fr 0.7fr 0.4fr;
+  background: #f8eef4;          /* rosa clarinho elegante */
+  color: #4e1633;               /* roxo-vinho */
+  font-weight: 700;
+  font-size: 14px;
+
+
+
+
+  border-bottom: 2px solid #c36196;  /* linha de destaque */
+}
+
+
+
+
+.thead .col {
+  padding: 12px 16px;
+}
+
+
+
+
+/* Linhas */
+.row {
+  font-size: 14px;
+  border-bottom: 1px solid #f3f3f3;
+  transition: background 0.12s ease;
+}
+
+
+
+
+.row:nth-child(even) {
+  background: #fdfdfd;
+}
+
+
+
+
+.row:last-child {
+  border-bottom: none;
+}
+
+
+
+
+.row .col {
+  padding: 14px 16px;
+}
+
+
+
+
+/* hover da linha */
+.row:hover {
+  background: #faf4fb;
+}
+
+
+
+
+/* alinhamentos especiais */
+.col.right {
+  text-align: center;
+}
+
+
+
+
+.col.center {
+  text-align: center;
+}
+
+
+
+
+.col.action {
+  text-align: center;
+}
+
+
+
+
+/* "Acessar nota fiscal" e "Editar" */
+.link {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  color: #4e1633;
+  text-decoration: underline;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+
+
+.link:hover {
+  text-decoration-thickness: 2px;
+}
+
+
+
+
+/* Botão de excluir (X) */
+.delete-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid #4e1633;
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+
+
+
+.delete-btn:hover {
+  background: #4e1633;
+  color: #ffffff;
+}
+
+
+
+
+/* Mensagem de tabela vazia */
+.empty {
+  padding: 18px 16px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+}
+
+
+
+
+/* ===== RESPONSIVO BÁSICO ===== */
+@media (max-width: 900px) {
+  .title-row h1 {
+    font-size: 24px;
+  }
+
+
+
+
+  .thead,
+  .row {
+    font-size: 13px;
+  }
+
+
+
+
+  .thead .col,
+  .row .col {
+    padding: 10px 8px;
+  }
+}
+
+.modal-box {
+  background: #ffffff;
+
+  width: 100%;
+  max-width: 720px; /* MAIS EQUILIBRADO */
+  max-height: 90vh;
+
+  padding: 28px 32px;
+  border-radius: 16px;
+
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  animation: fadeInModal 0.25s ease;
+
+  overflow-y: auto;
+  color: #4e1633;
+}
+
+
+.modal-box input,
+.modal-box select {
+  width: 100%;
+  padding: 6px 10px;     /* menor altura */
+  margin-top: 4px;       /* menos espaço vertical */
+  border: 1px solid #d2c5d3;
+  border-radius: 6px;    /* mais compacto */
+  outline: none;
+  font-size: 14px;
+  background: #faf8fb;
+}
+
+
+
+
+.modal-box input:focus,
+.modal-box select:focus {
+  border-color: #7b1f50;
+}
+
+
+
+
+.carrinho-lista {
+  list-style: none;
+  padding: 0;
+  margin-top: 8px;
+}
+
+
+
+
+.carrinho-lista li {
+  background: #faf5f9;
+  border: 1px solid #eed9e9;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+
+
+
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
+
+
+.estoque-info {
+  margin-top: 6px;
+  color: #7b1f50;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+
+
+.qtd-produto {
+  display: block;
+  margin-bottom: 4px;
+  color: #7b1f50;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+
+
+
+.modal-actions button {
+  flex: 1;
+  height: 48px;        
+  display: flex;
+  align-items: center;  
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 0;          
+  line-height: 1;    
+  border: none;
+  cursor: pointer;
+}
+
+
+/* Cancelar */
+.cancel-btn {
+  background: #d13a3a;
+  color: #fff;
+}
+.cancel-btn:hover {
+  background: #b73333;
+}
+
+
+/* Finalizar */
+.save-btn {
+  background: #4e1633;
+  color: #fff;
+  margin-top: 20px;
+}
+
+
+.save-btn:hover {
+  background: #701e49;
+}
+
+
+.novo-cliente-form {
+  margin-top: 16px;
+  padding: 14px;
+  background: #faf5f9;
+  border: 1px solid #eed9e9;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+
+
+
+.add-btn {
+  background: #ffd262;
+  color: #4e1633;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+
+
+
+.add-btn:hover {
+  background: #ffca40;
+  transform: translateY(-2px);
+}
+
+
+
+
+.carrinho-lista .delete-btn {
+  border: 1px solid #b37ea0;
+  background: #ffffff;
+  color: #4e1633;
+  font-size: 15px;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+
+
+
+
+
+
+.carrinho-lista .delete-btn:hover {
+  background: #4e1633;
+  color: #fff;
+}
+
+
+
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+
+
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+
+
+/* --- FUNDO ESCURO DO MODAL --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+
+
+
+/* --- CAIXA PRINCIPAL DO MODAL --- */
+.modal-box {
+  background: #ffffff;
+  width: 900px;
+  max-width: 90vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  animation: fadeIn 0.25s ease-out;
+  color: #4e1633;
+}
+
+
+
+
+/* Animação de entrada suave */
+@keyframes fadeInModal {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+
+
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
+
+/* TÍTULOS */
+.modal-box h2 {
+  font-size: 24px;
+  margin-bottom: 15px;
+  color: #4a0f35;
+  text-align: left;
+}
+
+
+
+
+.modal-box h3 {
+  font-size: 18px;
+  margin-top: 18px;
+  margin-bottom: 8px;
+  color: #4a0f35;
+ 
+}
+
+
+
+
+/* TEXTOS */
+.modal-box p {
+  margin: 4px 0;
+  font-size: 15px;
+  color: #444;
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+
+
+
+/* LISTA DE ITENS */
+.modal-box ul {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 10px;
+}
+
+
+
+
+.modal-box ul li {
+  padding: 8px 10px;
+  background: #f7f7f7;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #333;
+}
+
+
+
+
+/* BOTÃO FECHAR */
+.modal-box .cancel-btn {
+  width: 100%;
+  background: #c62828;
+  color: #fff;
+  border: none;
+  padding: 10px 0;
+  border-radius: 8px;
+  font-size: 16px;
+  margin-top: 20px;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+
+
+
+.modal-box .cancel-btn:hover {
+  background: #a02020;
+}
+
+
+
+
+/* SCROLL BONITO */
+.modal-box::-webkit-scrollbar {
+  width: 8px;
+}
+
+
+
+
+.modal-box::-webkit-scrollbar-thumb {
+  background: #c7c7c7;
+  border-radius: 8px;
+}
+
+
+
+
+.modal-box::-webkit-scrollbar-thumb:hover {
+  background: #b4b4b4;
+}
+
+
+
+
+.item-nome {
+  flex: 1;
+  word-break: break-word;
+  white-space: normal;
+}
+
+
+.modal-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-grid {
+  gap: 24px 32px;
+}
+.resumo-venda {
+  background: #faf5f9;
+  border: 1px solid #eed9e9;
+  border-radius: 12px;
+  padding: 16px;
+}
+.total {
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 10px;
+  color: #4e1633;
+}
+.criar-btn {
+  background: #4e1633;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.criar-btn:hover {
+  background: #701e49;
+}
+
+/* Para telas pequenas */
+@media (max-width: 900px) {
+  .modal-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* Remover inline, adicionar essa classe */
+.novo-cliente-inline {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  align-items: center;
+}
+
+
+.novo-cliente-inline input {
+  flex: 1; /* garante que o input ocupe o espaço correto */
+}
+
+
+.novo-cliente-inline .save-btn {
+  all: unset;                 /* zera TODAS as regras herdadas */
+  background: #4e1633;
+  color: #fff;
+  padding: 7px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  height: 34px;
+  padding: 0 16px;
+}
+
+
+/* hover */
+.novo-cliente-inline .save-btn:hover {
+  background: #701e49;
+}
+
+
+
+
+/* ===== SIDEBAR FILTROS (IGUAL ESTOQUE) ===== */
+
+
+.filtros-avancados {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 260px;
+  min-width: 260px;
+  height: 100vh;
+  background: #ffffff;
+  border-right: 1px solid #e3e3e3;
+  padding: 20px;
+  z-index: 998;
+  transition: transform 0.3s ease;
+
+
+  height: calc(100vh - 70px);
+}
+
+
+/* aberto */
+.filtros-avancados.aberto {
+  transform: translateX(0);
+}
+
+
+/* fechado */
+.filtros-avancados.fechado {
+  transform: translateX(-100%);
+}
+
+
+/* header */
+.filtros-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+
+.filtros-header h2 {
+  font-size: 18px;
+  color: #4e1633;
+}
+
+
+.close-btn {
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+
+/* scroll */
+.filtro-scroll-area {
+  overflow-y: auto;
+  max-height: calc(100vh - 220px);
+}
+
+
+/* seção */
+.filtro-secao {
+  margin-bottom: 20px;
+}
+
+
+.filtro-secao label {
+  font-weight: 600;
+  font-size: 14px;
+  color: #4e1633;
+  margin-bottom: 6px;
+  display: block;
+}
+
+
+/* input */
+.filtro-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+
+/* checkbox */
+.checkbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+
+/* actions */
+.filtros-actions {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+
+.btn-limpar {
+  background: #eee;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+
+
+
+.btn-aplicar {
+  background: #4e1633;
+  color: #fff;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+
+/* botão toggle */
+.filter-btn-toggle {
+  border: 1px solid #4e1633;
+  background: #fdf9fc;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #4e1633;
+  transition: 0.2s;
+}
+
+
+.filter-btn-toggle:hover {
+  background: #f3e3f1;
+}
+
+
+.filter-btn-toggle.active {
+  background: #4e1633;
+  color: #fff;
+}
+
+
+/* empurra conteúdo quando sidebar aberta */
+.vendas-page {
+  display: flex;
+}
+
+
+.vendas-page {
+  display: flex;
+}
+
+
+.filtros-avancados {
+  width: 260px;
+}
+
+
+.vendas-main {
+  flex: 1;
+  padding: 20px;
+}
+/* quando fechado */
+.filtros-avancados.fechado ~ * {
+  margin-left: 0 !important;
+}
+
+
+.vendas-page {
+  display: flex;
+}

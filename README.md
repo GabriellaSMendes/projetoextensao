@@ -33,7 +33,7 @@ Sem essa etapa você fica preso na tela de login sem conseguir criar um usuário
 
 ### 3.1 Configurar conexão com o banco
 - Edita o arquivo: ```backend/app/config.py```
-- Atualiza a linha: ```SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://usuario:senha@localhost/tropicalmix_db'```
+- Atualiza a linha: ```SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://usuario:senha@localhost/tropicalmix_db_2'```
 
 Substitui **usuario** e **senha** pelos seus do seu MySQL.
 

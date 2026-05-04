@@ -13,8 +13,8 @@ function Clientes() {
   const [filtroEmail, setFiltroEmail] = useState("");
 
   const [formData, setFormData] = useState({
-    nome_cliente: "",
-    cpf: "",
+    razao_social: "",
+    cpf_cnpj: "",
     telefone: "",
     email: "",
     endereco: ""
@@ -98,8 +98,8 @@ function Clientes() {
 
   const limparForm = () => {
     setFormData({
-      nome_cliente: "",
-      cpf: "",
+      razao_social: "",
+      cpf_cnpj: "",
       telefone: "",
       email: "",
       endereco: ""
@@ -115,8 +115,8 @@ function Clientes() {
 
       const filtroNomeCpfOk =
         !nomeCpf ||
-        c.nome_cliente?.toLowerCase().includes(nomeCpf) ||
-        c.cpf?.toLowerCase().includes(nomeCpf);
+        c.razao_social?.toLowerCase().includes(nomeCpf) ||
+        c.cpf_cnpj?.toLowerCase().includes(nomeCpf);
 
       const filtroTelefoneOk =
         !telefone ||
@@ -245,8 +245,8 @@ function Clientes() {
 
         <div className="clientes-table">
           <div className="thead">
-            <div>Nome</div>
-            <div>CPF</div>
+            <div>Razão Social</div>
+            <div>CPF/CNPJ</div>
             <div>Telefone</div>
             <div>Email</div>
             <div>Endereço</div>
@@ -260,8 +260,8 @@ function Clientes() {
           ) : (
             clientesFiltrados.map((c) => (
               <div className="row" key={c.id_cliente}>
-                <div>{c.nome_cliente}</div>
-                <div>{c.cpf}</div>
+                <div>{c.razao_social}</div>
+                <div>{c.cpf_cnpj}</div>
                 <div>{c.telefone}</div>
                 <div>{c.email}</div>
                 <div>{c.endereco}</div>
@@ -296,8 +296,8 @@ function Clientes() {
           <div className="modal-box">
             <h2>{clienteEditando ? "Editar Cliente" : "Novo Cliente"}</h2>
 
-            <input name="nome_cliente" placeholder="Nome" value={formData.nome_cliente} onChange={handleChange} />
-            <input name="cpf" placeholder="CPF" value={formData.cpf} onChange={handleChange} />
+            <input name="razao_social" placeholder="Razão Social" value={formData.razao_social} onChange={handleChange} />
+            <input name="cpf_cnpj" placeholder="CPF/CNPJ" value={formData.cpf_cnpj} onChange={handleChange} />
             <input name="telefone" placeholder="Telefone" value={formData.telefone} onChange={handleChange} />
             <input name="email" placeholder="Email" value={formData.email} onChange={handleChange} />
             <input name="endereco" placeholder="Endereço" value={formData.endereco} onChange={handleChange} />

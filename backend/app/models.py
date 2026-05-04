@@ -58,18 +58,18 @@ class Produto(db.Model):
     movimentacoes = db.relationship('MovimentacaoEstoque', backref='produto', lazy=True)
 
 
-class Estoque(db.Model):
-    __tablename__ = 'estoque'
-    id_estoque = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    id_produto = db.Column(db.Integer, db.ForeignKey('produto.id_produto'), nullable=False, unique=True)
-    qtdd_atual = db.Column(db.Integer, default=0)
-    qtdd_entrada = db.Column(db.Integer, default=0)
-    qtdd_saida = db.Column(db.Integer, default=0)
-    ultima_atualizacao = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
+# class Estoque(db.Model):
+#     __tablename__ = 'estoque'
+#     id_estoque = db.Column(db.Integer, primary_key=True, autoincrement=True)
+#     id_produto = db.Column(db.Integer, db.ForeignKey('produto.id_produto'), nullable=False, unique=True)
+#     qtdd_atual = db.Column(db.Integer, default=0)
+#     qtdd_entrada = db.Column(db.Integer, default=0)
+#     qtdd_saida = db.Column(db.Integer, default=0)
+#     ultima_atualizacao = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
 
-    abastecimentos = db.relationship('Abastece', backref='estoque', lazy=True)
+#     abastecimentos = db.relationship('Abastece', backref='estoque', lazy=True)
 
-    itens_venda = db.relationship('VendaEstoque', backref='estoque', lazy=True)
+#     itens_venda = db.relationship('VendaEstoque', backref='estoque', lazy=True)
 
 
 class Fornecedor(db.Model):

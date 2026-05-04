@@ -7,8 +7,10 @@ function traduzMetodo(mtd) {
   switch (mtd) {
     case "dinheiro":
       return "Dinheiro";
-    case "cartao":
-      return "Cartão";
+    case "cartao_debito":
+      return "Cartão de débito";
+    case "cartao_credito":
+      return "Cartão de crédito";
     case "pix":
       return "PIX";
     case "outros":
@@ -107,7 +109,7 @@ function Vendas() {
 
       const atendeBusca =
         v.nome_cliente?.toLowerCase().includes(busca.toLowerCase()) ||
-        v.nome_vendedor?.toLowerCase().includes(busca.toLowerCase());
+        v.vendedor?.toLowerCase().includes(busca.toLowerCase());
 
       const atendePagamento =
         filtroPagamento.length === 0 ||
@@ -122,7 +124,7 @@ function Vendas() {
       return atendeBusca && atendePagamento && atendeItens;
 
     });
-  }, [vendas, busca, filtroPagamento, , filtroItens]);
+  }, [vendas, busca, filtroPagamento, filtroItens]);
 
   const itensUnicos = [
     ...new Set(
@@ -182,15 +184,15 @@ function Vendas() {
       setLoading(true);
       const token = localStorage.getItem("token");
 
-      const respLista = await api.get("/vendas", {
+      const respLista = await api.get("/pedidos", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const lista = respLista.data?.vendas || [];
+      const lista = respLista.data?.pedidos || [];
 
       const detalhes = await Promise.all(
         lista.map((v) =>
-          api.get(`/vendas/${v.id_venda}`, {
+          api.get(`/pedidos/${v.id_pedido}`, {
             headers: { Authorization: `Bearer ${token}` },
           }).catch(() => null)
         )
@@ -201,31 +203,38 @@ function Vendas() {
 
         let itensTexto = "—";
         let itemPrincipal = "";
+        let totalCalculado = 0;
 
-        if (det?.itens_vendidos && det.itens_vendidos.length > 0) {
-          const itens = det.itens_vendidos;
+        if (det?.itens && det.itens.length > 0) {
+          const itens = det.itens;
           const primeiro = itens[0].nome_produto;
           const totalProdutos = itens.length;
 
           itemPrincipal = primeiro;
 
+          // ✅ CALCULAR TOTAL AQUI
+          totalCalculado = itens.reduce((acc, item) => {
+            return acc + Number(item.preco_unitario) * item.qtdd_pedido;
+          }, 0);
+
           if (totalProdutos === 1) {
-            itensTexto = primeiro; // só 1 produto
+            itensTexto = primeiro;
           } else {
             itensTexto = `${primeiro} + ${totalProdutos - 1} item(s)`;
           }
         }
 
         return {
-          id_venda: venda.id_venda,
-          dt_venda: venda.dt_venda,
-          dataFormatada: new Date(venda.dt_venda).toLocaleDateString("pt-BR"),
-          nome_cliente: venda.nome_cliente,
+          id_venda: venda.id_pedido,
+          dt_venda: venda.dt_pedido, // 🔥 aproveita e corrige isso também
+          dataFormatada: new Date(venda.dt_pedido).toLocaleDateString("pt-BR"),
+          nome_cliente: venda.cliente,
           itens: itensTexto,
-          itemPrincipal: itemPrincipal, // 🔥 NOVO
-          valor_total: Number(venda.valor_total || 0),
-          metodo_pagamento: traduzMetodo(venda.mtd_pagamento),
-          vendedor: venda.nome_vendedor || "—"
+          itemPrincipal: itemPrincipal,
+          valor_total: totalCalculado, // ✅ AGORA CORRETO
+          metodo_pagamento: venda.mtd_pagamento,          // 🔥 valor real
+          metodo_pagamento_label: traduzMetodo(venda.mtd_pagamento), // 🔥 label
+          vendedor: venda.vendedor || "—"
         };
       });
 
@@ -286,7 +295,7 @@ function Vendas() {
     try {
       const token = localStorage.getItem("token");
 
-      await api.delete(`/vendas/${id_venda}`, {
+      await api.delete(`/pedidos/${id_venda}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -337,18 +346,17 @@ function Vendas() {
 
     const payload = {
       id_cliente: Number(cliente),
-      id_usuario: Number(vendedor),
       mtd_pagamento: pagamento,
       itens: carrinho.map((i) => ({
         id_produto: i.id_produto,
-        quantidade: i.quantidade,
-      })),
+        qtdd_pedido: i.quantidade,
+      }))
     };
 
     try {
       const token = localStorage.getItem("token");
 
-      await api.post("/vendas", payload, {
+      await api.post("/pedidos", payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -421,7 +429,7 @@ function Vendas() {
           <div className="filtro-secao">
             <label>Forma de pagamento</label>
             <div className="checkbox-list">
-              {["dinheiro", "cartao", "pix", "outros"].map((tipo) => (
+              {["dinheiro", "cartao_debito", "cartao_credito", "pix", "outros"].map((tipo) => (
                 <div key={tipo} className="checkbox-item">
                   <input
                     type="checkbox"
@@ -524,7 +532,7 @@ function Vendas() {
                 <div className="col">{v.nome_cliente}</div>
                 <div className="col">{v.itens}</div>
                 <div className="col right">{formatR$(v.valor_total)}</div>
-                <div className="col">{v.metodo_pagamento}</div>
+                <div className="col">{v.metodo_pagamento_label}</div>
                 <div className="col">{v.vendedor}</div>
 
                 <div className="col action">
@@ -534,7 +542,7 @@ function Vendas() {
                       try {
                         const token = localStorage.getItem("token");
 
-                        const resp = await api.get(`/vendas/${v.id_venda}`, {
+                        const resp = await api.get(`/pedidos/${v.id_venda}`, {
                           headers: { Authorization: `Bearer ${token}` }
                         });
 
@@ -580,7 +588,7 @@ function Vendas() {
                     <option value="">Selecione...</option>
                     {clientes.map((c) => (
                       <option key={c.id_cliente} value={c.id_cliente}>
-                        {c.nome_cliente}
+                        {c.razao_social}
                       </option>
                     ))}
                   </select>
@@ -654,8 +662,8 @@ function Vendas() {
                             const resp = await api.post(
                               "/clientes",
                               {
-                                nome_cliente: clienteNome,
-                                cpf: clienteCpf || null,
+                                razao_social: clienteNome,
+                                cpf_cnpj: clienteCpf,
                                 telefone: clienteTelefone || null,
                                 email: clienteEmail || null,
                                 endereco: clienteEndereco || null,
@@ -709,7 +717,8 @@ function Vendas() {
                   >
                     <option value="pix">PIX</option>
                     <option value="dinheiro">Dinheiro</option>
-                    <option value="cartao">Cartão</option>
+                    <option value="cartao_debito">Cartão de Débito</option>
+                    <option value="cartao_credito">Cartão de Crédito</option>
                     <option value="outros">Outros</option>
                   </select>
                 </div>
@@ -851,11 +860,11 @@ function Vendas() {
                 </p>
 
                 <p><strong>Cliente: </strong>
-                  {vendaSelecionada.cliente?.nome_cliente}
+                  {vendaSelecionada.cliente?.razao_social}
                 </p>
 
                 <p><strong>Vendedor: </strong>
-                  {vendaSelecionada.vendedor?.nome_vendedor}
+                  {vendaSelecionada.vendedor?.nome_usuario}
                 </p>
 
                 <p><strong>Método de pagamento: </strong>
@@ -865,7 +874,7 @@ function Vendas() {
                 <h3 style={{ marginTop: 20 }}>Itens</h3>
 
                 <ul className="carrinho-lista">
-                  {vendaSelecionada.itens_vendidos.map((item) => (
+                  {(vendaSelecionada.itens || []).map((item) => (
                     <li key={item.id_produto} className="item-linha">
                       <span className="item-nome">
                         {item.nome_produto} — R$ {(item.preco_unitario_na_venda * item.qtdd_venda).toFixed(2)}

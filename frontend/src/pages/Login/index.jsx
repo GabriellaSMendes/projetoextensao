@@ -116,7 +116,7 @@ function Login() {
       {/* Logo acima do cartão */}
       <img src={logo} alt="Tropical Mix" className="login-logo" />
 
-      <form onSubmit={handleRegister} className="login-card">
+      <form className="login-card">
         <h1>Login</h1>
 
         {/* NOME DO USUÁRIO 

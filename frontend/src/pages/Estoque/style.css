@@ -1,362 +1,105 @@
-
-
 .estoque-title-row {
-
-
   display: flex;
-
-
   justify-content: space-between;
-
-
   align-items: center;
-
-
   margin-bottom: 18px;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 .estoque-page {
-
-
   min-height: 100vh;
-
-
   background: #fff;
-
-
   padding: 32px;
-
-
   font-family: "Poppins", sans-serif;
-
-
   color: #4e1633;
-
-
 }
-
-
-
-
-
-
-
-
-
-
 /* TÍTULO */
-
-
 .estoque-title {
-
-
   display: flex;
-
-
   align-items: baseline;
-
-
   gap: 10px;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 .estoque-title h1 {
-
-
   font-size: 32px;
-
-
   color: #4e1633;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 .estoque-title small {
-
-
   color: #7b1f50;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 /* Botão */
-
-
 .add-btn {
-
-
   background: #ffd262;
-
-
   color: #4e1633;
-
-
-  padding: 8px 16px;          
-
-
+  padding: 8px 16px;
   border: none;
-
-
   border-radius: 6px;        
-
-
   font-weight: 600;
-
-
   font-size: 14px;            
-
-
   cursor: pointer;
-
-
   transition: 0.2s;
-
-
   box-shadow: 0 2px 4px rgba(0,0,0,0.15);  
-
-
 }
-
-
-
-
-
-
-
-
-
 
 .add-btn:hover {
-
-
   background: #ffca40;
-
-
   transform: translateY(-2px);            
-
-
 }
-
-
-
-
-
-
-
-
-
 
 /* BUSCA */
-
-
 .estoque-search {
-
-
   display: flex;
-
-
   align-items: center;
-
-
   gap: 12px;
-
-
   margin-bottom: 20px;
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 .searchbox {
   flex: 1;
   display: flex;
   align-items: center;
   gap: 10px;
-
   background: #ffffff;
   padding: 10px 14px;
-
   border-radius: 10px;
   border: 1px solid #e5e5e5;
-
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
   transition: all 0.2s ease;
 }
 
-
-
-
-
-
-
 .searchbox input {
-
-
   flex: 1;
-
-
   border: none;
-
-
   background: transparent;
-
-
   outline: none;
-
-
   font-size: 14px;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 .searchbox .clear {
-
-
   background: #ddd;
-
-
   border: none;
-
-
   width: 28px;
-
-
   height: 28px;
-
-
   border-radius: 6px;
-
-
   cursor: pointer;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 .filter-btn {
-
-
   background: #7b1f50;
-
-
   color: white;
-
-
   border: none;
-
-
   padding: 10px 18px;
-
-
   border-radius: 8px;
-
-
   cursor: pointer;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 /* TABELA */
-
-
 .estoque-table {
-
-
   border: 1px solid #ddd;
-
-
   border-radius: 8px;
-
-
   overflow: hidden;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 .estoque-table .thead,
 .estoque-table .row {
@@ -374,521 +117,141 @@
     0.8fr;
 }
 
-
-
-
-
-
-
-
-
-
 .estoque-table .thead {
-
-
   padding: 1px 0 !important;
-
-
   min-height: 30px !important;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 .estoque-table .row {
-
-
   padding: 1px 0 !important;
-
-
   min-height: 30px !important;
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 .thead {
-
-
   background: #f3e6ef;
-
-
   color: #4e1633;
-
-
   font-weight: 600;
-
-
   border-bottom: 2px solid #c36196;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 .row:nth-child(even) {
-
-
   background: #fafafa;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 .col {
-
-
   padding: 8px;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 .col.center {
-
-
   text-align: center;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 .col.action {
-
-
   text-align: center;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 .edit-btn {
-
-
   background: #ffd262;
-
-
   border: none;
-
-
   padding: 6px 12px;
-
-
   border-radius: 6px;
-
-
   font-weight: bold;
-
-
   cursor: pointer;
-
-
 }
-
-
 
 
 .empty, .loading {
-
-
   padding: 20px;
-
-
   text-align: center;
-
-
   color: #7b1f50;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 /* Modal geral */
-
-
 .modal-overlay {
-
-
   position: fixed;
-
-
   top: 0;
-
-
   left: 0;
-
-
   width: 100%;
-
-
   height: 100%;
-
-
   background: rgba(0, 0, 0, 0.45);
-
-
   display: flex;
-
-
   align-items: center;
-
-
   justify-content: center;
-
-
   z-index: 999;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 .modal-box {
-
-
   background: white;
-
-
   width: 40%;
-
-
   padding: 25px;
-
-
   border-radius: 12px;
-
-
   box-shadow: 0 5px 25px rgba(0,0,0,0.2);
-
-
   animation: fadeIn 0.3s ease;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 @keyframes fadeIn {
-
-
   from { opacity: 0; transform: scale(0.9); }
-
-
   to   { opacity: 1; transform: scale(1); }
-
-
 }
-
-
-
-
-
-
-
-
-
 
 .modal-box h2 {
-
-
   color: #4e1633;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 /* Form grid */
-
-
 .form-grid {
-
-
   margin-top: 20px;
-
-
   display: grid;
-
-
   grid-template-columns: 1fr 1fr;
-
-
   gap: 18px;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 .form-grid label {
-
-
   font-size: 14px;
-
-
   color: #4e1633;
-
-
   font-weight: 600;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 .form-grid input,
-
-
 .form-grid select {
-
-
   width: 100%;
-
-
   padding: 8px;
-
-
   border-radius: 6px;
-
-
   border: 1px solid #ccc;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 /* Ações */
-
-
 .modal-actions {
-
-
   margin-top: 25px;
-
-
   display: flex;
-
-
   justify-content: flex-end;
-
-
   gap: 12px;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 .cancel-btn {
-
-
   background: #ccc;
-
-
   padding: 8px 16px;
-
-
   border-radius: 6px;
-
-
   border: none;
-
-
   cursor: pointer;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 .save-btn {
-
-
   background: #4e1633;
-
-
   color: white;
-
-
   padding: 8px 16px;
-
-
   border-radius: 6px;
-
-
   border: none;
-
-
   cursor: pointer;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 /* Placeholder da imagem */
-
-
 .placeholder-img {
-
-
   width: 40px;
-
-
   height: 40px;
-
-
   background: #e0e0e0;
-
-
   border-radius: 6px;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 .estoque-container {
   display: flex;
@@ -897,10 +260,6 @@
   background-color: #fdfdfd;
   min-height: 100vh;
 }
-
-
-
-
 
 
 .filtros-avancados {
@@ -917,426 +276,153 @@
   padding: 20px;
   z-index: 998;
   transition: transform 0.3s ease;
-
   height: calc(100vh - 70px);
 }
 
 
-
-
-
-
 .filtros-header {
-
-
   display: flex;
-
-
   justify-content: space-between;
-
-
   align-items: center;
-
-
   font-weight: bold;
-
-
   color: #4e1633;
-
-
   font-size: 18px;
-
-
 }
-
-
-
-
 
 
 .filtros-header h2 {
-
-
   font-size: 20px;
-
-
   color: #4e1633;
-
-
   margin: 0;
-
-
 }
-
-
-
-
 
 
 .close-btn {
-
-
   background: none;
-
-
   border: none;
-
-
   font-size: 24px;
-
-
   cursor: pointer;
-
-
   color: #999;
-
-
 }
-
-
-
-
 
 
 /* Campos de Input e Seções */
-
-
 .filtro-secao label {
-
-
   font-size: 14px;
-
-
   font-weight: 700;
-
-
   color: #4e1633;
-
-
   margin-bottom: 12px;
-
-
   display: block;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 .filtro-input {
-
-
   width: 100%;
-
-
   padding: 10px 14px;
-
-
   border-radius: 20px; /* Estilo arredondado das imagens */
-
-
   border: 1px solid #ddd;
-
-
   outline: none;
-
-
   font-size: 14px;
-
-
 }
-
-
-
-
-
-
-
-
-
 
 .checkbox-grid {
-
-
   display: grid;
-
-
   grid-template-columns: 1fr 1fr;
-
-
   gap: 10px;
-
-
 }
-
-
-
-
 
 
 .checkbox-item {
-
-
   display: flex;
-
-
   align-items: center;
-
-
   gap: 8px;
-
-
 }
-
-
-
-
 
 
 .checkbox-item label {
-
-
   font-weight: 400;
-
-
   font-size: 13px;
-
-
   color: #555;
-
-
   margin: 0;
-
-
   cursor: pointer;
-
-
 }
-
-
-
-
 
 
 .checkbox-item input[type="checkbox"] {
-
-
   accent-color: #4e1633; /* Cor do check combinando com o tema */
-
-
   cursor: pointer;
-
-
 }
-
-
-
-
 
 
 .filtros-actions {
-
-
   margin-top: auto; /* Joga os botões para o final do painel */
-
-
   display: flex;
-
-
   flex-direction: column;
-
-
   gap: 10px;
-
-
 }
-
-
-
-
 
 
 .btn-aplicar {
-
-
   background: #4e1633; /* Roxo escuro para ação principal */
-
-
   color: white;
-
-
   border: none;
-
-
   padding: 12px;
-
-
   border-radius: 8px;
-
-
   font-weight: 600;
-
-
   cursor: pointer;
-
-
   transition: 0.3s;
-
-
 }
-
-
 /* COMPLEMENTO: Área de scroll interna para os filtros não vazarem da tela */
-
-
 .filtro-scroll-area {
-
-
   flex: 1;
-
-
   overflow-y: auto;
-
-
   padding-right: 5px;
-
-
   margin-bottom: 20px;
-
-
 }
-
-
-
-
 
 
 /* COMPLEMENTO: Listas mais limpas */
-
-
 .checkbox-list {
-
-
   display: flex;
-
-
   flex-direction: column;
-
-
   gap: 8px;
-
-
   background: #fdfdfd;
-
-
   padding: 10px;
-
-
   border-radius: 8px;
-
-
   border: 1px solid #eee;
-
-
   max-height: 200px;
-
-
   overflow-y: auto;
-
-
 }
-
-
-
-
 
 
 .checkbox-item label {
-
-
   display: flex;
-
-
   justify-content: space-between;
-
-
   width: 100%;
-
-
 }
-
-
-
-
 
 
 .checkbox-item label span {
-
-
   color: #999;
-
-
   font-size: 11px;
-
-
 }
-
-
-
-
 
 
 /* COMPLEMENTO: Estilo para linha em alerta (Estoque Baixo) */
-
-
 .row-alerta {
-
-
   background-color: #fffcf0 !important;
-
-
   border-left: 4px solid #ffd262;
-
-
 }
-
-
-
-
 
 
 .row-alerta .col.center {
-
-
   color: #b30000;
-
-
   font-weight: bold;
-
-
 }
 
 
-
-
-
-
 /* COMPLEMENTO: Ajuste na Sidebar para animação suave */
-
-
 .filtros-avancados {
-
-
   transition: width 0.3s ease, padding 0.3s ease, opacity 0.2s ease;
-
-
 }
 
 .filtros-avancados.aberto {
@@ -1347,8 +433,6 @@
 .search-row {
   margin-bottom: 16px;
 }
-
-
 .filtros-avancados.fechado {
   width: 0;
   min-width: 0;
@@ -1359,96 +443,36 @@
 }
 
 
-
-
-
-
 /* COMPLEMENTO: Scrollbar customizada para o painel de filtros */
-
-
 .filtro-scroll-area::-webkit-scrollbar {
-
-
   width: 4px;
-
-
 }
-
-
 .filtro-scroll-area::-webkit-scrollbar-thumb {
-
-
   background: #e0e0e0;
-
-
   border-radius: 10px;
-
-
 }
-
-
-
-
 
 
 .btn-aplicar:hover {
-
-
   background: #351024;
-
-
 }
-
-
-
-
 
 
 .btn-limpar {
-
-
   background: #f0f0f5; /* Fundo claro para limpar */
-
-
   color: #4e1633;
-
-
   border: 1px solid #ddd;
-
-
   padding: 12px;
-
-
   border-radius: 8px;
-
-
   font-weight: 600;
-
-
   cursor: pointer;
-
-
   transition: 0.3s;
-
-
 }
-
-
-
-
 
 
 .btn-limpar:hover {
-
-
   background: #e2e2e8;
-
-
 }
-
-
-
-
 
 
 .estoque-main {
@@ -1459,57 +483,18 @@
   background: #ffffff;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 .actions-right {
-
-
   display: flex;
-
-
   gap: 10px;
-
-
 }
 
 
-
-
-
-
 .filter-btn-toggle {
-
-
   background: #4e1633;
-
-
   color: white;
-
-
   border: none;
-
-
   padding: 8px 20px;
-
-
   border-radius: 6px;
-
-
   cursor: pointer;
-
-
   font-weight: 600;
-
-
 }

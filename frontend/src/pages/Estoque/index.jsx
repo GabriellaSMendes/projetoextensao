@@ -1,155 +1,54 @@
-
-
 import { useEffect, useState, useMemo } from "react";
-
-
 import api from "../../services/api";
-
-
 import "./style.css";
 
 
-
-
-
-
 function normalizarDataISO(data) {
-
-
   if (!data) return "";
-
-
   return data.split("T")[0];
-
-
 }
-
-
-
-
-
 
 function formatarDataBR(data) {
-
-
   if (!data) return "-";
-
-
   const partes = data.split("-");
-
-
   if (partes.length !== 3) return data;
-
-
   return `${partes[2]}/${partes[1]}/${partes[0]}`;
-
-
 }
 
-
-
-
-
-
 function Estoque() {
-
-
   const [filtrosAbertos, setFiltrosAbertos] = useState(false);
   const [fornecedores, setFornecedores] = useState([]);
-
   const [filtroCategoria, setFiltroCategoria] = useState([]);
-
-
   const [filtroSabor, setFiltroSabor] = useState("");
-
-
   const [produtos, setProdutos] = useState([]);
-
-
   const [categorias, setCategorias] = useState([]);
-
-
   const [busca, setBusca] = useState("");
-
-
   const [loading, setLoading] = useState(true);
-
-
   const [modalOpen, setModalOpen] = useState(false);
-
-
   const [produtoEditando, setProdutoEditando] = useState(null);
-
-
-
-
-
-
-
-
-
-
   const carregarProdutos = async () => {
 
-
     try {
-
-
       const token = localStorage.getItem("token");
-
-
       const response = await api.get("/estoque/produtos", {
-
-
         headers: { Authorization: `Bearer ${token}` },
-
-
       });
 
-
       setProdutos(response.data.produtos.map(p => ({
-
-
         ...p, data_vencimento: p.data_vencimento ? normalizarDataISO(p.data_vencimento) : ""
-
-
       })));
-
-
     } catch (err) { console.error(err); } finally { setLoading(false); }
-
-
   };
-
-
-
-
-
 
   const carregarCategorias = async () => {
 
-
     try {
-
-
       const token = localStorage.getItem("token");
-
-
       const response = await api.get("/estoque/categorias", {
-
-
         headers: { Authorization: `Bearer ${token}` },
-
-
       });
-
-
       setCategorias(response.data.categorias);
-
-
     } catch (err) { console.error(err); }
-
-
   };
 
   const carregarFornecedores = async () => {
@@ -164,67 +63,32 @@ function Estoque() {
     }
   };
 
-
-
-
-
-
   useEffect(() => {
     carregarProdutos();
     carregarCategorias();
     carregarFornecedores(); // 👈 ADD AQUI
   }, []);
 
-
-
-
-
-
   const toggleFiltro = (lista, item, setLista) => {
 
-
     setLista(lista.includes(item) ? lista.filter(i => i !== item) : [...lista, item]);
-
-
   };
-
-
-
-
-
 
   const filtrados = useMemo(() => {
 
-
     return produtos.filter((p) => {
-
-
       const termo = busca.toLowerCase();
-
       const atendeBusca =
         p.nome_produto?.toLowerCase().includes(termo) ||
         p.marca?.toLowerCase().includes(termo) ||
         p.sabor?.toLowerCase().includes(termo) ||
         p.nome_fornecedor?.toLowerCase().includes(termo);
-
-
       const atendeCategoria = filtroCategoria.length === 0 || filtroCategoria.includes(p.nome);
-
-
       const atendeSabor =
         !filtroSabor ||
         p.sabor?.toLowerCase().includes(filtroSabor.toLowerCase());
-
-
-
-
-
-
       return atendeBusca && atendeCategoria && atendeSabor;
-
-
     });
-
 
   }, [produtos, busca, filtroCategoria, filtroSabor]);
 
@@ -283,13 +147,13 @@ function Estoque() {
         }
       );
 
-      // 🔄 Atualiza lista
+      // Atualiza lista
       carregarProdutos();
 
-      // 🔒 Fecha modal
+      // Fecha modal
       setModalOpen(false);
 
-      // 🧹 Limpa form
+      // Limpa form
       setFormData({
         nome_produto: "",
         sabor: "",
@@ -346,130 +210,54 @@ function Estoque() {
     }
   };
 
+  const abrirDetalheProduto = (idProduto) => {
+    window.open(`/estoque/produtos/${idProduto}`, "_blank");
+  };
 
   return (
 
-
     <div className="estoque-container">
-
-
       <aside className={`filtros-avancados ${filtrosAbertos ? "aberto" : "fechado"}`}>
-
-
         <div className="filtros-header">
-
-
           <h2>Filtros Avançados</h2>
-
-
           <button className="close-btn" onClick={() => setFiltrosAbertos(false)}>×</button>
-
-
         </div>
 
-
-
-
-
-
         <div className="filtro-scroll-area">
-
-
           <div className="filtro-secao">
-
-
             <label>Pesquisar</label>
-
-
             <input
-
-
               type="text"
-
-
               className="filtro-input"
-
-
               placeholder="Produto ou marca..."
-
-
               value={busca}
-
-
               onChange={(e) => setBusca(e.target.value)}
-
-
             />
-
-
           </div>
 
-
-
-
-
-
           <div className="filtro-secao">
-
-
             <label>Categorias</label>
-
-
             <div className="checkbox-list">
-
-
               {categorias.map((c) => (
-
-
                 <div key={c.id_categoria} className="checkbox-item">
-
-
                   <input
-
-
                     type="checkbox"
-
-
                     id={`cat-${c.id_categoria}`}
-
-
                     checked={filtroCategoria.includes(c.nome)}
-
-
                     onChange={() => toggleFiltro(filtroCategoria, c.nome, setFiltroCategoria)}
-
-
                   />
 
-
                   <label htmlFor={`cat-${c.id_categoria}`}>
-
-
                     {c.nome} <span>({produtos.filter(p => p.nome === c.nome).length})</span>
-
-
                   </label>
-
-
                 </div>
-
-
               ))}
-
-
             </div>
-
-
           </div>
-
-
-
-
 
 
           <div className="filtro-secao">
             <label>Sabor</label>
-
             <input
               type="text"
               className="filtro-input"
@@ -478,83 +266,33 @@ function Estoque() {
               onChange={(e) => setFiltroSabor(e.target.value)}
             />
           </div>
-
-
         </div>
-
-
-
-
-
 
         <div className="filtros-actions">
-
-
           <button className="btn-limpar" onClick={() => { setFiltroCategoria([]); setFiltroSabor(""); setBusca(""); }}>
-
-
             Limpar Filtros
-
-
           </button>
-
 
           <button className="btn-aplicar" onClick={() => setFiltrosAbertos(false)}>
-
-
             Aplicar Filtros
-
-
           </button>
-
-
         </div>
-
-
       </aside>
 
-
-
-
-
-
       <main className="estoque-main">
-
-
         <div className="estoque-title-row">
-
           <div className="estoque-title">
-
-
             <h1>PRODUTOS</h1>
-
-
             <small><strong>{filtrados.length}</strong> itens listados</small>
-
-
           </div>
 
-
           <div className="actions-right">
-
-
             <button
-
-
               className={`filter-btn-toggle ${filtrosAbertos ? 'active' : ''}`}
-
-
               onClick={() => setFiltrosAbertos(!filtrosAbertos)}
-
-
             >
-
-
               {filtrosAbertos ? "Ocultar Filtros" : "Filtrar"}
-
-
             </button>
-
 
             <button
               className="add-btn"
@@ -577,111 +315,49 @@ function Estoque() {
             >
               + Adicionar novo
             </button>
-
-
           </div>
-
-
         </div>
 
-
-
-
-
-
         <div className="estoque-table">
-
-
           <div className="thead">
-
-
             <div className="col img-col"></div>
-
-
             <div className="col">Produto</div>
-
-
             <div className="col">Categoria</div>
-
-
             <div className="col">Sabor</div>
-
-
             <div className="col">Marca</div>
-
-
             <div className="col">Validade</div>
-
-
             <div className="col center">Qtd.</div>
-
-
             <div className="col">Fornecedor</div>
-
-
-            <div className="col action">Editar</div>
-
-
+            <div className="col action">Ações</div>
           </div>
 
-
-
-
-
-
           {loading ? (
-
-
             <div className="loading">Carregando produtos...</div>
-
-
           ) : filtrados.length === 0 ? (
-
-
             <div className="empty">Nenhum produto encontrado.</div>
-
-
           ) : (
-
-
             filtrados.map((p) => (
-
-
               <div className="row" key={p.id_produto}>
-
-
                 <div className="col img-col"><div className="placeholder-img"></div></div>
-
-
                 <div className="col">{p.nome_produto}</div>
-
-
-                <div className="col">{p.nome}</div>
-
-
+                <div className="col">{p.nome_categoria}</div>
                 <div className="col">{p.sabor}</div>
-
-
                 <div className="col">{p.marca}</div>
-
-
                 <div className="col">{formatarDataBR(p.data_vencimento)}</div>
-
-
                 <div className="col center">{p.qtdd_atual}</div>
-
-
                 <div className="col">{p.nome_fornecedor || "-"}</div>
-
-
                 <div className="col action">
-
+                  <button
+                    className="edit-btn"
+                    onClick={() => abrirDetalheProduto(p.id_produto)}
+                  >
+                    Detalhes
+                  </button>
 
                   <button
                     className="edit-btn"
                     onClick={() => {
                       setProdutoEditando(p);
-
                       setFormData({
                         nome_produto: p.nome_produto || "",
                         sabor: p.sabor || "",
@@ -694,38 +370,17 @@ function Estoque() {
                           ? p.data_vencimento.split("T")[0]
                           : ""
                       });
-
                       setModalOpen(true);
                     }}
                   >
                     Editar
                   </button>
-
-
                 </div>
-
-
               </div>
-
-
             ))
-
-
           )}
-
-
         </div>
-
-
       </main>
-
-
-
-
-
-
-
-
 
 
       {/* Adicione isso antes do fim do return */}
@@ -862,30 +517,8 @@ function Estoque() {
           </div>
         </div>
       )}
-
-
     </div>
-
-
-
-
-
-
-
-
-
-
-
-
   );
-
-
 }
 
-
-
-
-
-
 export default Estoque;
-

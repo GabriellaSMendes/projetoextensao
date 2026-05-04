@@ -51,6 +51,7 @@ class Produto(db.Model):
     data_vencimento = db.Column(db.Date)
     preco_unitario = db.Column(db.Numeric(10, 2), nullable=False)
     dt_cadastro = db.Column(db.DateTime, default=db.func.now())
+    ativo = db.Column(db.Boolean, default=True)
     id_categoria = db.Column(db.Integer, db.ForeignKey('categoria.id_categoria'), nullable=False)
 
     itens_pedido = db.relationship('ItemPedido', backref='produto', lazy=True)

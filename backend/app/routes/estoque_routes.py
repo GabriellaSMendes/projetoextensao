@@ -41,13 +41,15 @@ def criar_categoria():
 @jwt_required()
 def listar_produtos():
     """
-    Lista todos os produtos, incluindo o fornecedor do último abastecimento.
+    Lista todos os produtos de forma consolidada,
+    incluindo resumo de fornecedor e validade por lote.
     """
     produtos = Produto.query.all()
     lista_json = []
-    
+
+    hoje = date.today()
+
     for p in produtos:
-        # Buscar o último abastecimento para descobrir o fornecedor recente
         ultimo_abastecimento = (
             Abastece.query
             .filter_by(id_produto=p.id_produto)
@@ -62,20 +64,58 @@ def listar_produtos():
         else:
             nome_fornecedor = None
             id_fornecedor = None
-            
+
+        lotes_disponiveis = (
+            Abastece.query
+            .filter(
+                Abastece.id_produto == p.id_produto,
+                Abastece.qtdd_disponivel > 0
+            )
+            .all()
+        )
+
+        lotes_com_validade = [
+            lote for lote in lotes_disponiveis
+            if lote.data_vencimento is not None
+        ]
+
+        proxima_validade = None
+        lotes_proximos_validade = 0
+        lotes_vencidos = 0
+
+        if lotes_com_validade:
+            lote_mais_proximo = sorted(
+                lotes_com_validade,
+                key=lambda lote: lote.data_vencimento
+            )[0]
+
+            proxima_validade = lote_mais_proximo.data_vencimento
+
+            for lote in lotes_com_validade:
+                dias = (lote.data_vencimento - hoje).days
+
+                if dias < 0:
+                    lotes_vencidos += 1
+                elif dias <= 45:
+                    lotes_proximos_validade += 1
+
         lista_json.append({
             "id_produto": p.id_produto,
             "nome_produto": p.nome_produto,
             "sabor": p.sabor,
             "marca": p.marca,
-            "qtdd_atual": p.qtdd_atual, # v2: direto da tabela produto
-            "data_vencimento": p.data_vencimento.isoformat() if p.data_vencimento else None,
+            "qtdd_atual": p.qtdd_atual,
             "preco_unitario": str(p.preco_unitario),
             "id_categoria": p.id_categoria,
             "nome_categoria": p.categoria.nome if p.categoria else None,
             "id_fornecedor": id_fornecedor,
-            "nome_fornecedor": nome_fornecedor
+            "nome_fornecedor": nome_fornecedor,
+            "proxima_validade": proxima_validade.isoformat() if proxima_validade else None,
+            "lotes_proximos_validade": lotes_proximos_validade,
+            "lotes_vencidos": lotes_vencidos,
+            "ativo": p.ativo
         })
+
     return jsonify(produtos=lista_json), 200
 
 @estoque_bp.route('/produtos/<int:id_produto>', methods=['GET'])
@@ -145,6 +185,8 @@ def criar_produto():
     Cria um novo PRODUTO e (opcionalmente) regista o seu abastecimento inicial.
     """
     dados = request.get_json()
+    
+    id_usuario_logado = int(get_jwt_identity())
 
     if not dados.get('nome_produto') or not dados.get('preco_unitario') or not dados.get('id_categoria'):
         return jsonify({"erro": "Nome, Preço Unitário e Categoria são obrigatórios"}), 400
@@ -182,8 +224,12 @@ def criar_produto():
             abastecimento_inicial = Abastece(
                 id_fornecedor=id_fornecedor,
                 id_produto=novo_produto.id_produto,
+                numero_lote=dados.get("numero_lote"),
+                id_usuario=id_usuario_logado,
                 qtdd_recebida=qtdd_inicial,
-                valor_unitario=dados.get("preco_unitario")
+                qtdd_disponivel=qtdd_inicial,
+                valor_unitario=dados.get("valor_unitario", dados.get("preco_unitario")),
+                data_vencimento=dados.get("data_vencimento")
             )
             db.session.add(abastecimento_inicial)
 
@@ -235,6 +281,38 @@ def atualizar_produto(id_produto):
         db.session.rollback()
         return jsonify({"erro": "Erro ao atualizar produto", "detalhes": str(e)}), 500
 
+@estoque_bp.route('/produtos/<int:id_produto>/status', methods=['PATCH'])
+@jwt_required()
+def alterar_status_produto(id_produto):
+    """
+    Ativa ou oculta um produto da listagem principal.
+    Não remove o produto do banco.
+    """
+    produto = Produto.query.get_or_404(id_produto)
+    dados = request.get_json() or {}
+
+    if "ativo" not in dados:
+        return jsonify({"erro": "O campo 'ativo' é obrigatório"}), 400
+
+    produto.ativo = bool(dados.get("ativo"))
+
+    try:
+        db.session.commit()
+
+        status = "ativado" if produto.ativo else "ocultado"
+
+        return jsonify({
+            "mensagem": f"Produto {status} com sucesso!",
+            "id_produto": produto.id_produto,
+            "ativo": produto.ativo
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "erro": "Erro ao alterar status do produto",
+            "detalhes": str(e)
+        }), 500
 
 @estoque_bp.route('/produtos/<int:id_produto>', methods=['DELETE'])
 @jwt_required()

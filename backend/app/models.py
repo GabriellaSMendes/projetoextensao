@@ -99,9 +99,13 @@ class Abastece(db.Model):
     id_abastecimento = db.Column(db.Integer, primary_key=True, autoincrement=True)
     id_fornecedor = db.Column(db.Integer, db.ForeignKey('fornecedor.id_fornecedor'), nullable=False)
     id_produto = db.Column(db.Integer, db.ForeignKey('produto.id_produto'), nullable=False) # Agora liga direto no produto
+    numero_lote = db.Column(db.String(50))
+    id_usuario = db.Column(db.Integer, db.ForeignKey('usuario.id_usuario'), nullable=False)
     dt_abastecimento = db.Column(db.DateTime, default=db.func.now())
     qtdd_recebida = db.Column(db.Integer, nullable=False)
+    qtdd_disponivel = db.Column(db.Integer)
     valor_unitario = db.Column(db.Numeric(10, 2))
+    data_vencimento = db.Column(db.Date)
 
 class ItemPedido(db.Model): # Era VendaEstoque
     __tablename__ = 'item_pedido'

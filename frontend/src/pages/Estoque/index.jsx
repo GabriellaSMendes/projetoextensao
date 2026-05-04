@@ -15,6 +15,87 @@ function formatarDataBR(data) {
   return `${partes[2]}/${partes[1]}/${partes[0]}`;
 }
 
+function CampoSugestao({ label, name, value, onChange, options, placeholder }) {
+  const [aberto, setAberto] = useState(false);
+
+  const opcoesFiltradas = options
+    .filter((opcao) =>
+      opcao.toLowerCase().includes((value || "").toLowerCase())
+    )
+    .sort((a, b) => a.localeCompare(b));
+
+  const atualizarValor = (novoValor) => {
+    onChange({
+      target: {
+        name,
+        value: novoValor
+      }
+    });
+  };
+
+  const selecionarOpcao = (opcao) => {
+    atualizarValor(opcao);
+    setAberto(false);
+  };
+
+  return (
+    <div className="campo-sugestao">
+      <label>{label}</label>
+
+      <div className={`campo-sugestao-wrapper ${aberto ? "aberto" : ""}`}>
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => {
+            atualizarValor(e.target.value);
+            setAberto(true);
+          }}
+          onFocus={() => setAberto(true)}
+          onBlur={() => {
+            setTimeout(() => setAberto(false), 150);
+          }}
+          placeholder={placeholder}
+          autoComplete="off"
+          name={`no-autocomplete-${name}`}
+          className="campo-sugestao-input"
+        />
+
+        <button
+          type="button"
+          className="campo-sugestao-seta"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            setAberto(!aberto);
+          }}
+        >
+          ▾
+        </button>
+      </div>
+
+      {aberto && (
+        <div className="sugestao-lista">
+          {opcoesFiltradas.length > 0 ? (
+            opcoesFiltradas.map((opcao) => (
+              <button
+                type="button"
+                key={opcao}
+                className="sugestao-item"
+                onMouseDown={() => selecionarOpcao(opcao)}
+              >
+                {opcao}
+              </button>
+            ))
+          ) : (
+            <div className="sugestao-vazia">
+              Novo valor: <strong>{value}</strong>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Estoque() {
   const [filtrosAbertos, setFiltrosAbertos] = useState(false);
   const [fornecedores, setFornecedores] = useState([]);
@@ -75,31 +156,45 @@ function Estoque() {
   };
 
   const filtrados = useMemo(() => {
+    return produtos
+      .filter((p) => {
+        const termo = busca.toLowerCase();
 
-    return produtos.filter((p) => {
-      const termo = busca.toLowerCase();
-      const atendeBusca =
-        p.nome_produto?.toLowerCase().includes(termo) ||
-        p.marca?.toLowerCase().includes(termo) ||
-        p.sabor?.toLowerCase().includes(termo) ||
-        p.nome_fornecedor?.toLowerCase().includes(termo);
-      const atendeCategoria = filtroCategoria.length === 0 || filtroCategoria.includes(p.nome);
-      const atendeSabor =
-        !filtroSabor ||
-        p.sabor?.toLowerCase().includes(filtroSabor.toLowerCase());
-      return atendeBusca && atendeCategoria && atendeSabor;
-    });
+        const atendeBusca =
+          p.nome_produto?.toLowerCase().includes(termo) ||
+          p.marca?.toLowerCase().includes(termo) ||
+          p.sabor?.toLowerCase().includes(termo) ||
+          p.nome_fornecedor?.toLowerCase().includes(termo);
 
+        const atendeCategoria =
+          filtroCategoria.length === 0 ||
+          filtroCategoria.includes(p.nome_categoria);
+
+        const atendeSabor =
+          !filtroSabor ||
+          p.sabor?.toLowerCase().includes(filtroSabor.toLowerCase());
+
+        return atendeBusca && atendeCategoria && atendeSabor;
+      })
+      .sort((a, b) => {
+        if (a.ativo === b.ativo) {
+          return a.nome_produto.localeCompare(b.nome_produto);
+        }
+
+        return a.ativo ? -1 : 1;
+      });
   }, [produtos, busca, filtroCategoria, filtroSabor]);
 
   const [formData, setFormData] = useState({
     nome_produto: "",
     sabor: "",
     marca: "",
-    quantidade: "",
     preco_unitario: "",
-    id_fornecedor: "",
-    id_categoria: "",
+    categoria_nome: "",
+    fornecedor_nome: "",
+    quantidade: "",
+    custo_unitario_lote: "",
+    numero_lote: "",
     data_vencimento: ""
   });
 
@@ -122,96 +217,194 @@ function Estoque() {
     return vencimento >= hoje;
   }
 
+  const nomesProdutosExistentes = [...new Set(
+    produtos.map((p) => p.nome_produto).filter(Boolean)
+  )].sort((a, b) => a.localeCompare(b));
+
+  const saboresExistentes = [...new Set(
+    produtos.map((p) => p.sabor).filter(Boolean)
+  )].sort((a, b) => a.localeCompare(b));
+
+  const marcasExistentes = [...new Set(
+    produtos.map((p) => p.marca).filter(Boolean)
+  )].sort((a, b) => a.localeCompare(b));
+
+  const categoriasOrdenadas = [...categorias].sort((a, b) =>
+    a.nome.localeCompare(b.nome)
+  );
+
+  const fornecedoresOrdenados = [...fornecedores].sort((a, b) =>
+    a.razao_social.localeCompare(b.razao_social)
+  );
+
+  async function obterOuCriarCategoria(nomeCategoria) {
+    const nome = nomeCategoria.trim();
+
+    const categoriaExistente = categorias.find(
+      (c) => c.nome.toLowerCase() === nome.toLowerCase()
+    );
+
+    if (categoriaExistente) {
+      return categoriaExistente.id_categoria;
+    }
+
+    const token = localStorage.getItem("token");
+
+    const resp = await api.post(
+      "/estoque/categorias",
+      { nome },
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+
+    await carregarCategorias();
+
+    return resp.data.id_categoria;
+  }
+
+  async function obterOuCriarFornecedor(nomeFornecedor) {
+    const nome = nomeFornecedor.trim();
+
+    const fornecedorExistente = fornecedores.find(
+      (f) => f.razao_social.toLowerCase() === nome.toLowerCase()
+    );
+
+    if (fornecedorExistente) {
+      return fornecedorExistente.id_fornecedor;
+    }
+
+    const token = localStorage.getItem("token");
+
+    const resp = await api.post(
+      "/fornecedores",
+      { razao_social: nome },
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+
+    await carregarFornecedores();
+
+    return resp.data.id_fornecedor;
+  }
+
   const salvarProduto = async () => {
     try {
       const token = localStorage.getItem("token");
 
-      if (!dataEhValida(formData.data_vencimento)) {
-        alert("Produto vencido não pode ser cadastrado");
+      if (!formData.nome_produto.trim()) {
+        alert("Informe o nome do produto.");
         return;
       }
+
+      if (!formData.categoria_nome.trim()) {
+        alert("Informe a categoria.");
+        return;
+      }
+
+      if (!formData.fornecedor_nome.trim()) {
+        alert("Informe o fornecedor da entrada inicial.");
+        return;
+      }
+
+      if (!formData.quantidade || Number(formData.quantidade) <= 0) {
+        alert("Informe uma quantidade inicial válida.");
+        return;
+      }
+
+      if (!formData.preco_unitario) {
+        alert("Informe o custo unitário padrão.");
+        return;
+      }
+
+      if (!dataEhValida(formData.data_vencimento)) {
+        alert("Produto vencido não pode ser cadastrado.");
+        return;
+      }
+
+      const idCategoria = await obterOuCriarCategoria(formData.categoria_nome);
+      const idFornecedor = await obterOuCriarFornecedor(formData.fornecedor_nome);
+
       await api.post(
         "/estoque/produtos",
         {
           nome_produto: formData.nome_produto,
           sabor: formData.sabor,
           marca: formData.marca,
-          qtdd_entrada: Number(formData.quantidade),
           preco_unitario: Number(formData.preco_unitario.replace(",", ".")),
-          id_fornecedor: formData.id_fornecedor || null,
-          id_categoria: formData.id_categoria || null,
-          data_vencimento: formData.data_vencimento || null,
+          id_categoria: idCategoria,
+
+          id_fornecedor: idFornecedor,
+          qtdd_entrada: Number(formData.quantidade),
+          valor_unitario: formData.custo_unitario_lote
+            ? Number(formData.custo_unitario_lote.replace(",", "."))
+            : Number(formData.preco_unitario.replace(",", ".")),
+          numero_lote: formData.numero_lote || null,
+          data_vencimento: formData.data_vencimento || null
         },
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${token}` }
         }
       );
 
-      // Atualiza lista
       carregarProdutos();
 
-      // Fecha modal
       setModalOpen(false);
 
-      // Limpa form
       setFormData({
         nome_produto: "",
         sabor: "",
         marca: "",
-        quantidade: "",
         preco_unitario: "",
-        id_fornecedor: "",
-        id_categoria: "",
+        categoria_nome: "",
+        fornecedor_nome: "",
+        quantidade: "",
+        custo_unitario_lote: "",
+        numero_lote: "",
         data_vencimento: ""
       });
-
     } catch (error) {
       console.error(error);
-      alert("Erro ao salvar produto");
-    }
-  };
-
-  const atualizarProduto = async () => {
-    try {
-      const token = localStorage.getItem("token");
-
-      if (!dataEhValida(formData.data_vencimento)) {
-        alert("Produto vencido não pode ser atualizado");
-        return;
-      }
-
-      await api.put(
-        `/estoque/produtos/${produtoEditando.id_produto}`,
-        {
-          nome_produto: formData.nome_produto,
-          sabor: formData.sabor,
-          marca: formData.marca,
-          preco_unitario: formData.preco_unitario
-            ? Number(formData.preco_unitario.replace(",", "."))
-            : 0,
-          id_fornecedor: formData.id_fornecedor || null,
-          id_categoria: formData.id_categoria || null,
-          data_vencimento: formData.data_vencimento || null,
-
-          // qtdd_atual: Number(formData.quantidade) || produtoEditando.qtdd_atual
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+      alert(
+        error.response?.data?.erro ||
+        error.response?.data?.detalhes ||
+        "Erro ao salvar produto."
       );
-
-      carregarProdutos();
-      setModalOpen(false);
-      setProdutoEditando(null);
-
-    } catch (error) {
-      console.error(error);
-      alert("Erro ao atualizar produto");
     }
   };
 
   const abrirDetalheProduto = (idProduto) => {
     window.open(`/estoque/produtos/${idProduto}`, "_blank");
+  };
+
+  const alterarStatusProduto = async (produto) => {
+    const acao = produto.ativo ? "ocultar" : "reativar";
+
+    const confirmar = window.confirm(
+      `Deseja ${acao} o produto "${produto.nome_produto}"?`
+    );
+
+    if (!confirmar) return;
+
+    try {
+      const token = localStorage.getItem("token");
+
+      await api.patch(
+        `/estoque/produtos/${produto.id_produto}/status`,
+        {
+          ativo: !produto.ativo
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      carregarProdutos();
+    } catch (error) {
+      console.error(error);
+      alert(`Erro ao ${acao} produto.`);
+    }
   };
 
   return (
@@ -303,10 +496,12 @@ function Estoque() {
                   nome_produto: "",
                   sabor: "",
                   marca: "",
-                  quantidade: "",
                   preco_unitario: "",
-                  id_fornecedor: "",
-                  id_categoria: "",
+                  categoria_nome: "",
+                  fornecedor_nome: "",
+                  quantidade: "",
+                  custo_unitario_lote: "",
+                  numero_lote: "",
                   data_vencimento: ""
                 });
 
@@ -320,14 +515,13 @@ function Estoque() {
 
         <div className="estoque-table">
           <div className="thead">
-            <div className="col img-col"></div>
-            <div className="col">Produto</div>
+            <div className="col produto-col">Produto</div>
             <div className="col">Categoria</div>
             <div className="col">Sabor</div>
-            <div className="col">Marca</div>
-            <div className="col">Validade</div>
-            <div className="col center">Qtd.</div>
-            <div className="col">Fornecedor</div>
+            <div className="col center">Saldo atual</div>
+            <div className="col">Próximo da validade</div>
+            <div className="col">Status</div>
+            <div className="col">Último fornecedor</div>
             <div className="col action">Ações</div>
           </div>
 
@@ -337,15 +531,39 @@ function Estoque() {
             <div className="empty">Nenhum produto encontrado.</div>
           ) : (
             filtrados.map((p) => (
-              <div className="row" key={p.id_produto}>
-                <div className="col img-col"><div className="placeholder-img"></div></div>
-                <div className="col">{p.nome_produto}</div>
-                <div className="col">{p.nome_categoria}</div>
-                <div className="col">{p.sabor}</div>
-                <div className="col">{p.marca}</div>
-                <div className="col">{formatarDataBR(p.data_vencimento)}</div>
-                <div className="col center">{p.qtdd_atual}</div>
+              <div
+                className={`row ${p.ativo === false ? "row-inativo" : ""}`}
+                key={p.id_produto}
+              >
+                <div className="col produto-col">
+                  <strong>{p.nome_produto}</strong>
+                  <span>{p.marca || "-"}</span>
+                </div>
+
+                <div className="col">{p.nome_categoria || "-"}</div>
+                <div className="col">{p.sabor || "-"}</div>
+                <div className="col center saldo-col">{p.qtdd_atual}</div>
+
+                <div className="col">
+                  {p.proxima_validade ? formatarDataBR(p.proxima_validade) : "-"}
+                </div>
+
+                <div className="col">
+                  {p.lotes_vencidos > 0 ? (
+                    <span className="status-badge vencido">
+                      {p.lotes_vencidos} vencido(s)
+                    </span>
+                  ) : p.lotes_proximos_validade > 0 ? (
+                    <span className="status-badge alerta">
+                      {p.lotes_proximos_validade} próximo(s)
+                    </span>
+                  ) : (
+                    <span className="status-badge ok">OK</span>
+                  )}
+                </div>
+
                 <div className="col">{p.nome_fornecedor || "-"}</div>
+
                 <div className="col action">
                   <button
                     className="edit-btn"
@@ -355,25 +573,10 @@ function Estoque() {
                   </button>
 
                   <button
-                    className="edit-btn"
-                    onClick={() => {
-                      setProdutoEditando(p);
-                      setFormData({
-                        nome_produto: p.nome_produto || "",
-                        sabor: p.sabor || "",
-                        marca: p.marca || "",
-                        quantidade: p.qtdd_atual || "",
-                        preco_unitario: p.preco_unitario || "",
-                        id_fornecedor: p.id_fornecedor || "",
-                        id_categoria: p.id_categoria || "",
-                        data_vencimento: p.data_vencimento
-                          ? p.data_vencimento.split("T")[0]
-                          : ""
-                      });
-                      setModalOpen(true);
-                    }}
+                    className={p.ativo ? "hide-btn" : "restore-btn"}
+                    onClick={() => alterarStatusProduto(p)}
                   >
-                    Editar
+                    {p.ativo ? "Ocultar" : "Reativar"}
                   </button>
                 </div>
               </div>
@@ -383,100 +586,123 @@ function Estoque() {
       </main>
 
 
-      {/* Adicione isso antes do fim do return */}
-
       {modalOpen && (
         <div className="modal-overlay">
-          <div className="modal-box">
+          <div className="modal-box produto-modal-box">
 
-            {/* título dinâmico */}
-            <h2>{produtoEditando ? "Editar Produto" : "Novo Produto"}</h2>
+            <div className="modal-header-produto">
+              <h2>Novo Produto</h2>
+
+              <button
+                type="button"
+                className="modal-close-x"
+                onClick={() => {
+                  setModalOpen(false);
+                  setProdutoEditando(null);
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="modal-section-title">Dados do produto</div>
 
             <div className="form-grid">
+              <CampoSugestao
+                label="Nome do produto"
+                name="nome_produto"
+                value={formData.nome_produto}
+                onChange={handleChange}
+                options={nomesProdutosExistentes}
+                placeholder="Digite ou selecione..."
+              />
+
+              <CampoSugestao
+                label="Categoria"
+                name="categoria_nome"
+                value={formData.categoria_nome}
+                onChange={handleChange}
+                options={categoriasOrdenadas.map((c) => c.nome)}
+                placeholder="Digite ou selecione..."
+              />
+
+              <CampoSugestao
+                label="Sabor"
+                name="sabor"
+                value={formData.sabor}
+                onChange={handleChange}
+                options={saboresExistentes}
+                placeholder="Digite ou selecione..."
+              />
+
+              <CampoSugestao
+                label="Marca"
+                name="marca"
+                value={formData.marca}
+                onChange={handleChange}
+                options={marcasExistentes}
+                placeholder="Digite ou selecione..."
+              />
 
               <div>
-                <label>Nome do produto</label>
-                <input
-                  name="nome_produto"
-                  value={formData.nome_produto}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div>
-                <label>Sabor</label>
-                <input
-                  name="sabor"
-                  value={formData.sabor}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div>
-                <label>Marca</label>
-                <input
-                  name="marca"
-                  value={formData.marca}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div>
-                <label>Quantidade</label>
-                <input
-                  type="number"
-                  name="quantidade"
-                  value={formData.quantidade}
-                  onChange={handleChange}
-                  disabled={produtoEditando !== null}
-                  className={produtoEditando ? "input-disabled" : ""}
-                />
-              </div>
-
-              <div>
-                <label>Preço unitário</label>
+                <label>Custo unitário padrão</label>
                 <input
                   type="text"
                   name="preco_unitario"
                   value={formData.preco_unitario}
                   onChange={handleChange}
+                  placeholder="Ex: 120.00"
+                />
+              </div>
+            </div>
+
+            <div className="modal-section-title">Entrada inicial de estoque</div>
+
+            <div className="form-grid">
+              <CampoSugestao
+                label="Fornecedor"
+                name="fornecedor_nome"
+                value={formData.fornecedor_nome}
+                onChange={handleChange}
+                options={fornecedoresOrdenados.map((f) => f.razao_social)}
+                placeholder="Digite ou selecione..."
+              />
+
+              <div>
+                <label>Número do lote</label>
+                <input
+                  type="text"
+                  name="numero_lote"
+                  value={formData.numero_lote}
+                  onChange={handleChange}
+                  placeholder="Ex: LOTE-2026-001"
                 />
               </div>
 
               <div>
-                <label>Fornecedor</label>
-                <select
-                  name="id_fornecedor"
-                  value={formData.id_fornecedor}
+                <label>Quantidade inicial</label>
+                <input
+                  type="number"
+                  name="quantidade"
+                  value={formData.quantidade}
                   onChange={handleChange}
-                >
-                  <option value="">Selecione...</option>
-                  {fornecedores.map((f) => (
-                    <option key={f.id_fornecedor} value={f.id_fornecedor}>
-                      {f.razao_social}
-                    </option>
-                  ))}
-                </select>
+                  min="1"
+                />
               </div>
 
               <div>
-                <label>Categoria</label>
-                <select
-                  name="id_categoria"
-                  value={formData.id_categoria}
+                <label>Custo unitário do lote</label>
+                <input
+                  type="text"
+                  name="custo_unitario_lote"
+                  value={formData.custo_unitario_lote}
                   onChange={handleChange}
-                >
-                  <option value="">Selecione...</option>
-                  {categorias.map((c) => (
-                    <option key={c.id_categoria} value={c.id_categoria}>
-                      {c.nome}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="Se vazio, usa o custo padrão"
+                />
               </div>
 
               <div>
-                <label>Data de vencimento</label>
+                <label>Data de vencimento do lote</label>
                 <input
                   type="date"
                   name="data_vencimento"
@@ -485,7 +711,6 @@ function Estoque() {
                   min={new Date().toISOString().split("T")[0]}
                 />
               </div>
-
             </div>
 
             <div className="modal-actions">
@@ -499,19 +724,9 @@ function Estoque() {
                 Cancelar
               </button>
 
-              <button
-                className="save-btn"
-                onClick={() => {
-                  if (produtoEditando) {
-                    atualizarProduto();
-                  } else {
-                    salvarProduto();
-                  }
-                }}
-              >
+              <button className="save-btn" onClick={salvarProduto}>
                 Salvar
               </button>
-
             </div>
 
           </div>

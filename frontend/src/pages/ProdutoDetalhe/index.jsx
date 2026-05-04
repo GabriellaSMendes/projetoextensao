@@ -244,6 +244,16 @@ function ProdutoDetalhe() {
                     </div>
 
                     <div>
+                        <span className="card-label">Sabor</span>
+                        <strong>{produto.sabor || "-"}</strong>
+                    </div>
+
+                    <div>
+                        <span className="card-label">Marca</span>
+                        <strong>{produto.marca || "-"}</strong>
+                    </div>
+
+                    <div>
                         <span className="card-label">Quantidade atual</span>
                         <strong>{produto.qtdd_atual}</strong>
                     </div>

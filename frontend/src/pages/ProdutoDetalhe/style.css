@@ -43,7 +43,7 @@
 
 .produto-card {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   background: #fff;
   border: 1px solid #ead7e9;
@@ -51,6 +51,7 @@
   padding: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   margin-bottom: 28px;
+  align-items: center;
 }
 
 .produto-card div {

@@ -11,6 +11,7 @@ import Relatorio from "./pages/Relatorio";
 import Navbar from "./components/navbar";
 import Footer from "./components/Footer/Footer";
 import ProdutoDetalhe from "./pages/ProdutoDetalhe";
+import Usuarios from "./pages/Usuarios";
 
 // ROTA PROTEGIDA
 function ProtectedRoute({ children }) {
@@ -97,6 +98,15 @@ function App() {
           element={
             <ProtectedRoute>
               <Cadastro />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/usuarios"
+          element={
+            <ProtectedRoute>
+              <Usuarios />
             </ProtectedRoute>
           }
         />

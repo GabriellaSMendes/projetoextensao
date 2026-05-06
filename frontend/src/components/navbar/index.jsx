@@ -116,11 +116,11 @@ function Navbar() {
                             {/* Só aparece para admin */}
                             {nivelAcesso === "admin" && (
                                 <Link
-                                    to="/cadastro"
+                                    to="/usuarios"
                                     className="dropdown-item"
                                     onClick={handleItemClick}
                                 >
-                                    Cadastrar usuário
+                                    Gerenciar usuários
                                 </Link>
                             )}
 

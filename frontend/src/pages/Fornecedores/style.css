@@ -23,16 +23,16 @@
   left: 0;
   width: 350px;
   min-width: 350px;
-  flex-shrink: 0;
-  /* 🔥 ESSENCIAL */
-  height: 100vh;
+  height: calc(100vh - 70px);
   background: #ffffff;
   border-right: 1px solid #e3e3e3;
   padding: 20px;
   z-index: 998;
   transition: transform 0.3s ease;
 
-  height: calc(100vh - 70px);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
 .filter-btn-toggle {
@@ -96,35 +96,46 @@
 }
 
 .filtros-actions {
+  margin-top: auto;
+  padding-top: 16px;
+  padding-bottom: 8px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+}
+
+.close-btn {
+  border: none;
+  background: transparent;
+  color: #4e1633;
+  font-size: 24px;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .btn-limpar {
+  width: 100%;
   background: #f0f0f5;
+  color: #4e1633;
   border: 1px solid #ddd;
-  padding: 10px;
-  border-radius: 6px;
+  padding: 12px;
+  border-radius: 8px;
   cursor: pointer;
+  font-weight: 700;
 }
 
 .btn-limpar:hover {
   background: #e2e2e8;
 }
 
-.filtros-header h2 {
-  font-size: 20px;
-  font-weight: bold;
-}
-
 .btn-aplicar {
+  width: 100%;
   background: #4e1633;
   color: white;
   border: none;
   padding: 12px;
   border-radius: 8px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: 0.3s;
 }
@@ -446,4 +457,91 @@
   .fornecedor-modal-actions {
     grid-template-columns: 1fr;
   }
+}
+
+/* ============================= */
+/* DROPDOWN PESQUISÁVEL FILTROS */
+/* ============================= */
+
+.campo-sugestao-filtro {
+  position: relative;
+}
+
+.campo-sugestao-filtro label {
+  display: block;
+  margin-bottom: 6px;
+  color: #4e1633;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.campo-sugestao-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 38px;
+  border: 1px solid #d2c5d3;
+  border-radius: 8px;
+  background: #faf8fb;
+  overflow: hidden;
+}
+
+.campo-sugestao-wrapper:focus-within {
+  border-color: #7b1f50;
+}
+
+.campo-sugestao-input {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  color: #333333;
+}
+
+.campo-sugestao-seta {
+  border: none;
+  border-left: 1px solid #d2c5d3;
+  background: #faf8fb;
+  color: #4e1633;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.campo-sugestao-seta:hover {
+  background: #f3e6ef;
+}
+
+.sugestao-lista {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 180px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #d2c5d3;
+  border-radius: 8px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+  z-index: 20;
+}
+
+.sugestao-item {
+  width: 100%;
+  padding: 9px 10px;
+  border: none;
+  background: #ffffff;
+  color: #4e1633;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.sugestao-item:hover {
+  background: #faf4fb;
+}
+
+.sugestao-vazia {
+  padding: 10px;
+  color: #7b1f50;
+  font-size: 13px;
 }

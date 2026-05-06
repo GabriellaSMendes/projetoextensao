@@ -3,6 +3,77 @@ import api from "../../services/api";
 import Notification from "../../components/Notification";
 import "./style.css";
 
+function CampoSugestaoFiltro({ label, value, onChange, options, placeholder }) {
+  const [aberto, setAberto] = useState(false);
+
+  const opcoesFiltradas = options
+    .filter((opcao) =>
+      opcao.toLowerCase().includes((value || "").toLowerCase())
+    )
+    .sort((a, b) => a.localeCompare(b));
+
+  const selecionarOpcao = (opcao) => {
+    onChange(opcao);
+    setAberto(false);
+  };
+
+  return (
+    <div className="campo-sugestao-filtro">
+      <label>{label}</label>
+
+      <div className={`campo-sugestao-wrapper ${aberto ? "aberto" : ""}`}>
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => {
+            onChange(e.target.value);
+            setAberto(true);
+          }}
+          onFocus={() => setAberto(true)}
+          onBlur={() => {
+            setTimeout(() => setAberto(false), 150);
+          }}
+          placeholder={placeholder}
+          autoComplete="off"
+          className="campo-sugestao-input"
+        />
+
+        <button
+          type="button"
+          className="campo-sugestao-seta"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            setAberto(!aberto);
+          }}
+        >
+          ▾
+        </button>
+      </div>
+
+      {aberto && (
+        <div className="sugestao-lista">
+          {opcoesFiltradas.length > 0 ? (
+            opcoesFiltradas.map((opcao) => (
+              <button
+                type="button"
+                key={opcao}
+                className="sugestao-item"
+                onMouseDown={() => selecionarOpcao(opcao)}
+              >
+                {opcao}
+              </button>
+            ))
+          ) : (
+            <div className="sugestao-vazia">
+              Nenhuma opção encontrada.
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Fornecedores() {
   const [fornecedores, setFornecedores] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,6 +117,22 @@ function Fornecedores() {
       (f.email || "").toLowerCase().includes(filtros.email.toLowerCase())
     );
   });
+
+  const nomesFiltro = [
+    ...new Set(fornecedores.map((f) => f.razao_social).filter(Boolean))
+  ].sort((a, b) => a.localeCompare(b));
+
+  const cnpjsFiltro = [
+    ...new Set(fornecedores.map((f) => f.cnpj).filter(Boolean))
+  ].sort((a, b) => a.localeCompare(b));
+
+  const telefonesFiltro = [
+    ...new Set(fornecedores.map((f) => f.telefone).filter(Boolean))
+  ].sort((a, b) => a.localeCompare(b));
+
+  const emailsFiltro = [
+    ...new Set(fornecedores.map((f) => f.email).filter(Boolean))
+  ].sort((a, b) => a.localeCompare(b));
 
   const carregarFornecedores = async () => {
     try {
@@ -175,45 +262,46 @@ function Fornecedores() {
           <button className="close-btn" onClick={() => setFiltroOpen(false)}>×</button>
         </div>
 
-        <div className="filtro-secao">
-          <label>Pesquisar</label>
-          <input
-            className="filtro-input"
-            placeholder="Nome ..."
-            value={filtros.nome}
-            onChange={(e) => setFiltros({ ...filtros, nome: e.target.value })}
-          />
-        </div>
-
         <div className="filtro-scroll-area">
+          <div className="filtro-secao">
+            <CampoSugestaoFiltro
+              label="Fornecedor"
+              value={filtros.nome}
+              onChange={(valor) => setFiltros({ ...filtros, nome: valor })}
+              options={nomesFiltro}
+              placeholder="Digite ou selecione..."
+            />
+          </div>
 
           <div className="filtro-secao">
-            <label>CNPJ</label>
-            <input
-              className="filtro-input"
+            <CampoSugestaoFiltro
+              label="CNPJ"
               value={filtros.cnpj}
-              onChange={(e) => setFiltros({ ...filtros, cnpj: e.target.value })}
+              onChange={(valor) => setFiltros({ ...filtros, cnpj: valor })}
+              options={cnpjsFiltro}
+              placeholder="Digite ou selecione..."
             />
           </div>
 
           <div className="filtro-secao">
-            <label>Telefone</label>
-            <input
-              className="filtro-input"
+            <CampoSugestaoFiltro
+              label="Telefone"
               value={filtros.telefone}
-              onChange={(e) => setFiltros({ ...filtros, telefone: e.target.value })}
+              onChange={(valor) => setFiltros({ ...filtros, telefone: valor })}
+              options={telefonesFiltro}
+              placeholder="Digite ou selecione..."
             />
           </div>
 
           <div className="filtro-secao">
-            <label>Email</label>
-            <input
-              className="filtro-input"
+            <CampoSugestaoFiltro
+              label="Email"
               value={filtros.email}
-              onChange={(e) => setFiltros({ ...filtros, email: e.target.value })}
+              onChange={(valor) => setFiltros({ ...filtros, email: valor })}
+              options={emailsFiltro}
+              placeholder="Digite ou selecione..."
             />
           </div>
-
         </div>
 
         <div className="filtros-actions">

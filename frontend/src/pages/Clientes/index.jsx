@@ -1,6 +1,78 @@
 import { useEffect, useState, useMemo } from "react";
 import api from "../../services/api";
+import Notification from "../../components/Notification";
 import "./style.css";
+
+function CampoSugestaoFiltro({ label, value, onChange, options, placeholder }) {
+  const [aberto, setAberto] = useState(false);
+
+  const opcoesFiltradas = options
+    .filter((opcao) =>
+      opcao.toLowerCase().includes((value || "").toLowerCase())
+    )
+    .sort((a, b) => a.localeCompare(b));
+
+  const selecionarOpcao = (opcao) => {
+    onChange(opcao);
+    setAberto(false);
+  };
+
+  return (
+    <div className="campo-sugestao-filtro">
+      <label>{label}</label>
+
+      <div className={`campo-sugestao-wrapper ${aberto ? "aberto" : ""}`}>
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => {
+            onChange(e.target.value);
+            setAberto(true);
+          }}
+          onFocus={() => setAberto(true)}
+          onBlur={() => {
+            setTimeout(() => setAberto(false), 150);
+          }}
+          placeholder={placeholder}
+          autoComplete="off"
+          className="campo-sugestao-input"
+        />
+
+        <button
+          type="button"
+          className="campo-sugestao-seta"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            setAberto(!aberto);
+          }}
+        >
+          ▾
+        </button>
+      </div>
+
+      {aberto && (
+        <div className="sugestao-lista">
+          {opcoesFiltradas.length > 0 ? (
+            opcoesFiltradas.map((opcao) => (
+              <button
+                type="button"
+                key={opcao}
+                className="sugestao-item"
+                onMouseDown={() => selecionarOpcao(opcao)}
+              >
+                {opcao}
+              </button>
+            ))
+          ) : (
+            <div className="sugestao-vazia">
+              Nenhuma opção encontrada.
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function Clientes() {
   const [clientes, setClientes] = useState([]);
@@ -11,6 +83,20 @@ function Clientes() {
   const [filtroNomeCpf, setFiltroNomeCpf] = useState("");
   const [filtroTelefone, setFiltroTelefone] = useState("");
   const [filtroEmail, setFiltroEmail] = useState("");
+  const [filtroEndereco, setFiltroEndereco] = useState("");
+
+  const [notification, setNotification] = useState({
+    message: "",
+    type: "success"
+  });
+
+  function mostrarNotificacao(message, type = "success") {
+    setNotification({ message, type });
+
+    setTimeout(() => {
+      setNotification({ message: "", type: "success" });
+    }, 3500);
+  }
 
   const [formData, setFormData] = useState({
     razao_social: "",
@@ -46,53 +132,81 @@ function Clientes() {
   };
 
   const salvarCliente = async () => {
+    if (!formData.razao_social.trim()) {
+      mostrarNotificacao("Informe a razão social do cliente.", "warning");
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
 
-      await api.post("/clientes", formData, {
+      const payload = {
+        razao_social: formData.razao_social.trim(),
+        cpf_cnpj: formData.cpf_cnpj.trim() || null,
+        telefone: formData.telefone.trim() || null,
+        email: formData.email.trim() || null,
+        endereco: formData.endereco.trim() || null
+      };
+
+      await api.post("/clientes", payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
       carregarClientes();
+
       setModalOpen(false);
       limparForm();
+
+      mostrarNotificacao("Cliente cadastrado com sucesso.", "success");
     } catch (error) {
       console.error(error);
-      alert("Erro ao salvar cliente");
+
+      mostrarNotificacao(
+        error.response?.data?.erro ||
+        error.response?.data?.detalhes ||
+        "Erro ao salvar cliente.",
+        "error"
+      );
     }
   };
 
   const atualizarCliente = async () => {
+    if (!formData.razao_social.trim()) {
+      mostrarNotificacao("Informe a razão social do cliente.", "warning");
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
 
-      await api.put(`/clientes/${clienteEditando.id_cliente}`, formData, {
+      const payload = {
+        razao_social: formData.razao_social.trim(),
+        cpf_cnpj: formData.cpf_cnpj.trim() || null,
+        telefone: formData.telefone.trim() || null,
+        email: formData.email.trim() || null,
+        endereco: formData.endereco.trim() || null
+      };
+
+      await api.put(`/clientes/${clienteEditando.id_cliente}`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
       carregarClientes();
+
       setModalOpen(false);
       setClienteEditando(null);
+      limparForm();
+
+      mostrarNotificacao("Cliente atualizado com sucesso.", "success");
     } catch (error) {
       console.error(error);
-      alert("Erro ao atualizar cliente");
-    }
-  };
 
-  const deletarCliente = async (id) => {
-    if (!window.confirm("Deseja excluir este cliente?")) return;
-
-    try {
-      const token = localStorage.getItem("token");
-
-      await api.delete(`/clientes/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      carregarClientes();
-    } catch (error) {
-      console.error(error);
-      alert("Erro ao excluir cliente");
+      mostrarNotificacao(
+        error.response?.data?.erro ||
+        error.response?.data?.detalhes ||
+        "Erro ao atualizar cliente.",
+        "error"
+      );
     }
   };
 
@@ -109,9 +223,10 @@ function Clientes() {
   const clientesFiltrados = useMemo(() => {
     return clientes.filter((c) => {
 
-      const nomeCpf = filtroNomeCpf.toLowerCase();
-      const telefone = filtroTelefone.toLowerCase();
-      const email = filtroEmail.toLowerCase();
+      const nomeCpf = filtroNomeCpf.toLowerCase().trim();
+      const telefone = filtroTelefone.toLowerCase().trim();
+      const email = filtroEmail.toLowerCase().trim();
+      const endereco = filtroEndereco.toLowerCase().trim();
 
       const filtroNomeCpfOk =
         !nomeCpf ||
@@ -126,16 +241,42 @@ function Clientes() {
         !email ||
         c.email?.toLowerCase().includes(email);
 
+      const filtroEnderecoOk =
+        !endereco ||
+        c.endereco?.toLowerCase().includes(endereco);
+
       return (
         filtroNomeCpfOk &&
         filtroTelefoneOk &&
-        filtroEmailOk
+        filtroEmailOk &&
+        filtroEnderecoOk
       );
     });
-  }, [clientes, filtroNomeCpf, filtroTelefone, filtroEmail]);
+  }, [clientes, filtroNomeCpf, filtroTelefone, filtroEmail, filtroEndereco]);
+
+  const telefonesFiltro = [
+    ...new Set(clientes.map((c) => c.telefone).filter(Boolean))
+  ].sort((a, b) => a.localeCompare(b));
+
+  const emailsFiltro = [
+    ...new Set(clientes.map((c) => c.email).filter(Boolean))
+  ].sort((a, b) => a.localeCompare(b));
+
+  const enderecosFiltro = [
+    ...new Set(clientes.map((c) => c.endereco).filter(Boolean))
+  ].sort((a, b) => a.localeCompare(b));
+
+  const clientesFiltro = [
+    ...new Set(clientes.map((c) => c.razao_social).filter(Boolean))
+  ].sort((a, b) => a.localeCompare(b));
 
   return (
     <div className="clientes-container">
+      <Notification
+        message={notification.message}
+        type={notification.type}
+        onClose={() => setNotification({ message: "", type: "success" })}
+      />
 
 
 
@@ -147,35 +288,42 @@ function Clientes() {
 
         <div className="filtro-scroll-area">
           <div className="filtro-secao">
-            <label>Nome ou CPF</label>
-            <input
-              type="text"
-              className="filtro-input"
-              placeholder="Digite nome ou CPF..."
+            <CampoSugestaoFiltro
+              label="Cliente ou CPF/CNPJ"
               value={filtroNomeCpf}
-              onChange={(e) => setFiltroNomeCpf(e.target.value)}
+              onChange={setFiltroNomeCpf}
+              options={clientesFiltro}
+              placeholder="Digite ou selecione..."
             />
           </div>
 
           <div className="filtro-secao">
-            <label>Telefone</label>
-            <input
-              type="text"
-              className="filtro-input"
-              placeholder="Digite o telefone..."
+            <CampoSugestaoFiltro
+              label="Endereço"
+              value={filtroEndereco}
+              onChange={setFiltroEndereco}
+              options={enderecosFiltro}
+              placeholder="Digite ou selecione..."
+            />
+          </div>
+
+          <div className="filtro-secao">
+            <CampoSugestaoFiltro
+              label="Telefone"
               value={filtroTelefone}
-              onChange={(e) => setFiltroTelefone(e.target.value)}
+              onChange={setFiltroTelefone}
+              options={telefonesFiltro}
+              placeholder="Digite ou selecione..."
             />
           </div>
 
           <div className="filtro-secao">
-            <label>Email</label>
-            <input
-              type="text"
-              className="filtro-input"
-              placeholder="Digite o email..."
+            <CampoSugestaoFiltro
+              label="Email"
               value={filtroEmail}
-              onChange={(e) => setFiltroEmail(e.target.value)}
+              onChange={setFiltroEmail}
+              options={emailsFiltro}
+              placeholder="Digite ou selecione..."
             />
           </div>
         </div>
@@ -187,6 +335,7 @@ function Clientes() {
               setFiltroNomeCpf("");
               setFiltroTelefone("");
               setFiltroEmail("");
+              setFiltroEndereco("");
             }}
           >
             Limpar Filtros
@@ -245,12 +394,13 @@ function Clientes() {
 
         <div className="clientes-table">
           <div className="thead">
-            <div>Razão Social</div>
-            <div>CPF/CNPJ</div>
-            <div>Telefone</div>
-            <div>Email</div>
-            <div>Endereço</div>
-            <div>Ações</div>
+            <div className="col">Cliente</div>
+            <div className="col">CPF/CNPJ</div>
+            <div className="col">Telefone</div>
+            <div className="col">Email</div>
+            <div className="col">Endereço</div>
+            <div className="col">Última compra</div>
+            <div className="col action">Ações</div>
           </div>
 
           {loading ? (
@@ -260,25 +410,36 @@ function Clientes() {
           ) : (
             clientesFiltrados.map((c) => (
               <div className="row" key={c.id_cliente}>
-                <div>{c.razao_social}</div>
-                <div>{c.cpf_cnpj}</div>
-                <div>{c.telefone}</div>
-                <div>{c.email}</div>
-                <div>{c.endereco}</div>
+                <div className="col cliente-col">
+                  <strong>{c.razao_social || "-"}</strong>
+                  <span>Cadastrado em {c.dt_cadastro ? new Date(c.dt_cadastro).toLocaleDateString("pt-BR") : "-"}</span>
+                </div>
 
-                <div className="actions">
+                <div className="col">{c.cpf_cnpj || "-"}</div>
+                <div className="col">{c.telefone || "-"}</div>
+                <div className="col">{c.email || "-"}</div>
+                <div className="col">{c.endereco || "-"}</div>
+
+                <div className="col">
+                  {c.ultima_compra_texto || "Sem compras"}
+                </div>
+
+                <div className="col action">
                   <button
+                    className="edit-btn"
                     onClick={() => {
                       setClienteEditando(c);
-                      setFormData(c);
+                      setFormData({
+                        razao_social: c.razao_social || "",
+                        cpf_cnpj: c.cpf_cnpj || "",
+                        telefone: c.telefone || "",
+                        email: c.email || "",
+                        endereco: c.endereco || ""
+                      });
                       setModalOpen(true);
                     }}
                   >
                     Editar
-                  </button>
-
-                  <button onClick={() => deletarCliente(c.id_cliente)}>
-                    Excluir
                   </button>
                 </div>
               </div>
@@ -292,27 +453,109 @@ function Clientes() {
 
 
       {modalOpen && (
-        <div className="modal">
-          <div className="modal-box">
-            <h2>{clienteEditando ? "Editar Cliente" : "Novo Cliente"}</h2>
+        <div className="modal-overlay">
+          <div className="modal-box cliente-modal-box">
+            <div className="modal-header-cliente">
+              <div>
+                <h2>{clienteEditando ? "Editar cliente" : "Novo cliente"}</h2>
+                <p>
+                  Cadastre os dados principais do cliente para registrar vendas e acompanhar o histórico de compras.
+                </p>
+              </div>
 
-            <input name="razao_social" placeholder="Razão Social" value={formData.razao_social} onChange={handleChange} />
-            <input name="cpf_cnpj" placeholder="CPF/CNPJ" value={formData.cpf_cnpj} onChange={handleChange} />
-            <input name="telefone" placeholder="Telefone" value={formData.telefone} onChange={handleChange} />
-            <input name="email" placeholder="Email" value={formData.email} onChange={handleChange} />
-            <input name="endereco" placeholder="Endereço" value={formData.endereco} onChange={handleChange} />
+              <button
+                type="button"
+                className="modal-close-x"
+                onClick={() => {
+                  setModalOpen(false);
+                  setClienteEditando(null);
+                  limparForm();
+                }}
+              >
+                ×
+              </button>
+            </div>
 
-            <div className="modal-actions">
-              <button onClick={() => setModalOpen(false)}>Cancelar</button>
+            <div className="modal-section-title">Dados do cliente</div>
 
-              <button onClick={() => {
-                if (clienteEditando) {
-                  atualizarCliente();
-                } else {
-                  salvarCliente();
-                }
-              }}>
-                Salvar
+            <div className="form-grid cliente-form-grid">
+              <div>
+                <label>Razão Social</label>
+                <input
+                  name="razao_social"
+                  value={formData.razao_social}
+                  onChange={handleChange}
+                  placeholder="Ex: João Sorveteiro"
+                />
+              </div>
+
+              <div>
+                <label>CPF/CNPJ</label>
+                <input
+                  name="cpf_cnpj"
+                  value={formData.cpf_cnpj}
+                  onChange={handleChange}
+                  placeholder="Opcional"
+                />
+              </div>
+
+              <div>
+                <label>Telefone</label>
+                <input
+                  name="telefone"
+                  value={formData.telefone}
+                  onChange={handleChange}
+                  placeholder="Opcional"
+                />
+              </div>
+
+              <div>
+                <label>Email</label>
+                <input
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="cliente@email.com"
+                />
+              </div>
+
+              <div className="cliente-campo-endereco">
+                <label>Endereço</label>
+                <input
+                  name="endereco"
+                  value={formData.endereco}
+                  onChange={handleChange}
+                  placeholder="Opcional"
+                />
+              </div>
+            </div>
+
+            <div className="modal-actions cliente-modal-actions">
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={() => {
+                  setModalOpen(false);
+                  setClienteEditando(null);
+                  limparForm();
+                }}
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                className="save-btn"
+                onClick={() => {
+                  if (clienteEditando) {
+                    atualizarCliente();
+                  } else {
+                    salvarCliente();
+                  }
+                }}
+              >
+                {clienteEditando ? "Salvar alterações" : "Cadastrar cliente"}
               </button>
             </div>
           </div>

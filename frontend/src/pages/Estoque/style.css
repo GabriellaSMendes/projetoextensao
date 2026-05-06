@@ -619,14 +619,16 @@
 }
 
 .campo-sugestao-seta {
-  position: absolute;
-  right: 10px;
-  background: transparent;
   border: none;
+  border-left: 1px solid #d2c5d3;
+  background: #faf8fb;
   color: #4e1633;
-  font-size: 16px;
   cursor: pointer;
-  padding: 2px 4px;
+  font-weight: 700;
+}
+
+.campo-sugestao-seta:hover {
+  background: #f3e6ef;
 }
 
 .sugestao-lista {

@@ -270,26 +270,42 @@
 }
 
 .checkbox-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: 16px 1fr;
   align-items: center;
-  gap: 8px;
+  column-gap: 10px;
+  min-height: 28px;
 }
-
-
-.checkbox-item label {
-  font-weight: 400;
-  font-size: 13px;
-  color: #555;
-  margin: 0;
-  cursor: pointer;
-}
-
 
 .checkbox-item input[type="checkbox"] {
-  accent-color: #4e1633; /* Cor do check combinando com o tema */
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  align-self: center;
+  accent-color: #4e1633;
   cursor: pointer;
 }
 
+.checkbox-list .checkbox-item label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  line-height: 15px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #4e1633;
+  cursor: pointer;
+}
+
+.checkbox-list .checkbox-item label span {
+  color: #999;
+  font-size: 11px;
+  line-height: 15px;
+  margin-left: 2px;
+}
 
 .filtros-actions {
   margin-top: auto; /* Joga os botões para o final do painel */
@@ -329,19 +345,6 @@
   border: 1px solid #eee;
   max-height: 200px;
   overflow-y: auto;
-}
-
-
-.checkbox-item label {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-}
-
-
-.checkbox-item label span {
-  color: #999;
-  font-size: 11px;
 }
 
 /* COMPLEMENTO: Ajuste na Sidebar para animação suave */
@@ -672,4 +675,60 @@
 .sugestao-lista::-webkit-scrollbar-thumb {
   background: #d8c5d1;
   border-radius: 999px;
+}
+
+.row-estoque-baixo {
+  background: #faf7fb !important;
+}
+
+.row-estoque-baixo:hover {
+  background: #f4edf6 !important;
+}
+
+.saldo-col {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.estoque-badge {
+  display: inline-block;
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.estoque-badge.baixo {
+  background: #e9e1ee;
+  color: #4e1633;
+  border: 1px solid #d4c2dd;
+}
+
+.produto-nome-linha {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.produto-nome-linha strong {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.produto-nome-linha .estoque-badge {
+  flex-shrink: 0;
+}
+
+.produto-col .estoque-badge.baixo {
+  background: #e9e1ee;
+  color: #4e1633;
+  border: 1px solid #d4c2dd;
+  font-size: 10.5px;
 }

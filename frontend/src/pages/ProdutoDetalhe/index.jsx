@@ -179,6 +179,24 @@ function ProdutoDetalhe() {
         return dias !== null && dias < 0;
     });
 
+    const estoqueTotal = lotesDisponiveis.reduce((total, lote) => {
+        return total + (Number(lote.qtdd_disponivel) || 0);
+    }, 0);
+
+    const proximaValidade = lotesDisponiveis
+        .filter((ab) => {
+            const dias = calcularDiasAteVencimento(ab.data_vencimento);
+            return dias !== null && dias >= 0;
+        })
+        .sort(
+            (a, b) =>
+                new Date(a.data_vencimento) - new Date(b.data_vencimento)
+        )[0]?.data_vencimento;
+
+    const quantidadeVencida = lotesVencidos.reduce((total, lote) => {
+        return total + (Number(lote.qtdd_disponivel) || 0);
+    }, 0);
+
     const lotesProximosVencimento = lotesDisponiveis.filter((ab) => {
         const dias = calcularDiasAteVencimento(ab.data_vencimento);
         return dias !== null && dias >= 0 && dias <= 45;
@@ -254,7 +272,7 @@ function ProdutoDetalhe() {
                     </div>
 
                     <div>
-                        <span className="card-label">Quantidade atual</span>
+                        <span className="card-label">Estoque atual</span>
                         <strong>{produto.qtdd_atual}</strong>
                     </div>
 

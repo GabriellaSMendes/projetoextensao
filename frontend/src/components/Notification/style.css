@@ -1,0 +1,68 @@
+.notification {
+  position: fixed;
+  top: 90px;
+  right: 24px;
+  z-index: 2000;
+
+  min-width: 280px;
+  max-width: 380px;
+
+  padding: 14px 16px;
+  border-radius: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  animation: slideIn 0.25s ease;
+}
+
+.notification-success {
+  background: #e8f7ee;
+  color: #1f6f3f;
+  border-left: 5px solid #2e9f5b;
+}
+
+.notification-error {
+  background: #fdecec;
+  color: #8a1020;
+  border-left: 5px solid #b30000;
+}
+
+.notification-warning {
+  background: #fff8e6;
+  color: #7a5a00;
+  border-left: 5px solid #ffd262;
+}
+
+.notification-info {
+  background: #f3e6ef;
+  color: #4e1633;
+  border-left: 5px solid #7b1f50;
+}
+
+.notification-close {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  color: inherit;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

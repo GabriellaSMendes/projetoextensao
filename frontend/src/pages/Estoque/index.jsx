@@ -1,5 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import api from "../../services/api";
+import Notification from "../../components/Notification";
+import ConfirmModal from "../../components/ConfirmModal";
 import "./style.css";
 
 
@@ -13,6 +15,12 @@ function formatarDataBR(data) {
   const partes = data.split("-");
   if (partes.length !== 3) return data;
   return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+
+const LIMITE_ESTOQUE_BAIXO = 20;
+
+function produtoComEstoqueBaixo(produto) {
+  return Number(produto.qtdd_atual) > 0 && Number(produto.qtdd_atual) <= LIMITE_ESTOQUE_BAIXO;
 }
 
 function CampoSugestao({ label, name, value, onChange, options, placeholder }) {
@@ -101,12 +109,30 @@ function Estoque() {
   const [fornecedores, setFornecedores] = useState([]);
   const [filtroCategoria, setFiltroCategoria] = useState([]);
   const [filtroSabor, setFiltroSabor] = useState("");
+  const [filtroMarca, setFiltroMarca] = useState("");
+  const [filtroFornecedor, setFiltroFornecedor] = useState("");
+  const [filtroStatus, setFiltroStatus] = useState([]);
   const [produtos, setProdutos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [busca, setBusca] = useState("");
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [produtoEditando, setProdutoEditando] = useState(null);
+  const [confirmModal, setConfirmModal] = useState({
+    aberto: false,
+    produto: null
+  });
+  const [notification, setNotification] = useState({
+    message: "",
+    type: "success"
+  });
+  function mostrarNotificacao(message, type = "success") {
+    setNotification({ message, type });
+
+    setTimeout(() => {
+      setNotification({ message: "", type: "success" });
+    }, 3500);
+  }
   const carregarProdutos = async () => {
 
     try {
@@ -155,15 +181,33 @@ function Estoque() {
     setLista(lista.includes(item) ? lista.filter(i => i !== item) : [...lista, item]);
   };
 
+  const categoriasFiltro = [...new Set(
+    produtos.map((p) => p.nome_categoria).filter(Boolean)
+  )].sort((a, b) => a.localeCompare(b));
+
+  const saboresFiltro = [...new Set(
+    produtos.map((p) => p.sabor).filter(Boolean)
+  )].sort((a, b) => a.localeCompare(b));
+
+  const marcasFiltro = [...new Set(
+    produtos.map((p) => p.marca).filter(Boolean)
+  )].sort((a, b) => a.localeCompare(b));
+
+  const fornecedoresFiltro = [...new Set(
+    produtos.map((p) => p.nome_fornecedor).filter(Boolean)
+  )].sort((a, b) => a.localeCompare(b));
+
   const filtrados = useMemo(() => {
     return produtos
       .filter((p) => {
-        const termo = busca.toLowerCase();
+        const termo = busca.toLowerCase().trim();
 
         const atendeBusca =
+          !termo ||
           p.nome_produto?.toLowerCase().includes(termo) ||
           p.marca?.toLowerCase().includes(termo) ||
           p.sabor?.toLowerCase().includes(termo) ||
+          p.nome_categoria?.toLowerCase().includes(termo) ||
           p.nome_fornecedor?.toLowerCase().includes(termo);
 
         const atendeCategoria =
@@ -174,7 +218,47 @@ function Estoque() {
           !filtroSabor ||
           p.sabor?.toLowerCase().includes(filtroSabor.toLowerCase());
 
-        return atendeBusca && atendeCategoria && atendeSabor;
+        const atendeMarca =
+          !filtroMarca ||
+          p.marca?.toLowerCase().includes(filtroMarca.toLowerCase());
+
+        const atendeFornecedor =
+          !filtroFornecedor ||
+          p.nome_fornecedor?.toLowerCase().includes(filtroFornecedor.toLowerCase());
+
+        const statusProduto = [];
+
+        if (p.lotes_vencidos > 0) {
+          statusProduto.push("vencido");
+        }
+
+        if (p.lotes_vencidos <= 0 && p.lotes_proximos_validade > 0) {
+          statusProduto.push("proximo_validade");
+        }
+
+        if (produtoComEstoqueBaixo(p)) {
+          statusProduto.push("estoque_baixo");
+        }
+
+        if (
+          p.lotes_vencidos <= 0 &&
+          p.lotes_proximos_validade <= 0 &&
+          !produtoComEstoqueBaixo(p)
+        ) {
+          statusProduto.push("ok");
+        }
+
+        const atendeStatus =
+          filtroStatus.length === 0 ||
+          filtroStatus.some((status) => statusProduto.includes(status));
+        return (
+          atendeBusca &&
+          atendeCategoria &&
+          atendeSabor &&
+          atendeMarca &&
+          atendeFornecedor &&
+          atendeStatus
+        );
       })
       .sort((a, b) => {
         if (a.ativo === b.ativo) {
@@ -183,7 +267,15 @@ function Estoque() {
 
         return a.ativo ? -1 : 1;
       });
-  }, [produtos, busca, filtroCategoria, filtroSabor]);
+  }, [
+    produtos,
+    busca,
+    filtroCategoria,
+    filtroSabor,
+    filtroMarca,
+    filtroFornecedor,
+    filtroStatus
+  ]);
 
   const [formData, setFormData] = useState({
     nome_produto: "",
@@ -294,32 +386,32 @@ function Estoque() {
       const token = localStorage.getItem("token");
 
       if (!formData.nome_produto.trim()) {
-        alert("Informe o nome do produto.");
+        mostrarNotificacao("Informe o nome do produto.", "warning");
         return;
       }
 
       if (!formData.categoria_nome.trim()) {
-        alert("Informe a categoria.");
+        mostrarNotificacao("Informe a categoria.", "warning");
         return;
       }
 
       if (!formData.fornecedor_nome.trim()) {
-        alert("Informe o fornecedor da entrada inicial.");
+        mostrarNotificacao("Informe o fornecedor da entrada inicial.", "warning");
         return;
       }
 
       if (!formData.quantidade || Number(formData.quantidade) <= 0) {
-        alert("Informe uma quantidade inicial válida.");
+        mostrarNotificacao("Informe uma quantidade inicial válida.", "warning");
         return;
       }
 
       if (!formData.preco_unitario) {
-        alert("Informe o custo unitário padrão.");
+        mostrarNotificacao("Informe o custo unitário padrão.", "warning");
         return;
       }
 
       if (!dataEhValida(formData.data_vencimento)) {
-        alert("Produto vencido não pode ser cadastrado.");
+        mostrarNotificacao("Produto vencido não pode ser cadastrado.", "warning");
         return;
       }
 
@@ -364,12 +456,16 @@ function Estoque() {
         numero_lote: "",
         data_vencimento: ""
       });
+
+      mostrarNotificacao("Produto salvo com sucesso.", "success");
+
     } catch (error) {
       console.error(error);
-      alert(
+      mostrarNotificacao(
         error.response?.data?.erro ||
         error.response?.data?.detalhes ||
-        "Erro ao salvar produto."
+        "Erro ao salvar produto.",
+        "error"
       );
     }
   };
@@ -378,14 +474,18 @@ function Estoque() {
     window.open(`/estoque/produtos/${idProduto}`, "_blank");
   };
 
-  const alterarStatusProduto = async (produto) => {
+  const abrirConfirmacaoStatusProduto = (produto) => {
+    setConfirmModal({
+      aberto: true,
+      produto
+    });
+  };
+
+  const alterarStatusProduto = async () => {
+    const produto = confirmModal.produto;
+    if (!produto) return;
+
     const acao = produto.ativo ? "ocultar" : "reativar";
-
-    const confirmar = window.confirm(
-      `Deseja ${acao} o produto "${produto.nome_produto}"?`
-    );
-
-    if (!confirmar) return;
 
     try {
       const token = localStorage.getItem("token");
@@ -400,16 +500,34 @@ function Estoque() {
         }
       );
 
+      setConfirmModal({
+        aberto: false,
+        produto: null
+      });
+
       carregarProdutos();
+
+      mostrarNotificacao(
+        produto.ativo
+          ? "Produto ocultado com sucesso."
+          : "Produto reativado com sucesso.",
+        "success"
+      );
     } catch (error) {
       console.error(error);
-      alert(`Erro ao ${acao} produto.`);
+
+      mostrarNotificacao(`Erro ao ${acao} produto.`, "error");
     }
   };
 
   return (
 
     <div className="estoque-container">
+      <Notification
+        message={notification.message}
+        type={notification.type}
+        onClose={() => setNotification({ message: "", type: "success" })}
+      />
       <aside className={`filtros-avancados ${filtrosAbertos ? "aberto" : "fechado"}`}>
         <div className="filtros-header">
           <h2>Filtros Avançados</h2>
@@ -422,47 +540,136 @@ function Estoque() {
             <input
               type="text"
               className="filtro-input"
-              placeholder="Produto ou marca..."
+              placeholder="Produto, marca, sabor, categoria ou fornecedor..."
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
             />
           </div>
 
           <div className="filtro-secao">
+            <label>Status</label>
+            <div className="checkbox-list">
+              <div className="checkbox-item">
+                <input
+                  type="checkbox"
+                  id="status-vencido"
+                  checked={filtroStatus.includes("vencido")}
+                  onChange={() =>
+                    toggleFiltro(filtroStatus, "vencido", setFiltroStatus)
+                  }
+                />
+                <label htmlFor="status-vencido">Vencido</label>
+              </div>
+
+              <div className="checkbox-item">
+                <input
+                  type="checkbox"
+                  id="status-proximo"
+                  checked={filtroStatus.includes("proximo_validade")}
+                  onChange={() =>
+                    toggleFiltro(filtroStatus, "proximo_validade", setFiltroStatus)
+                  }
+                />
+                <label htmlFor="status-proximo">Próximo da validade</label>
+              </div>
+
+              <div className="checkbox-item">
+                <input
+                  type="checkbox"
+                  id="status-baixo"
+                  checked={filtroStatus.includes("estoque_baixo")}
+                  onChange={() =>
+                    toggleFiltro(filtroStatus, "estoque_baixo", setFiltroStatus)
+                  }
+                />
+                <label htmlFor="status-baixo">Estoque baixo</label>
+              </div>
+
+              <div className="checkbox-item">
+                <input
+                  type="checkbox"
+                  id="status-ok"
+                  checked={filtroStatus.includes("ok")}
+                  onChange={() =>
+                    toggleFiltro(filtroStatus, "ok", setFiltroStatus)
+                  }
+                />
+                <label htmlFor="status-ok">OK</label>
+              </div>
+            </div>
+          </div>
+
+          <div className="filtro-secao">
             <label>Categorias</label>
             <div className="checkbox-list">
-              {categorias.map((c) => (
-                <div key={c.id_categoria} className="checkbox-item">
+              {categoriasFiltro.map((categoria) => (
+                <div key={categoria} className="checkbox-item">
                   <input
                     type="checkbox"
-                    id={`cat-${c.id_categoria}`}
-                    checked={filtroCategoria.includes(c.nome)}
-                    onChange={() => toggleFiltro(filtroCategoria, c.nome, setFiltroCategoria)}
+                    id={`cat-${categoria}`}
+                    checked={filtroCategoria.includes(categoria)}
+                    onChange={() =>
+                      toggleFiltro(filtroCategoria, categoria, setFiltroCategoria)
+                    }
                   />
 
-                  <label htmlFor={`cat-${c.id_categoria}`}>
-                    {c.nome} <span>({produtos.filter(p => p.nome === c.nome).length})</span>
+                  <label htmlFor={`cat-${categoria}`}>
+                    {categoria}
+                    <span>
+                      ({produtos.filter((p) => p.nome_categoria === categoria).length})
+                    </span>
                   </label>
                 </div>
               ))}
             </div>
           </div>
 
-
           <div className="filtro-secao">
-            <label>Sabor</label>
-            <input
-              type="text"
-              className="filtro-input"
-              placeholder="Digite o sabor..."
+            <CampoSugestao
+              label="Sabor"
+              name="filtroSabor"
               value={filtroSabor}
               onChange={(e) => setFiltroSabor(e.target.value)}
+              options={saboresFiltro}
+              placeholder="Digite ou selecione..."
+            />
+          </div>
+
+          <div className="filtro-secao">
+            <CampoSugestao
+              label="Marca"
+              name="filtroMarca"
+              value={filtroMarca}
+              onChange={(e) => setFiltroMarca(e.target.value)}
+              options={marcasFiltro}
+              placeholder="Digite ou selecione..."
+            />
+          </div>
+
+          <div className="filtro-secao">
+            <CampoSugestao
+              label="Fornecedor"
+              name="filtroFornecedor"
+              value={filtroFornecedor}
+              onChange={(e) => setFiltroFornecedor(e.target.value)}
+              options={fornecedoresFiltro}
+              placeholder="Digite ou selecione..."
             />
           </div>
         </div>
 
         <div className="filtros-actions">
-          <button className="btn-limpar" onClick={() => { setFiltroCategoria([]); setFiltroSabor(""); setBusca(""); }}>
+          <button
+            className="btn-limpar"
+            onClick={() => {
+              setFiltroCategoria([]);
+              setFiltroSabor("");
+              setFiltroMarca("");
+              setFiltroFornecedor("");
+              setFiltroStatus([]);
+              setBusca("");
+            }}
+          >
             Limpar Filtros
           </button>
 
@@ -518,8 +725,8 @@ function Estoque() {
             <div className="col produto-col">Produto</div>
             <div className="col">Categoria</div>
             <div className="col">Sabor</div>
-            <div className="col center">Saldo atual</div>
-            <div className="col">Próximo da validade</div>
+            <div className="col center">Qtd. atual</div>
+            <div className="col">Próxima validade</div>
             <div className="col">Status</div>
             <div className="col">Último fornecedor</div>
             <div className="col action">Ações</div>
@@ -532,11 +739,21 @@ function Estoque() {
           ) : (
             filtrados.map((p) => (
               <div
-                className={`row ${p.ativo === false ? "row-inativo" : ""}`}
+                className={`row 
+                    ${p.ativo === false ? "row-inativo" : ""} 
+                    ${produtoComEstoqueBaixo(p) ? "row-estoque-baixo" : ""}
+                  `}
                 key={p.id_produto}
               >
                 <div className="col produto-col">
-                  <strong>{p.nome_produto}</strong>
+                  <div className="produto-nome-linha">
+                    <strong>{p.nome_produto}</strong>
+
+                    {produtoComEstoqueBaixo(p) && (
+                      <span className="estoque-badge baixo">estoque baixo</span>
+                    )}
+                  </div>
+
                   <span>{p.marca || "-"}</span>
                 </div>
 
@@ -574,7 +791,7 @@ function Estoque() {
 
                   <button
                     className={p.ativo ? "hide-btn" : "restore-btn"}
-                    onClick={() => alterarStatusProduto(p)}
+                    onClick={() => abrirConfirmacaoStatusProduto(p)}
                   >
                     {p.ativo ? "Ocultar" : "Reativar"}
                   </button>
@@ -645,7 +862,7 @@ function Estoque() {
               />
 
               <div>
-                <label>Custo unitário padrão</label>
+                <label>Custo unitário</label>
                 <input
                   type="text"
                   name="preco_unitario"
@@ -691,17 +908,6 @@ function Estoque() {
               </div>
 
               <div>
-                <label>Custo unitário do lote</label>
-                <input
-                  type="text"
-                  name="custo_unitario_lote"
-                  value={formData.custo_unitario_lote}
-                  onChange={handleChange}
-                  placeholder="Se vazio, usa o custo padrão"
-                />
-              </div>
-
-              <div>
                 <label>Data de vencimento do lote</label>
                 <input
                   type="date"
@@ -731,6 +937,23 @@ function Estoque() {
 
           </div>
         </div>
+      )}
+      {confirmModal.aberto && confirmModal.produto && (
+        <ConfirmModal
+          title={confirmModal.produto.ativo ? "Ocultar produto" : "Reativar produto"}
+          message={`Deseja ${confirmModal.produto.ativo ? "ocultar" : "reativar"
+            } o produto "${confirmModal.produto.nome_produto}"?`}
+          confirmText={confirmModal.produto.ativo ? "Ocultar" : "Reativar"}
+          cancelText="Cancelar"
+          type={confirmModal.produto.ativo ? "warning" : "info"}
+          onConfirm={alterarStatusProduto}
+          onCancel={() =>
+            setConfirmModal({
+              aberto: false,
+              produto: null
+            })
+          }
+        />
       )}
     </div>
   );

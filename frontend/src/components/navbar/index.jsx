@@ -1,7 +1,7 @@
 import logo from "../../assets/logo.png";
 import iconLogo from "../../assets/icon-logo.png";
 import "./style.css";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { FaUserCircle, FaSignOutAlt } from "react-icons/fa";
 import { useState, useRef, useEffect } from "react";
 
@@ -48,16 +48,51 @@ function Navbar() {
             </div>
 
             <nav className="navbar-menu">
-                <Link to="/home" className="nav-link">Home</Link>
-                <Link to="/estoque" className="nav-link">Estoque</Link>
-                <Link to="/clientes" className="nav-link">Clientes</Link>
-                <Link to="/home">
+                <NavLink
+                    to="/home"
+                    className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+                >
+                    Home
+                </NavLink>
+
+                <NavLink
+                    to="/estoque"
+                    className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+                >
+                    Estoque
+                </NavLink>
+
+                <NavLink
+                    to="/clientes"
+                    className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+                >
+                    Clientes
+                </NavLink>
+
+                <Link to="/home" className="navbar-sun-link">
                     <img src={iconLogo} alt="Home" className="navbar-sun" />
                 </Link>
-                <Link to="/fornecedores" className="nav-link">Fornecedores</Link>
-                <Link to="/vendas" className="nav-link">Vendas</Link>
 
-                <Link to="/relatorio" className="nav-link">Relatório</Link>
+                <NavLink
+                    to="/fornecedores"
+                    className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+                >
+                    Fornecedores
+                </NavLink>
+
+                <NavLink
+                    to="/vendas"
+                    className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+                >
+                    Vendas
+                </NavLink>
+
+                <NavLink
+                    to="/relatorio"
+                    className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+                >
+                    Relatório
+                </NavLink>
             </nav>
 
             <div className="navbar-right">

@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import api from "../../services/api";
+import Notification from "../../components/Notification";
 import "./style.css";
 
 // traduz enum do banco
@@ -13,12 +14,20 @@ function traduzMetodo(mtd) {
       return "Cartão de crédito";
     case "pix":
       return "PIX";
-    case "outros":
-      return "Outros";
+    case "boleto":
+      return "Boleto";
     default:
       return mtd || "-";
   }
 }
+
+const opcoesPagamento = [
+  { value: "pix", label: "PIX" },
+  { value: "dinheiro", label: "Dinheiro" },
+  { value: "cartao_debito", label: "Cartão de débito" },
+  { value: "cartao_credito", label: "Cartão de crédito" },
+  { value: "boleto", label: "Boleto" },
+];
 
 function normalizarData(d) {
   if (!d) return null;
@@ -45,16 +54,99 @@ function normalizarData(d) {
   return null;
 }
 
+function CampoSugestaoFiltro({ label, value, onChange, options, placeholder }) {
+  const [aberto, setAberto] = useState(false);
+
+  const opcoesFiltradas = options
+    .filter((opcao) =>
+      opcao.toLowerCase().includes((value || "").toLowerCase())
+    )
+    .sort((a, b) => a.localeCompare(b));
+
+  const selecionarOpcao = (opcao) => {
+    onChange(opcao);
+    setAberto(false);
+  };
+
+  return (
+    <div className="campo-sugestao-filtro">
+      <label>{label}</label>
+
+      <div className={`campo-sugestao-wrapper ${aberto ? "aberto" : ""}`}>
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => {
+            onChange(e.target.value);
+            setAberto(true);
+          }}
+          onFocus={() => setAberto(true)}
+          onBlur={() => {
+            setTimeout(() => setAberto(false), 150);
+          }}
+          placeholder={placeholder}
+          autoComplete="off"
+          className="campo-sugestao-input"
+        />
+
+        <button
+          type="button"
+          className="campo-sugestao-seta"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            setAberto(!aberto);
+          }}
+        >
+          ▾
+        </button>
+      </div>
+
+      {aberto && (
+        <div className="sugestao-lista">
+          {opcoesFiltradas.length > 0 ? (
+            opcoesFiltradas.map((opcao) => (
+              <button
+                type="button"
+                key={opcao}
+                className="sugestao-item"
+                onMouseDown={() => selecionarOpcao(opcao)}
+              >
+                {opcao}
+              </button>
+            ))
+          ) : (
+            <div className="sugestao-vazia">
+              Nenhuma opção encontrada.
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Vendas() {
   // --------------------- ESTADOS ---------------------
   const [filtrosAbertos, setFiltrosAbertos] = useState(false);
   const [busca, setBusca] = useState("");
   const [filtroPagamento, setFiltroPagamento] = useState([]);
+  const [filtroDataInicio, setFiltroDataInicio] = useState("");
+  const [filtroDataFim, setFiltroDataFim] = useState("");
+  const [filtroCliente, setFiltroCliente] = useState("");
+  const [filtroVendedor, setFiltroVendedor] = useState("");
+  const [filtroItens, setFiltroItens] = useState("");
+  const [filtroValorMin, setFiltroValorMin] = useState("");
+  const [filtroValorMax, setFiltroValorMax] = useState("");
+
   const [vendas, setVendas] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [filtroItens, setFiltroItens] = useState("");
+
+  const [notification, setNotification] = useState({
+    message: "",
+    type: "success",
+  });
 
   const [clientes, setClientes] = useState([]);
   const [produtos, setProdutos] = useState([]);
@@ -97,6 +189,14 @@ function Vendas() {
     itens: []
   });
 
+  function mostrarNotificacao(message, type = "success") {
+    setNotification({ message, type });
+
+    setTimeout(() => {
+      setNotification({ message: "", type: "success" });
+    }, 3500);
+  }
+
   const toggleFiltro = (lista, item, setLista) => {
     setLista(lista.includes(item)
       ? lista.filter(i => i !== item)
@@ -106,31 +206,96 @@ function Vendas() {
 
   const filtrados = useMemo(() => {
     return vendas.filter((v) => {
+      const termoBusca = busca.toLowerCase().trim();
+
+      const clienteVenda = (v.cliente || "").toLowerCase();
+      const vendedorVenda = (v.vendedor || "").toLowerCase();
+      const itemVenda = (v.itemPrincipal || "").toLowerCase();
 
       const atendeBusca =
-        v.nome_cliente?.toLowerCase().includes(busca.toLowerCase()) ||
-        v.vendedor?.toLowerCase().includes(busca.toLowerCase());
+        !termoBusca ||
+        clienteVenda.includes(termoBusca) ||
+        vendedorVenda.includes(termoBusca) ||
+        itemVenda.includes(termoBusca);
 
       const atendePagamento =
         filtroPagamento.length === 0 ||
-        filtroPagamento.includes(
-          (v.metodo_pagamento || "").toLowerCase()
-        )
+        filtroPagamento.includes((v.mtd_pagamento || "").toLowerCase());
+
+      const dataVenda = normalizarData(v.dt_pedido);
+
+      const dataInicio = filtroDataInicio
+        ? new Date(`${filtroDataInicio}T00:00:00`)
+        : null;
+
+      const dataFim = filtroDataFim
+        ? new Date(`${filtroDataFim}T23:59:59`)
+        : null;
+
+      const atendeDataInicio =
+        !dataInicio || (dataVenda && dataVenda >= dataInicio);
+
+      const atendeDataFim =
+        !dataFim || (dataVenda && dataVenda <= dataFim);
+
+      const atendeCliente =
+        !filtroCliente ||
+        clienteVenda.includes(filtroCliente.toLowerCase());
+
+      const atendeVendedor =
+        !filtroVendedor ||
+        vendedorVenda.includes(filtroVendedor.toLowerCase());
 
       const atendeItens =
         !filtroItens ||
-        v.itemPrincipal?.toLowerCase().includes(filtroItens.toLowerCase());
+        itemVenda.includes(filtroItens.toLowerCase());
 
-      return atendeBusca && atendePagamento && atendeItens;
+      const valorVenda = Number(v.total) || 0;
+      const valorMin = filtroValorMin ? Number(filtroValorMin) : null;
+      const valorMax = filtroValorMax ? Number(filtroValorMax) : null;
 
+      const atendeValorMin =
+        valorMin === null || valorVenda >= valorMin;
+
+      const atendeValorMax =
+        valorMax === null || valorVenda <= valorMax;
+
+      return (
+        atendeBusca &&
+        atendePagamento &&
+        atendeDataInicio &&
+        atendeDataFim &&
+        atendeCliente &&
+        atendeVendedor &&
+        atendeItens &&
+        atendeValorMin &&
+        atendeValorMax
+      );
     });
-  }, [vendas, busca, filtroPagamento, filtroItens]);
+  }, [
+    vendas,
+    busca,
+    filtroPagamento,
+    filtroDataInicio,
+    filtroDataFim,
+    filtroCliente,
+    filtroVendedor,
+    filtroItens,
+    filtroValorMin,
+    filtroValorMax
+  ]);
 
-  const itensUnicos = [
-    ...new Set(
-      vendas.map(v => v.itemPrincipal)
-    )
-  ];
+  const clientesFiltro = [
+    ...new Set(vendas.map((v) => v.cliente).filter(Boolean))
+  ].sort((a, b) => a.localeCompare(b));
+
+  const vendedoresFiltro = [
+    ...new Set(vendas.map((v) => v.vendedor).filter(Boolean))
+  ].sort((a, b) => a.localeCompare(b));
+
+  const itensFiltro = [
+    ...new Set(vendas.map((v) => v.itemPrincipal).filter(Boolean))
+  ].sort((a, b) => a.localeCompare(b));
 
   //lista derivadas pros produtos  
   const nomesUnicos = [...new Set(produtos.map(p => p.nome_produto))];
@@ -182,6 +347,7 @@ function Vendas() {
   const carregarVendas = async () => {
     try {
       setLoading(true);
+
       const token = localStorage.getItem("token");
 
       const respLista = await api.get("/pedidos", {
@@ -191,57 +357,52 @@ function Vendas() {
       const lista = respLista.data?.pedidos || [];
 
       const detalhes = await Promise.all(
-        lista.map((v) =>
-          api.get(`/pedidos/${v.id_pedido}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }).catch(() => null)
+        lista.map((pedido) =>
+          api
+            .get(`/pedidos/${pedido.id_pedido}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            })
+            .catch(() => null)
         )
       );
 
-      const vendasFormatadas = lista.map((venda, i) => {
-        const det = detalhes[i]?.data;
+      const pedidosFormatados = lista.map((pedido, index) => {
+        const detalhe = detalhes[index]?.data;
+        const itens = detalhe?.itens || [];
 
-        let itensTexto = "—";
-        let itemPrincipal = "";
-        let totalCalculado = 0;
+        const total = itens.reduce((acc, item) => {
+          return acc + Number(item.subtotal || 0);
+        }, 0);
 
-        if (det?.itens && det.itens.length > 0) {
-          const itens = det.itens;
-          const primeiro = itens[0].nome_produto;
-          const totalProdutos = itens.length;
+        const itemPrincipal = itens[0]?.nome_produto || "";
 
-          itemPrincipal = primeiro;
-
-          // ✅ CALCULAR TOTAL AQUI
-          totalCalculado = itens.reduce((acc, item) => {
-            return acc + Number(item.preco_unitario) * item.qtdd_pedido;
-          }, 0);
-
-          if (totalProdutos === 1) {
-            itensTexto = primeiro;
-          } else {
-            itensTexto = `${primeiro} + ${totalProdutos - 1} item(s)`;
-          }
-        }
+        const itensResumo =
+          itens.length === 0
+            ? "—"
+            : itens.length === 1
+              ? itemPrincipal
+              : `${itemPrincipal} + ${itens.length - 1} item(s)`;
 
         return {
-          id_venda: venda.id_pedido,
-          dt_venda: venda.dt_pedido, // 🔥 aproveita e corrige isso também
-          dataFormatada: new Date(venda.dt_pedido).toLocaleDateString("pt-BR"),
-          nome_cliente: venda.cliente,
-          itens: itensTexto,
-          itemPrincipal: itemPrincipal,
-          valor_total: totalCalculado, // ✅ AGORA CORRETO
-          metodo_pagamento: venda.mtd_pagamento,          // 🔥 valor real
-          metodo_pagamento_label: traduzMetodo(venda.mtd_pagamento), // 🔥 label
-          vendedor: venda.vendedor || "—"
+          id_pedido: pedido.id_pedido,
+          dt_pedido: pedido.dt_pedido,
+          dataFormatada: pedido.dt_pedido
+            ? new Date(pedido.dt_pedido).toLocaleDateString("pt-BR")
+            : "-",
+          cliente: pedido.cliente || "—",
+          vendedor: pedido.vendedor || "—",
+          mtd_pagamento: pedido.mtd_pagamento,
+          mtd_pagamento_label: traduzMetodo(pedido.mtd_pagamento),
+          itensResumo,
+          itemPrincipal,
+          total,
         };
       });
 
-      setVendas(vendasFormatadas);
+      setVendas(pedidosFormatados);
     } catch (err) {
       console.error(err);
-      alert("Erro ao carregar vendas.");
+      mostrarNotificacao("Erro ao carregar vendas.", "error");
     } finally {
       setLoading(false);
     }
@@ -258,7 +419,6 @@ function Vendas() {
       const usuario = JSON.parse(u);
 
       setVendedor(usuario.id_usuario);
-      setNomeUsuarioLogado(usuario.nomeUsuario);
     }
   }, []);
 
@@ -288,30 +448,17 @@ function Vendas() {
       currency: "BRL",
     });
 
-  // ------------------ EXCLUIR (BACKEND) ------------------
-  const excluirVenda = async (id_venda) => {
-    if (!confirm("Deseja realmente excluir esta venda? Isso devolve os itens ao estoque.")) return;
-
-    try {
-      const token = localStorage.getItem("token");
-
-      await api.delete(`/pedidos/${id_venda}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      carregarVendas();
-    } catch (err) {
-      console.error(err);
-      alert("Erro ao excluir venda.");
-    }
-  };
-
   // ------------------ CARRINHO ------------------
   const adicionarItem = () => {
-    if (!produtoFinal) return alert("Selecione nome, sabor e marca.");
+    if (!produtoFinal) {
+      mostrarNotificacao("Selecione nome, sabor e marca.", "warning");
+      return;
+    }
 
-    if (itemQtd > produtoFinal.qtdd_atual)
-      return alert("Quantidade maior do que o estoque disponível.");
+    if (itemQtd > produtoFinal.qtdd_atual) {
+      mostrarNotificacao("Quantidade maior do que o estoque disponível.", "warning");
+      return;
+    }
 
     setCarrinho((prev) => [
       ...prev,
@@ -334,6 +481,28 @@ function Vendas() {
     setCarrinho((prev) => prev.filter((c) => c.id_produto !== id));
   };
 
+  const editarItemCarrinho = (item) => {
+    const produtoSelecionado = produtos.find(
+      (p) => p.id_produto === item.id_produto
+    );
+
+    if (!produtoSelecionado) {
+      mostrarNotificacao("Produto não encontrado para edição.", "error");
+      return;
+    }
+
+    setSelectNome(produtoSelecionado.nome_produto);
+    setSelectSabor(produtoSelecionado.sabor || "");
+    setSelectMarca(produtoSelecionado.marca || "");
+    setItemQtd(item.quantidade);
+
+    setCarrinho((prev) =>
+      prev.filter((c) => c.id_produto !== item.id_produto)
+    );
+
+    mostrarNotificacao("Item carregado para edição.", "info");
+  };
+
   const totalCarrinho = carrinho.reduce(
     (acc, i) => acc + i.preco * i.quantidade,
     0
@@ -341,8 +510,15 @@ function Vendas() {
 
   // ------------------ SALVAR VENDA ------------------
   const salvarVenda = async () => {
-    if (!cliente) return alert("Selecione um cliente.");
-    if (carrinho.length === 0) return alert("Carrinho vazio.");
+    if (!cliente) {
+      mostrarNotificacao("Selecione um cliente.", "warning");
+      return;
+    }
+
+    if (carrinho.length === 0) {
+      mostrarNotificacao("Carrinho vazio.", "warning");
+      return;
+    }
 
     const payload = {
       id_cliente: Number(cliente),
@@ -364,7 +540,12 @@ function Vendas() {
       carregarVendas();
     } catch (err) {
       console.error(err);
-      alert("Erro ao registrar venda.");
+      mostrarNotificacao(
+        err.response?.data?.detalhes ||
+        err.response?.data?.erro ||
+        "Erro ao registrar venda.",
+        "error"
+      );
     }
   };
 
@@ -387,7 +568,7 @@ function Vendas() {
   const anoAtual = new Date().getFullYear();
 
   const vendasDoMes = vendas.filter(v => {
-    const dataVenda = normalizarData(v.dt_venda);
+    const dataVenda = normalizarData(v.dt_pedido);
 
     if (!dataVenda || isNaN(dataVenda.getTime())) return false;
 
@@ -397,11 +578,15 @@ function Vendas() {
     );
   });
 
-  console.log("data_venda recebida:", filtrados.map(v => v.dt_venda));
-
   // ------------------ RENDER ------------------
   return (
     <div className="vendas-page">
+
+      <Notification
+        message={notification.message}
+        type={notification.type}
+        onClose={() => setNotification({ message: "", type: "success" })}
+      />
 
 
       <aside className={`filtros-avancados ${filtrosAbertos ? "aberto" : "fechado"}`}>
@@ -413,46 +598,106 @@ function Vendas() {
 
         <div className="filtro-scroll-area">
 
-          {/* BUSCA */}
+          {/* PERÍODO */}
           <div className="filtro-secao">
-            <label>Pesquisar</label>
-            <input
-              type="text"
-              className="filtro-input"
-              placeholder="Cliente ou vendedor..."
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-            />
+            <label>Período da venda</label>
+
+            <div className="filtro-periodo-grid">
+              <input
+                type="date"
+                className="filtro-input"
+                value={filtroDataInicio}
+                onChange={(e) => setFiltroDataInicio(e.target.value)}
+              />
+
+              <input
+                type="date"
+                className="filtro-input"
+                value={filtroDataFim}
+                onChange={(e) => setFiltroDataFim(e.target.value)}
+              />
+            </div>
           </div>
 
           {/* PAGAMENTO */}
           <div className="filtro-secao">
             <label>Forma de pagamento</label>
+
             <div className="checkbox-list">
-              {["dinheiro", "cartao_debito", "cartao_credito", "pix", "outros"].map((tipo) => (
-                <div key={tipo} className="checkbox-item">
+              {opcoesPagamento.map((opcao) => (
+                <div key={opcao.value} className="checkbox-item">
                   <input
                     type="checkbox"
-                    id={tipo}
-                    checked={filtroPagamento.includes(tipo)}
-                    onChange={() => toggleFiltro(filtroPagamento, tipo, setFiltroPagamento)}
+                    id={`pagamento-${opcao.value}`}
+                    checked={filtroPagamento.includes(opcao.value)}
+                    onChange={() =>
+                      toggleFiltro(filtroPagamento, opcao.value, setFiltroPagamento)
+                    }
                   />
-                  <label htmlFor={tipo}>{tipo}</label>
+                  <label htmlFor={`pagamento-${opcao.value}`}>
+                    {opcao.label}
+                  </label>
                 </div>
               ))}
             </div>
           </div>
 
+          {/* CLIENTE */}
           <div className="filtro-secao">
-            <label>Itens</label>
-
-            <input
-              type="text"
-              className="filtro-input"
-              placeholder="Digite o nome do item..."
-              value={filtroItens}
-              onChange={(e) => setFiltroItens(e.target.value)}
+            <CampoSugestaoFiltro
+              label="Cliente"
+              value={filtroCliente}
+              onChange={setFiltroCliente}
+              options={clientesFiltro}
+              placeholder="Digite ou selecione..."
             />
+          </div>
+
+          {/* VENDEDOR */}
+          <div className="filtro-secao">
+            <CampoSugestaoFiltro
+              label="Vendedor"
+              value={filtroVendedor}
+              onChange={setFiltroVendedor}
+              options={vendedoresFiltro}
+              placeholder="Digite ou selecione..."
+            />
+          </div>
+
+          {/* ITEM VENDIDO */}
+          <div className="filtro-secao">
+            <CampoSugestaoFiltro
+              label="Item vendido"
+              value={filtroItens}
+              onChange={setFiltroItens}
+              options={itensFiltro}
+              placeholder="Digite ou selecione..."
+            />
+          </div>
+
+          {/* FAIXA DE VALOR */}
+          <div className="filtro-secao">
+            <label>Faixa de valor</label>
+
+            <div className="filtro-periodo-grid">
+              <input
+                type="number"
+                className="filtro-input"
+                placeholder="Mín."
+                min="0"
+                value={filtroValorMin}
+                onChange={(e) => setFiltroValorMin(e.target.value)}
+              />
+
+              <input
+                type="number"
+                className="filtro-input"
+                placeholder="Máx."
+                min="0"
+                value={filtroValorMax}
+                onChange={(e) => setFiltroValorMax(e.target.value)}
+              />
+            </div>
           </div>
 
         </div>
@@ -463,7 +708,13 @@ function Vendas() {
             onClick={() => {
               setBusca("");
               setFiltroPagamento([]);
+              setFiltroDataInicio("");
+              setFiltroDataFim("");
+              setFiltroCliente("");
+              setFiltroVendedor("");
               setFiltroItens("");
+              setFiltroValorMin("");
+              setFiltroValorMax("");
             }}
           >
             Limpar Filtros
@@ -523,16 +774,15 @@ function Vendas() {
               <div className="col">Pagamento</div>
               <div className="col">Vendedor</div>
               <div className="col action"></div>
-              <div className="col center"></div>
             </div>
 
             {filtrados.map((v) => (
-              <div className="row" key={v.id_venda}>
+              <div className="row" key={v.id_pedido}>
                 <div className="col">{v.dataFormatada}</div>
-                <div className="col">{v.nome_cliente}</div>
-                <div className="col">{v.itens}</div>
-                <div className="col right">{formatR$(v.valor_total)}</div>
-                <div className="col">{v.metodo_pagamento_label}</div>
+                <div className="col">{v.cliente}</div>
+                <div className="col">{v.itensResumo}</div>
+                <div className="col right">{formatR$(v.total)}</div>
+                <div className="col">{v.mtd_pagamento_label}</div>
                 <div className="col">{v.vendedor}</div>
 
                 <div className="col action">
@@ -542,7 +792,7 @@ function Vendas() {
                       try {
                         const token = localStorage.getItem("token");
 
-                        const resp = await api.get(`/pedidos/${v.id_venda}`, {
+                        const resp = await api.get(`/pedidos/${v.id_pedido}`, {
                           headers: { Authorization: `Bearer ${token}` }
                         });
 
@@ -551,7 +801,7 @@ function Vendas() {
 
                       } catch (err) {
                         console.error("Erro ao carregar detalhes da venda:", err);
-                        alert("Erro ao carregar detalhes.");
+                        mostrarNotificacao("Erro ao carregar detalhes da venda.", "error");
                       }
                     }}
                   >
@@ -559,315 +809,459 @@ function Vendas() {
                   </button>
                 </div>
 
-                <div className="col center">
-                  <button
-                    className="delete-btn"
-                    onClick={() => excluirVenda(v.id_venda)}
-                  >
-                    ✖
-                  </button>
-                </div>
               </div>
             ))}
           </div>
         )}
 
         {/* MODAL */}
+        {/* MODAL NOVA VENDA */}
         {modalOpen && (
           <div className="modal-overlay">
-            <div className="modal-box">
-              <h2>Nova Venda</h2>
+            <div className="modal-box venda-modal-box">
 
-              <div className="modal-grid">
-                {/* =============== COLUNA ESQUERDA =============== */}
-                <div className="modal-col">
+              <div className="modal-header-venda">
+                <div>
+                  <h2>Nova venda</h2>
+                  <p>Selecione o cliente, adicione os produtos e finalize o pagamento.</p>
+                </div>
 
-                  {/* CLIENTE */}
-                  <label>Cliente</label>
-                  <select value={cliente} onChange={(e) => setCliente(e.target.value)}>
-                    <option value="">Selecione...</option>
-                    {clientes.map((c) => (
-                      <option key={c.id_cliente} value={c.id_cliente}>
-                        {c.razao_social}
-                      </option>
-                    ))}
-                  </select>
+                <button
+                  type="button"
+                  className="modal-close-x"
+                  onClick={() => setModalOpen(false)}
+                >
+                  ×
+                </button>
+              </div>
 
-                  {/* Novo cliente */}
-                  <div className="novo-cliente-inline">
-                    <input
-                      type="text"
-                      placeholder="Novo cliente"
-                      value={novoCliente}
-                      onChange={(e) => setNovoCliente(e.target.value)}
-                    />
+              <div className="venda-modal-content">
 
-                    <button
-                      className="criar-btn"
-                      onClick={() => {
-                        if (!novoCliente.trim()) return alert("Digite um nome");
-                        setClienteNome(novoCliente);
-                        setShowNovoClienteForm(true);
-                      }}
-                    >
-                      Criar
-                    </button>
+                {/* DADOS DA VENDA */}
+                <section className="venda-section">
+                  <div className="venda-section-title">
+                    <span>1</span>
+                    <h3>Dados da venda</h3>
+                  </div>
+
+                  <div className="venda-form-grid">
+                    <div className="campo-venda campo-cliente">
+                      <label>Cliente</label>
+
+                      <div className="cliente-select-row">
+                        <select
+                          value={cliente}
+                          onChange={(e) => setCliente(e.target.value)}
+                        >
+                          <option value="">Selecione um cliente...</option>
+                          {clientes.map((c) => (
+                            <option key={c.id_cliente} value={c.id_cliente}>
+                              {c.razao_social}
+                            </option>
+                          ))}
+                        </select>
+
+                        <button
+                          type="button"
+                          className="btn-novo-cliente"
+                          onClick={() => {
+                            setShowNovoClienteForm(!showNovoClienteForm);
+                            setNovoCliente("");
+                          }}
+                        >
+                          + Novo cliente
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="campo-venda">
+                      <label>Vendedor</label>
+                      <select
+                        value={vendedor}
+                        onChange={(e) => setVendedor(e.target.value)}
+                      >
+                        {usuarios.length === 0 && (
+                          <option value={vendedor}>{nomeUsuario}</option>
+                        )}
+
+                        {usuarios.map((u) => (
+                          <option key={u.id_usuario} value={u.id_usuario}>
+                            {u.nome}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
 
                   {showNovoClienteForm && (
-                    <div className="novo-cliente-form">
-                      <h3>Novo cliente</h3>
+                    <div className="novo-cliente-card">
+                      <div className="novo-cliente-header">
+                        <div>
+                          <h4>Cadastrar novo cliente</h4>
+                          <p>Após salvar, o cliente será selecionado automaticamente na venda.</p>
+                        </div>
 
-                      <input
-                        type="text"
-                        placeholder="Nome"
-                        value={clienteNome}
-                        onChange={(e) => setClienteNome(e.target.value)}
-                      />
-
-                      <input
-                        type="text"
-                        placeholder="CPF"
-                        value={clienteCpf}
-                        onChange={(e) => setClienteCpf(e.target.value)}
-                      />
-
-                      <input
-                        type="text"
-                        placeholder="Telefone"
-                        value={clienteTelefone}
-                        onChange={(e) => setClienteTelefone(e.target.value)}
-                      />
-
-                      <input
-                        type="email"
-                        placeholder="E-mail"
-                        value={clienteEmail}
-                        onChange={(e) => setClienteEmail(e.target.value)}
-                      />
-
-                      <input
-                        type="text"
-                        placeholder="Endereço"
-                        value={clienteEndereco}
-                        onChange={(e) => setClienteEndereco(e.target.value)}
-                      />
-
-                      <button
-                        className="save-btn"
-                        onClick={async () => {
-                          const token = localStorage.getItem("token");
-
-                          try {
-                            const resp = await api.post(
-                              "/clientes",
-                              {
-                                razao_social: clienteNome,
-                                cpf_cnpj: clienteCpf,
-                                telefone: clienteTelefone || null,
-                                email: clienteEmail || null,
-                                endereco: clienteEndereco || null,
-                              },
-                              { headers: { Authorization: `Bearer ${token}` } }
-                            );
-
-                            const id = resp.data.id_cliente;
-
-                            await carregarClientes();
-                            setCliente(id);
+                        <button
+                          type="button"
+                          className="btn-cancelar-cliente"
+                          onClick={() => {
                             setShowNovoClienteForm(false);
                             setNovoCliente("");
-
                             setClienteNome("");
                             setClienteCpf("");
                             setClienteTelefone("");
                             setClienteEmail("");
                             setClienteEndereco("");
-                          } catch (err) {
-                            console.error(err);
-                          }
-                        }}
-                      >
-                        Salvar cliente
-                      </button>
+                          }}
+                        >
+                          Cancelar cadastro
+                        </button>
+                      </div>
+
+                      <div className="novo-cliente-grid">
+                        <div>
+                          <label>Nome/Razão social</label>
+                          <input
+                            type="text"
+                            placeholder="Ex: Cliente LTDA."
+                            value={clienteNome}
+                            onChange={(e) => setClienteNome(e.target.value)}
+                          />
+                        </div>
+
+                        <div>
+                          <label>CPF/CNPJ</label>
+                          <input
+                            type="text"
+                            placeholder="Opcional"
+                            value={clienteCpf}
+                            onChange={(e) => setClienteCpf(e.target.value)}
+                          />
+                        </div>
+
+                        <div>
+                          <label>Telefone</label>
+                          <input
+                            type="text"
+                            placeholder="Opcional"
+                            value={clienteTelefone}
+                            onChange={(e) => setClienteTelefone(e.target.value)}
+                          />
+                        </div>
+
+                        <div>
+                          <label>E-mail</label>
+                          <input
+                            type="email"
+                            placeholder="Ex: cliente@email.com"
+                            value={clienteEmail}
+                            onChange={(e) => setClienteEmail(e.target.value)}
+                            required
+                          />
+                        </div>
+
+                        <div className="campo-endereco">
+                          <label>Endereço</label>
+                          <input
+                            type="text"
+                            placeholder="Opcional"
+                            value={clienteEndereco}
+                            onChange={(e) => setClienteEndereco(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="novo-cliente-actions">
+                        <button
+                          type="button"
+                          className="save-btn"
+                          onClick={async () => {
+                            if (!clienteNome.trim()) {
+                              mostrarNotificacao("Informe o nome do cliente.", "warning");
+                              return;
+                            }
+
+                            if (!clienteEmail.trim()) {
+                              mostrarNotificacao("Informe o e-mail do cliente.", "warning");
+                              return;
+                            }
+
+                            const token = localStorage.getItem("token");
+
+                            try {
+                              const resp = await api.post(
+                                "/clientes",
+                                {
+                                  razao_social: clienteNome,
+                                  cpf_cnpj: clienteCpf || null,
+                                  telefone: clienteTelefone || null,
+                                  email: clienteEmail || null,
+                                  endereco: clienteEndereco || null,
+                                },
+                                {
+                                  headers: { Authorization: `Bearer ${token}` },
+                                }
+                              );
+
+                              const id = resp.data.id_cliente;
+
+                              await carregarClientes();
+                              setCliente(id);
+                              setShowNovoClienteForm(false);
+                              setNovoCliente("");
+
+                              setClienteNome("");
+                              setClienteCpf("");
+                              setClienteTelefone("");
+                              setClienteEmail("");
+                              setClienteEndereco("");
+                            } catch (err) {
+                              console.error(err);
+                              mostrarNotificacao(
+                                err.response?.data?.erro ||
+                                err.response?.data?.detalhes ||
+                                "Erro ao cadastrar cliente.",
+                                "error"
+                              );
+                            }
+                          }}
+                        >
+                          Salvar cliente
+                        </button>
+                      </div>
                     </div>
                   )}
+                </section>
 
-                  {/* VENDEDOR */}
-                  <label style={{ marginTop: 20 }}>Vendedor</label>
-                  <select value={vendedor} onChange={(e) => setVendedor(e.target.value)}>
-                    {/* enquanto a rota não existe */}
-                    {usuarios.length === 0 && (
-                      <option value={vendedor}>{nomeUsuario}</option>
-                    )}
+                {/* ITENS DA VENDA */}
+                <section className="venda-section">
+                  <div className="venda-section-title">
+                    <span>2</span>
+                    <h3>Adicionar produtos</h3>
+                  </div>
 
-                    {/* quando o backend criar a rota /usuarios */}
-                    {usuarios.map((u) => (
-                      <option key={u.id_usuario} value={u.id_usuario}>
-                        {u.nome}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="produto-venda-grid">
+                    <div className="campo-venda">
+                      <label>Produto</label>
+                      <select
+                        value={selectNome}
+                        onChange={(e) => {
+                          setSelectNome(e.target.value);
+                          setSelectSabor("");
+                          setSelectMarca("");
+                        }}
+                      >
+                        <option value="">Selecione...</option>
+                        {nomesUnicos.map((nome, i) => (
+                          <option key={i} value={nome}>
+                            {nome}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-                  {/* PAGAMENTO */}
-                  <label>Método de pagamento</label>
-                  <select
-                    value={pagamento}
-                    onChange={(e) => setPagamento(e.target.value)}
-                  >
-                    <option value="pix">PIX</option>
-                    <option value="dinheiro">Dinheiro</option>
-                    <option value="cartao_debito">Cartão de Débito</option>
-                    <option value="cartao_credito">Cartão de Crédito</option>
-                    <option value="outros">Outros</option>
-                  </select>
-                </div>
-
-                {/* =============== COLUNA DIREITA =============== */}
-                <div className="modal-col">
-
-                  {/* NOME DO PRODUTO */}
-                  <label style={{ marginTop: 20 }}>Nome do produto</label>
-                  <select
-                    value={selectNome}
-                    onChange={(e) => {
-                      setSelectNome(e.target.value);
-                      setSelectSabor("");
-                      setSelectMarca("");
-                    }}
-                  >
-                    <option value="">Selecione...</option>
-                    {nomesUnicos.map((nome, i) => (
-                      <option key={i} value={nome}>{nome}</option>
-                    ))}
-                  </select>
-
-                  {/* SABOR */}
-                  {selectNome && (
-                    <>
-                      <label style={{ marginTop: 16 }}>Sabor</label>
+                    <div className="campo-venda">
+                      <label>Sabor</label>
                       <select
                         value={selectSabor}
                         onChange={(e) => {
                           setSelectSabor(e.target.value);
                           setSelectMarca("");
                         }}
+                        disabled={!selectNome}
                       >
                         <option value="">Selecione...</option>
                         {saboresFiltrados.map((s, i) => (
-                          <option key={i} value={s}>{s}</option>
+                          <option key={i} value={s}>
+                            {s}
+                          </option>
                         ))}
                       </select>
-                    </>
-                  )}
+                    </div>
 
-                  {/* MARCA */}
-                  {selectSabor && (
-                    <>
-                      <label style={{ marginTop: 16 }}>Marca</label>
+                    <div className="campo-venda">
+                      <label>Marca</label>
                       <select
                         value={selectMarca}
                         onChange={(e) => setSelectMarca(e.target.value)}
+                        disabled={!selectSabor}
                       >
                         <option value="">Selecione...</option>
                         {marcasFiltradas.map((m, i) => (
-                          <option key={i} value={m}>{m}</option>
+                          <option key={i} value={m}>
+                            {m}
+                          </option>
                         ))}
                       </select>
-                    </>
-                  )}
+                    </div>
 
-                  {/* PREVIEW DO PRODUTO FINAL */}
+                    <div className="campo-venda">
+                      <label>Quantidade</label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={itemQtd}
+                        onChange={(e) => setItemQtd(Number(e.target.value))}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="produto-venda-actions">
+                    <button
+                      type="button"
+                      className="btn-adicionar-item"
+                      onClick={adicionarItem}
+                    >
+                      Adicionar item
+                    </button>
+                  </div>
+
                   {selectMarca && produtoFinal && (
-                    <div style={{ marginTop: 12, fontSize: 14 }}>
-                      <p><strong>Validade mais próxima:</strong> {new Date(produtoFinal.data_vencimento).toLocaleDateString("pt-BR")}</p>
-                      <p><strong>Estoque disponível:</strong> {produtoFinal.qtdd_atual} unidades</p>
-                      <p><strong>Preço:</strong> R$ {Number(produtoFinal.preco_unitario).toFixed(2)}</p>
+                    <div className="produto-preview-card">
+                      <div>
+                        <span>Estoque disponível</span>
+                        <strong>{produtoFinal.qtdd_atual} unidades</strong>
+                      </div>
+
+                      <div>
+                        <span>Preço unitário</span>
+                        <strong>R$ {Number(produtoFinal.preco_unitario).toFixed(2)}</strong>
+                      </div>
+
+                      <div>
+                        <span>Validade mais próxima</span>
+                        <strong>
+                          {produtoFinal.data_vencimento
+                            ? new Date(produtoFinal.data_vencimento).toLocaleDateString("pt-BR")
+                            : "-"}
+                        </strong>
+                      </div>
                     </div>
                   )}
+                </section>
 
-                  <label style={{ marginTop: 20 }}>Quantidade</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={itemQtd}
-                    onChange={(e) => setItemQtd(Number(e.target.value))}
-                  />
+                {/* CARRINHO */}
+                <section className="venda-section">
+                  <div className="venda-section-title">
+                    <span>3</span>
+                    <h3>Carrinho da venda</h3>
+                  </div>
 
-                  <button className="add-btn" style={{ marginTop: 10 }} onClick={adicionarItem}>
-                    Adicionar item
-                  </button>
+                  {carrinho.length === 0 ? (
+                    <div className="carrinho-vazio">
+                      Nenhum item adicionado à venda.
+                    </div>
+                  ) : (
+                    <div className="carrinho-table">
+                      <div className="carrinho-head">
+                        <span>Produto</span>
+                        <span>Qtd.</span>
+                        <span>Preço unitário</span>
+                        <span>Subtotal</span>
+                        <span>Ações</span>
+                      </div>
 
-                  {/* CARRINHO */}
-                  <div className="resumo-venda">
-                    <h3>Itens da venda</h3>
+                      {carrinho.map((i) => (
+                        <div className="carrinho-row" key={i.id_produto}>
+                          <span>{i.nome}</span>
+                          <span>{i.quantidade}</span>
+                          <span>{formatR$(i.preco)}</span>
+                          <span>{formatR$(i.preco * i.quantidade)}</span>
 
-                    {carrinho.length === 0 && <p>Nenhum item.</p>}
-
-                    {carrinho.length > 0 && (
-                      <ul className="carrinho-lista">
-                        {carrinho.map((i) => (
-                          <li key={i.id_produto}>
-                            {i.quantidade}x {i.nome} — R$
-                            {(i.preco * i.quantidade).toFixed(2)}
+                          <div className="carrinho-actions">
                             <button
+                              type="button"
+                              className="edit-item-btn"
+                              onClick={() => editarItemCarrinho(i)}
+                            >
+                              Editar
+                            </button>
+
+                            <button
+                              type="button"
                               className="delete-btn"
                               onClick={() => removerItem(i.id_produto)}
-                              style={{ marginLeft: 10 }}
                             >
                               ✖
                             </button>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </section>
 
-                    <p className="total">
-                      Total: R$ {totalCarrinho.toFixed(2)}
-                    </p>
+                {/* FINALIZAÇÃO */}
+                <section className="venda-section venda-finalizacao">
+                  <div className="campo-venda">
+                    <label>Método de pagamento</label>
+                    <select
+                      value={pagamento}
+                      onChange={(e) => setPagamento(e.target.value)}
+                    >
+                      <option value="pix">PIX</option>
+                      <option value="dinheiro">Dinheiro</option>
+                      <option value="cartao_debito">Cartão de débito</option>
+                      <option value="cartao_credito">Cartão de crédito</option>
+                      <option value="boleto">Boleto</option>
+                    </select>
                   </div>
 
-                  <p style={{ marginTop: 12, fontWeight: "bold" }}>
-                    Total: R$ {totalCarrinho.toFixed(2)}
-                  </p>
-
-                  <div className="modal-actions" style={{ marginTop: 20 }}>
-                    <button className="cancel-btn" onClick={() => setModalOpen(false)}>
-                      Cancelar
-                    </button>
-                    <button className="save-btn" onClick={salvarVenda}>
-                      Finalizar venda
-                    </button>
+                  <div className="total-venda-box">
+                    <span>Total da venda</span>
+                    <strong>{formatR$(totalCarrinho)}</strong>
                   </div>
+                </section>
 
+                <div className="venda-modal-actions">
+                  <button
+                    type="button"
+                    className="cancel-btn"
+                    onClick={() => setModalOpen(false)}
+                  >
+                    Cancelar
+                  </button>
+
+                  <button
+                    type="button"
+                    className="save-btn"
+                    onClick={salvarVenda}
+                  >
+                    Finalizar venda
+                  </button>
                 </div>
-              </div>
 
+              </div>
             </div>
           </div>
-        )
-        }
+        )}
 
         {
           detalhesOpen && vendaSelecionada && (
             <div className="modal-overlay">
               <div className="modal-box">
 
-                <h2>Detalhes da venda #{vendaSelecionada.id_venda}</h2>
+                <h2>Detalhes da venda #{vendaSelecionada.id_pedido}</h2>
 
-                <p><strong>Data: </strong>
-                  {new Date(vendaSelecionada.dt_venda).toLocaleDateString("pt-BR")}
+                <p>
+                  <strong>Data: </strong>
+                  {vendaSelecionada.dt_pedido
+                    ? new Date(vendaSelecionada.dt_pedido).toLocaleDateString("pt-BR")
+                    : "-"}
                 </p>
 
-                <p><strong>Cliente: </strong>
-                  {vendaSelecionada.cliente?.razao_social}
+                <p>
+                  <strong>Cliente: </strong>
+                  {vendaSelecionada.cliente || "-"}
                 </p>
 
-                <p><strong>Vendedor: </strong>
-                  {vendaSelecionada.vendedor?.nome_usuario}
+                <p>
+                  <strong>Vendedor: </strong>
+                  {vendaSelecionada.vendedor || "-"}
                 </p>
 
-                <p><strong>Método de pagamento: </strong>
+                <p>
+                  <strong>Método de pagamento: </strong>
                   {traduzMetodo(vendaSelecionada.mtd_pagamento)}
                 </p>
 
@@ -877,15 +1271,22 @@ function Vendas() {
                   {(vendaSelecionada.itens || []).map((item) => (
                     <li key={item.id_produto} className="item-linha">
                       <span className="item-nome">
-                        {item.nome_produto} — R$ {(item.preco_unitario_na_venda * item.qtdd_venda).toFixed(2)}
+                        {item.nome_produto} — {item.qtdd_pedido}x R$ {Number(item.preco_unitario).toFixed(2)}
                       </span>
-                      <span className="item-qtd">{item.qtdd_venda}x</span>
+
+                      <span className="item-qtd">
+                        Subtotal: R$ {Number(item.subtotal).toFixed(2)}
+                      </span>
                     </li>
                   ))}
                 </ul>
 
                 <p style={{ marginTop: 20, fontWeight: "bold" }}>
-                  Total: R$ {Number(vendaSelecionada.valor_total).toFixed(2)}
+                  Total: R$ {
+                    (vendaSelecionada.itens || [])
+                      .reduce((acc, item) => acc + Number(item.subtotal || 0), 0)
+                      .toFixed(2)
+                  }
                 </p>
 
                 <div className="modal-actions">

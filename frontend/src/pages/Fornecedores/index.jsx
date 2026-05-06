@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
+import Notification from "../../components/Notification";
 import "./style.css";
 
 function Fornecedores() {
@@ -14,6 +15,19 @@ function Fornecedores() {
     telefone: "",
     email: ""
   });
+
+  const [notification, setNotification] = useState({
+    message: "",
+    type: "success"
+  });
+
+  function mostrarNotificacao(message, type = "success") {
+    setNotification({ message, type });
+
+    setTimeout(() => {
+      setNotification({ message: "", type: "success" });
+    }, 3500);
+  }
 
   const [filtroOpen, setFiltroOpen] = useState(false);
 
@@ -61,50 +75,98 @@ function Fornecedores() {
   };
 
   const salvarFornecedor = async () => {
+    if (!formData.razao_social.trim()) {
+      mostrarNotificacao("Informe a razão social do fornecedor.", "warning");
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
 
-      await api.post("/fornecedores", formData, {
+      const payload = {
+        razao_social: formData.razao_social.trim(),
+        cnpj: formData.cnpj.trim() || null,
+        telefone: formData.telefone.trim() || null,
+        email: formData.email.trim() || null
+      };
+
+      await api.post("/fornecedores", payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
       carregarFornecedores();
+
       setModalOpen(false);
+
       setFormData({
         razao_social: "",
         cnpj: "",
         telefone: "",
         email: ""
       });
+
+      mostrarNotificacao("Fornecedor cadastrado com sucesso.", "success");
     } catch (err) {
       console.error(err);
-      alert("Erro ao cadastrar fornecedor");
+
+      mostrarNotificacao(
+        err.response?.data?.erro ||
+        err.response?.data?.detalhes ||
+        "Erro ao cadastrar fornecedor.",
+        "error"
+      );
     }
   };
 
   const atualizarFornecedor = async () => {
+    if (!formData.razao_social.trim()) {
+      mostrarNotificacao("Informe a razão social do fornecedor.", "warning");
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
 
+      const payload = {
+        razao_social: formData.razao_social.trim(),
+        cnpj: formData.cnpj.trim() || null,
+        telefone: formData.telefone.trim() || null,
+        email: formData.email.trim() || null
+      };
+
       await api.put(
         `/fornecedores/${editando.id_fornecedor}`,
-        formData,
+        payload,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
 
       carregarFornecedores();
+
       setModalOpen(false);
       setEditando(null);
+
+      mostrarNotificacao("Fornecedor atualizado com sucesso.", "success");
     } catch (err) {
       console.error(err);
-      alert("Erro ao atualizar fornecedor");
+
+      mostrarNotificacao(
+        err.response?.data?.erro ||
+        err.response?.data?.detalhes ||
+        "Erro ao atualizar fornecedor.",
+        "error"
+      );
     }
   };
 
   return (
     <div className="fornecedores-page">
+      <Notification
+        message={notification.message}
+        type={notification.type}
+        onClose={() => setNotification({ message: "", type: "success" })}
+      />
 
       <div className={`filtros-avancados ${filtroOpen ? "aberto" : "fechado"}`}>
 
@@ -259,12 +321,34 @@ function Fornecedores() {
       </main>
 
       {/* MODAL */}
+      {/* MODAL */}
       {modalOpen && (
         <div className="modal-overlay">
-          <div className="modal-box">
-            <h2>{editando ? "Editar Fornecedor" : "Novo Fornecedor"}</h2>
+          <div className="modal-box fornecedor-modal-box">
 
-            <div className="form-grid">
+            <div className="modal-header-fornecedor">
+              <div>
+                <h2>{editando ? "Editar fornecedor" : "Novo fornecedor"}</h2>
+                <p>
+                  Cadastre os dados principais do fornecedor para vincular entradas de estoque.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="modal-close-x"
+                onClick={() => {
+                  setModalOpen(false);
+                  setEditando(null);
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="modal-section-title">Dados do fornecedor</div>
+
+            <div className="form-grid fornecedor-form-grid">
               <div>
                 <label>Razão Social</label>
                 <input
@@ -302,8 +386,9 @@ function Fornecedores() {
               </div>
             </div>
 
-            <div className="modal-actions">
+            <div className="modal-actions fornecedor-modal-actions">
               <button
+                type="button"
                 className="cancel-btn"
                 onClick={() => {
                   setModalOpen(false);
@@ -314,6 +399,7 @@ function Fornecedores() {
               </button>
 
               <button
+                type="button"
                 className="save-btn"
                 onClick={() => {
                   if (editando) {
@@ -323,7 +409,7 @@ function Fornecedores() {
                   }
                 }}
               >
-                Salvar
+                {editando ? "Salvar alterações" : "Cadastrar fornecedor"}
               </button>
             </div>
           </div>

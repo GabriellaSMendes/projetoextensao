@@ -7,7 +7,8 @@
 
 
 .fornecedores-page {
-  display: flex;              /* 🔥 IMPORTANTE */
+  display: flex;
+  /* 🔥 IMPORTANTE */
   width: 100%;
   min-height: 100vh;
   background: #fdfdfd;
@@ -22,7 +23,8 @@
   left: 0;
   width: 350px;
   min-width: 350px;
-  flex-shrink: 0; /* 🔥 ESSENCIAL */
+  flex-shrink: 0;
+  /* 🔥 ESSENCIAL */
   height: 100vh;
   background: #ffffff;
   border-right: 1px solid #e3e3e3;
@@ -45,7 +47,7 @@
 
   font-weight: 600;
 
-  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
   transition: 0.2s;
 }
 
@@ -92,6 +94,7 @@
   border-radius: 8px;
   border: 1px solid #ddd;
 }
+
 .filtros-actions {
   display: flex;
   flex-direction: column;
@@ -109,6 +112,7 @@
 .btn-limpar:hover {
   background: #e2e2e8;
 }
+
 .filtros-header h2 {
   font-size: 20px;
   font-weight: bold;
@@ -183,11 +187,16 @@
   align-items: center;
 
   grid-template-columns:
-    3fr   /* Nome */
-    2fr   /* CNPJ */
-    1.5fr /* Telefone */
-    2fr   /* Email */
-    1fr;  /* Editar */
+    3fr
+    /* Nome */
+    2fr
+    /* CNPJ */
+    1.5fr
+    /* Telefone */
+    2fr
+    /* Email */
+    1fr;
+  /* Editar */
 }
 
 /* HEADER */
@@ -246,7 +255,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.45);
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -258,13 +267,20 @@
   width: 420px;
   padding: 25px;
   border-radius: 12px;
-  box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
   animation: fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.9); }
-  to   { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .modal-box h2 {
@@ -314,4 +330,120 @@
   border-radius: 6px;
   border: none;
   cursor: pointer;
+}
+
+/* ============================= */
+/* MODAL FORNECEDOR */
+/* ============================= */
+
+.fornecedor-modal-box {
+  width: 720px;
+  max-width: 94vw;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 18px;
+}
+
+.modal-header-fornecedor {
+  position: relative;
+  padding: 24px 30px;
+  background: #faf5f9;
+  border-bottom: 1px solid #ead7e9;
+}
+
+.modal-header-fornecedor h2 {
+  margin: 0;
+  color: #4e1633;
+  font-size: 26px;
+}
+
+.modal-header-fornecedor p {
+  margin: 6px 40px 0 0;
+  color: #7b1f50;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.modal-close-x {
+  position: absolute;
+  top: 20px;
+  right: 26px;
+  background: transparent;
+  border: none;
+  color: #4e1633;
+  font-size: 30px;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+
+.modal-close-x:hover {
+  background: #f3e6ef;
+}
+
+.modal-section-title {
+  margin: 22px 30px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ead7e9;
+  color: #4e1633;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.fornecedor-form-grid {
+  padding: 22px 30px 0;
+  margin-top: 0;
+}
+
+.fornecedor-form-grid label {
+  display: block;
+  margin-bottom: 6px;
+  color: #4e1633;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.fornecedor-form-grid input {
+  width: 100%;
+  height: 42px;
+  padding: 9px 11px;
+  border: 1px solid #d2c5d3;
+  border-radius: 8px;
+  background: #faf8fb;
+  color: #333333;
+  outline: none;
+  font-size: 14px;
+}
+
+.fornecedor-form-grid input:focus {
+  border-color: #7b1f50;
+  box-shadow: 0 0 0 3px rgba(195, 97, 150, 0.18);
+}
+
+.fornecedor-modal-actions {
+  padding: 24px 30px 30px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.fornecedor-modal-actions button {
+  height: 48px;
+  font-size: 15px;
+}
+
+@media (max-width: 700px) {
+  .fornecedor-modal-box {
+    width: 96vw;
+  }
+
+  .fornecedor-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .fornecedor-modal-actions {
+    grid-template-columns: 1fr;
+  }
 }

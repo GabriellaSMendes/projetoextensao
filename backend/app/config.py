@@ -7,7 +7,7 @@ class Config:
     """Configuração base."""
     SECRET_KEY = secrets.token_hex(32)
 
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:root@localhost/db_tropicalmix' # ATUALIZAR PARA CONECTAR AO DB
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:Senha*123@localhost/tropicalmix_db_2' # ATUALIZAR PARA CONECTAR AO DB
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     JWT_SECRET_KEY = SECRET_KEY

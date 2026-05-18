@@ -51,7 +51,6 @@ class Produto(db.Model):
     data_vencimento = db.Column(db.Date)
     preco_unitario = db.Column(db.Numeric(10, 2), nullable=False)
     dt_cadastro = db.Column(db.DateTime, default=db.func.now())
-    ativo = db.Column(db.Boolean, default=True)
     id_categoria = db.Column(db.Integer, db.ForeignKey('categoria.id_categoria'), nullable=False)
 
     itens_pedido = db.relationship('ItemPedido', backref='produto', lazy=True)
@@ -59,18 +58,18 @@ class Produto(db.Model):
     movimentacoes = db.relationship('MovimentacaoEstoque', backref='produto', lazy=True)
 
 
-# class Estoque(db.Model):
-#     __tablename__ = 'estoque'
-#     id_estoque = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     id_produto = db.Column(db.Integer, db.ForeignKey('produto.id_produto'), nullable=False, unique=True)
-#     qtdd_atual = db.Column(db.Integer, default=0)
-#     qtdd_entrada = db.Column(db.Integer, default=0)
-#     qtdd_saida = db.Column(db.Integer, default=0)
-#     ultima_atualizacao = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
+class Estoque(db.Model):
+    __tablename__ = 'estoque'
+    id_estoque = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id_produto = db.Column(db.Integer, db.ForeignKey('produto.id_produto'), nullable=False, unique=True)
+    qtdd_atual = db.Column(db.Integer, default=0)
+    qtdd_entrada = db.Column(db.Integer, default=0)
+    qtdd_saida = db.Column(db.Integer, default=0)
+    ultima_atualizacao = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
 
-#     abastecimentos = db.relationship('Abastece', backref='estoque', lazy=True)
+    abastecimentos = db.relationship('Abastece', backref='estoque', lazy=True)
 
-#     itens_venda = db.relationship('VendaEstoque', backref='estoque', lazy=True)
+    itens_venda = db.relationship('VendaEstoque', backref='estoque', lazy=True)
 
 
 class Fornecedor(db.Model):
@@ -100,13 +99,9 @@ class Abastece(db.Model):
     id_abastecimento = db.Column(db.Integer, primary_key=True, autoincrement=True)
     id_fornecedor = db.Column(db.Integer, db.ForeignKey('fornecedor.id_fornecedor'), nullable=False)
     id_produto = db.Column(db.Integer, db.ForeignKey('produto.id_produto'), nullable=False) # Agora liga direto no produto
-    numero_lote = db.Column(db.String(50))
-    id_usuario = db.Column(db.Integer, db.ForeignKey('usuario.id_usuario'), nullable=False)
     dt_abastecimento = db.Column(db.DateTime, default=db.func.now())
     qtdd_recebida = db.Column(db.Integer, nullable=False)
-    qtdd_disponivel = db.Column(db.Integer)
     valor_unitario = db.Column(db.Numeric(10, 2))
-    data_vencimento = db.Column(db.Date)
 
 class ItemPedido(db.Model): # Era VendaEstoque
     __tablename__ = 'item_pedido'

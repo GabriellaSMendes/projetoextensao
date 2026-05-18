@@ -1,6 +1,6 @@
 from flask import request, jsonify, Blueprint
-from app.models import db, Produto, Categoria, Fornecedor, Abastece, MovimentacaoEstoque, TipoMovimentacao, Usuario
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from app.models import db, Produto, Categoria, Fornecedor, Abastece
+from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 from datetime import date
 
@@ -41,15 +41,13 @@ def criar_categoria():
 @jwt_required()
 def listar_produtos():
     """
-    Lista todos os produtos de forma consolidada,
-    incluindo resumo de fornecedor e validade por lote.
+    Lista todos os produtos, incluindo o fornecedor do último abastecimento.
     """
     produtos = Produto.query.all()
     lista_json = []
-
-    hoje = date.today()
-
+    
     for p in produtos:
+        # Buscar o último abastecimento para descobrir o fornecedor recente
         ultimo_abastecimento = (
             Abastece.query
             .filter_by(id_produto=p.id_produto)
@@ -64,119 +62,22 @@ def listar_produtos():
         else:
             nome_fornecedor = None
             id_fornecedor = None
-
-        lotes_disponiveis = (
-            Abastece.query
-            .filter(
-                Abastece.id_produto == p.id_produto,
-                Abastece.qtdd_disponivel > 0
-            )
-            .all()
-        )
-
-        lotes_com_validade = [
-            lote for lote in lotes_disponiveis
-            if lote.data_vencimento is not None
-        ]
-
-        proxima_validade = None
-        lotes_proximos_validade = 0
-        lotes_vencidos = 0
-
-        if lotes_com_validade:
-            lote_mais_proximo = sorted(
-                lotes_com_validade,
-                key=lambda lote: lote.data_vencimento
-            )[0]
-
-            proxima_validade = lote_mais_proximo.data_vencimento
-
-            for lote in lotes_com_validade:
-                dias = (lote.data_vencimento - hoje).days
-
-                if dias < 0:
-                    lotes_vencidos += 1
-                elif dias <= 45:
-                    lotes_proximos_validade += 1
-
+            
         lista_json.append({
             "id_produto": p.id_produto,
             "nome_produto": p.nome_produto,
             "sabor": p.sabor,
             "marca": p.marca,
-            "qtdd_atual": p.qtdd_atual,
+            "qtdd_atual": p.qtdd_atual, # v2: direto da tabela produto
+            "data_vencimento": p.data_vencimento.isoformat() if p.data_vencimento else None,
             "preco_unitario": str(p.preco_unitario),
             "id_categoria": p.id_categoria,
             "nome_categoria": p.categoria.nome if p.categoria else None,
             "id_fornecedor": id_fornecedor,
-            "nome_fornecedor": nome_fornecedor,
-            "proxima_validade": proxima_validade.isoformat() if proxima_validade else None,
-            "lotes_proximos_validade": lotes_proximos_validade,
-            "lotes_vencidos": lotes_vencidos,
-            "ativo": p.ativo
+            "nome_fornecedor": nome_fornecedor
         })
-
     return jsonify(produtos=lista_json), 200
 
-@estoque_bp.route('/produtos/<int:id_produto>', methods=['GET'])
-@jwt_required()
-def detalhar_produto(id_produto):
-    """
-    Retorna os dados de um único produto
-    """
-    p = Produto.query.get_or_404(id_produto)
-
-    produto_json = {
-        "id_produto": p.id_produto,
-        "nome_produto": p.nome_produto,
-        "sabor": p.sabor,
-        "marca": p.marca,
-        "qtdd_atual": p.qtdd_atual,
-        "data_vencimento": p.data_vencimento.isoformat() if p.data_vencimento else None,
-        "preco_unitario": str(p.preco_unitario),
-        "id_categoria": p.id_categoria,
-        "nome_categoria": p.categoria.nome if p.categoria else None
-    }
-
-    return jsonify(produto=produto_json), 200
-
-@estoque_bp.route('/produtos/<int:id_produto>/movimentacoes', methods=['GET'])
-@jwt_required()
-def listar_movimentacoes_produto(id_produto):
-    """
-    Lista o histórico de movimentações de estoque de um produto.
-    """
-    produto = Produto.query.get_or_404(id_produto)
-
-    movimentacoes = (
-        db.session.query(MovimentacaoEstoque, TipoMovimentacao, Usuario)
-        .join(
-            TipoMovimentacao,
-            MovimentacaoEstoque.id_tipo_movimentacao == TipoMovimentacao.id_tipo_movimentacao
-        )
-        .join(
-            Usuario,
-            MovimentacaoEstoque.id_usuario == Usuario.id_usuario
-        )
-        .filter(MovimentacaoEstoque.id_produto == id_produto)
-        .order_by(MovimentacaoEstoque.ultima_atualizacao.desc())
-        .all()
-    )
-
-    lista_json = []
-
-    for mov, tipo, usuario in movimentacoes:
-        lista_json.append({
-            "id_movimentacao": mov.id_estoque,
-            "id_produto": mov.id_produto,
-            "nome_produto": produto.nome_produto,
-            "tipo_movimentacao": tipo.tipo_movimentacao,
-            "qtdd_movimentacao": mov.qtdd_movimentacao,
-            "usuario": usuario.nome_usuario,
-            "ultima_atualizacao": mov.ultima_atualizacao.isoformat() if mov.ultima_atualizacao else None
-        })
-
-    return jsonify(movimentacoes=lista_json), 200
 
 @estoque_bp.route('/produtos', methods=['POST'])
 @jwt_required()
@@ -185,8 +86,6 @@ def criar_produto():
     Cria um novo PRODUTO e (opcionalmente) regista o seu abastecimento inicial.
     """
     dados = request.get_json()
-    
-    id_usuario_logado = int(get_jwt_identity())
 
     if not dados.get('nome_produto') or not dados.get('preco_unitario') or not dados.get('id_categoria'):
         return jsonify({"erro": "Nome, Preço Unitário e Categoria são obrigatórios"}), 400
@@ -224,12 +123,8 @@ def criar_produto():
             abastecimento_inicial = Abastece(
                 id_fornecedor=id_fornecedor,
                 id_produto=novo_produto.id_produto,
-                numero_lote=dados.get("numero_lote"),
-                id_usuario=id_usuario_logado,
                 qtdd_recebida=qtdd_inicial,
-                qtdd_disponivel=qtdd_inicial,
-                valor_unitario=dados.get("valor_unitario", dados.get("preco_unitario")),
-                data_vencimento=dados.get("data_vencimento")
+                valor_unitario=dados.get("preco_unitario")
             )
             db.session.add(abastecimento_inicial)
 
@@ -281,38 +176,6 @@ def atualizar_produto(id_produto):
         db.session.rollback()
         return jsonify({"erro": "Erro ao atualizar produto", "detalhes": str(e)}), 500
 
-@estoque_bp.route('/produtos/<int:id_produto>/status', methods=['PATCH'])
-@jwt_required()
-def alterar_status_produto(id_produto):
-    """
-    Ativa ou oculta um produto da listagem principal.
-    Não remove o produto do banco.
-    """
-    produto = Produto.query.get_or_404(id_produto)
-    dados = request.get_json() or {}
-
-    if "ativo" not in dados:
-        return jsonify({"erro": "O campo 'ativo' é obrigatório"}), 400
-
-    produto.ativo = bool(dados.get("ativo"))
-
-    try:
-        db.session.commit()
-
-        status = "ativado" if produto.ativo else "ocultado"
-
-        return jsonify({
-            "mensagem": f"Produto {status} com sucesso!",
-            "id_produto": produto.id_produto,
-            "ativo": produto.ativo
-        }), 200
-
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({
-            "erro": "Erro ao alterar status do produto",
-            "detalhes": str(e)
-        }), 500
 
 @estoque_bp.route('/produtos/<int:id_produto>', methods=['DELETE'])
 @jwt_required()
@@ -346,7 +209,6 @@ def abastecer_estoque():
     id_produto = dados.get('id_produto')
     id_fornecedor = dados.get('id_fornecedor')
     qtdd_recebida = dados.get('qtdd_recebida')
-    id_usuario_logado = int(get_jwt_identity())
 
     if not id_produto or not id_fornecedor or not qtdd_recebida:
         return jsonify({"erro": "id_produto, id_fornecedor e qtdd_recebida são obrigatórios"}), 400
@@ -368,13 +230,10 @@ def abastecer_estoque():
         novo_abastecimento = Abastece(
             id_fornecedor=id_fornecedor,
             id_produto=id_produto,
-            numero_lote=dados.get('numero_lote'),
-            id_usuario=id_usuario_logado,
             qtdd_recebida=qtdd_recebida,
-            qtdd_disponivel=qtdd_recebida,
-            valor_unitario=dados.get('valor_unitario'),
-            data_vencimento=dados.get('data_vencimento')
+            valor_unitario=dados.get('valor_unitario')
         )
+
         db.session.add(novo_abastecimento)
         db.session.commit()
 
@@ -386,50 +245,6 @@ def abastecer_estoque():
     except Exception as e:
         db.session.rollback()
         return jsonify({"erro": "Erro ao abastecer estoque", "detalhes": str(e)}), 500
-    
-@estoque_bp.route('/produtos/<int:id_produto>/abastecimentos', methods=['GET'])
-@jwt_required()
-def listar_abastecimentos_produto(id_produto):
-    """
-    Lista as entradas/abastecimentos de um produto,
-    incluindo fornecedores relacionados.
-    """
-    produto = Produto.query.get_or_404(id_produto)
-
-    abastecimentos = (
-        db.session.query(Abastece, Fornecedor, Usuario)
-        .join(
-            Fornecedor,
-            Abastece.id_fornecedor == Fornecedor.id_fornecedor
-        )
-        .join(
-            Usuario,
-            Abastece.id_usuario == Usuario.id_usuario
-        )
-        .filter(Abastece.id_produto == id_produto)
-        .order_by(Abastece.data_vencimento.asc(), Abastece.dt_abastecimento.desc())
-        .all()
-    )
-
-    lista_json = []
-
-    for abastecimento, fornecedor, usuario in abastecimentos:
-        lista_json.append({
-            "id_abastecimento": abastecimento.id_abastecimento,
-            "id_produto": produto.id_produto,
-            "nome_produto": produto.nome_produto,
-            "numero_lote": abastecimento.numero_lote,
-            "id_fornecedor": fornecedor.id_fornecedor,
-            "fornecedor": fornecedor.razao_social,
-            "qtdd_recebida": abastecimento.qtdd_recebida,
-            "valor_unitario": str(abastecimento.valor_unitario) if abastecimento.valor_unitario else None,
-            "dt_abastecimento": abastecimento.dt_abastecimento.isoformat() if abastecimento.dt_abastecimento else None,
-            "usuario": usuario.nome_usuario,
-            "qtdd_disponivel": abastecimento.qtdd_disponivel,
-            "data_vencimento": abastecimento.data_vencimento.isoformat() if abastecimento.data_vencimento else None
-        })
-
-    return jsonify(abastecimentos=lista_json), 200
 
 # @estoque_bp.route('/ajuste/<int:id_estoque>', methods=['PUT'])
 # @jwt_required()

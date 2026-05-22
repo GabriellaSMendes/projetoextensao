@@ -1,5 +1,5 @@
-from flask import jsonify, Blueprint, send_file
-from app.models import db, Pedido, Produto, ItemPedido
+from flask import jsonify, Blueprint, send_file, request
+from app.models import db, Pedido, Produto, ItemPedido, MovimentacaoEstoque, TipoMovimentacao, Usuario
 from flask_jwt_extended import jwt_required
 from sqlalchemy import func, desc
 import pandas as pd
@@ -8,6 +8,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import io
 from matplotlib.figure import Figure
+from datetime import datetime
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
@@ -143,3 +144,92 @@ def produtos_validade():
 
     # Transformar em JSON
     return jsonify(df.to_dict(orient="records")), 200
+
+@dashboard_bp.route('/relatorio-estoque', methods=['GET'])
+@jwt_required()
+def exportar_relatorio_estoque():
+    """
+    Exporta relatório de movimentações de estoque em formato .xlsx.
+
+    Filtros opcionais:
+    - data_inicio: YYYY-MM-DD
+    - data_fim: YYYY-MM-DD
+    - id_produto: número do produto
+    - tipo: entrada, saida, saída, ajuste, remoção etc.
+    """
+
+    data_inicio = request.args.get("data_inicio")
+    data_fim = request.args.get("data_fim")
+    id_produto = request.args.get("id_produto")
+    tipo = request.args.get("tipo")
+
+    query = (
+        db.session.query(
+            MovimentacaoEstoque.id_estoque.label("ID Movimentação"),
+            Produto.nome_produto.label("Produto"),
+            TipoMovimentacao.tipo_movimentacao.label("Tipo de Movimentação"),
+            MovimentacaoEstoque.qtdd_movimentacao.label("Quantidade"),
+            Usuario.nome_usuario.label("Usuário"),
+            MovimentacaoEstoque.ultima_atualizacao.label("Data da Movimentação")
+        )
+        .join(Produto, MovimentacaoEstoque.id_produto == Produto.id_produto)
+        .join(
+            TipoMovimentacao,
+            MovimentacaoEstoque.id_tipo_movimentacao == TipoMovimentacao.id_tipo_movimentacao
+        )
+        .join(Usuario, MovimentacaoEstoque.id_usuario == Usuario.id_usuario)
+    )
+
+    if data_inicio:
+        data_inicio_dt = datetime.strptime(data_inicio, "%Y-%m-%d")
+        query = query.filter(MovimentacaoEstoque.ultima_atualizacao >= data_inicio_dt)
+
+    if data_fim:
+        data_fim_dt = datetime.strptime(data_fim, "%Y-%m-%d")
+        query = query.filter(MovimentacaoEstoque.ultima_atualizacao <= data_fim_dt)
+
+    if id_produto:
+        query = query.filter(MovimentacaoEstoque.id_produto == int(id_produto))
+
+    if tipo:
+        query = query.filter(TipoMovimentacao.tipo_movimentacao.ilike(f"%{tipo}%"))
+
+    resultados = (
+        query
+        .order_by(MovimentacaoEstoque.ultima_atualizacao.desc())
+        .all()
+    )
+
+    dados = []
+    for item in resultados:
+        dados.append({
+            "ID Movimentação": item[0],
+            "Produto": item[1],
+            "Tipo de Movimentação": item[2],
+            "Quantidade": item[3],
+            "Usuário": item[4],
+            "Data da Movimentação": item[5].strftime("%d/%m/%Y %H:%M") if item[5] else ""
+        })
+
+    df = pd.DataFrame(dados)
+
+    if df.empty:
+        df = pd.DataFrame([{
+            "Mensagem": "Nenhum registro encontrado para os filtros informados."
+        }])
+
+    output = io.BytesIO()
+
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Relatório Estoque")
+
+    output.seek(0)
+
+    nome_arquivo = "relatorio_estoque.xlsx"
+
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name=nome_arquivo,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )

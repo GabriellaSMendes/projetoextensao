@@ -804,15 +804,19 @@ function Estoque() {
 
 
       {modalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-box produto-modal-box">
-
-            <div className="modal-header-produto">
-              <h2>Novo Produto</h2>
+        <div className="produto-modal-overlay">
+          <div className="produto-modal-card">
+            <div className="produto-modal-header">
+              <div>
+                <h2>Novo Produto</h2>
+                <p>
+                  Cadastre os dados do produto e registre a entrada inicial no estoque.
+                </p>
+              </div>
 
               <button
                 type="button"
-                className="modal-close-x"
+                className="produto-modal-close"
                 onClick={() => {
                   setModalOpen(false);
                   setProdutoEditando(null);
@@ -822,7 +826,7 @@ function Estoque() {
               </button>
             </div>
 
-            <div className="modal-section-title">Dados do produto</div>
+            <div className="produto-modal-section-title">Dados do produto</div>
 
             <div className="form-grid">
               <CampoSugestao
@@ -873,7 +877,7 @@ function Estoque() {
               </div>
             </div>
 
-            <div className="modal-section-title">Entrada inicial de estoque</div>
+            <div className="produto-modal-section-title">Entrada inicial de estoque</div>
 
             <div className="form-grid">
               <CampoSugestao
@@ -919,7 +923,7 @@ function Estoque() {
               </div>
             </div>
 
-            <div className="modal-actions">
+            <div className="produto-modal-actions">
               <button
                 className="cancel-btn"
                 onClick={() => {

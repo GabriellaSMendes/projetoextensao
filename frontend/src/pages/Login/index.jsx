@@ -3,8 +3,7 @@ import { useState } from "react";
 import api from "../../services/api";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
-
-
+import Notification from "../../components/Notification";
 
 function Login() {
   const navigate = useNavigate();
@@ -13,7 +12,67 @@ function Login() {
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotMessage, setForgotMessage] = useState("");
 
-  //funcao p o esqueci a senha
+  const [notification, setNotification] = useState({
+    message: "",
+    type: "success",
+  });
+
+  const [formData, setFormData] = useState({
+    email: "",
+    senha: "",
+  });
+
+  function mostrarNotificacao(message, type = "success") {
+    setNotification({ message, type });
+
+    setTimeout(() => {
+      setNotification({ message: "", type: "success" });
+    }, 3500);
+  }
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleLogin = async () => {
+    if (!formData.email.trim() || !formData.senha.trim()) {
+      mostrarNotificacao("Informe e-mail e senha para entrar.", "warning");
+      return;
+    }
+
+    try {
+      const response = await api.post("/auth/login", {
+        email: formData.email,
+        senha: formData.senha,
+      });
+
+      const token = response.data.access_token;
+
+      if (!token) {
+        mostrarNotificacao("Token não recebido. Verifique o backend.", "error");
+        return;
+      }
+
+      localStorage.setItem("token", token);
+
+      const payload = JSON.parse(atob(token.split(".")[1]));
+
+      localStorage.setItem("userName", payload.nome);
+      localStorage.setItem("userLevel", payload.nivel);
+
+      navigate("/home");
+    } catch (error) {
+      console.error(error);
+      mostrarNotificacao(
+        error.response?.data?.erro || "Verifique suas credenciais.",
+        "error"
+      );
+    }
+  };
+
   const handleForgotPassword = async () => {
     if (!forgotEmail.trim()) {
       setForgotMessage("Informe um e-mail válido.");
@@ -25,170 +84,131 @@ function Login() {
 
       setForgotMessage("Se o e-mail existir, você receberá instruções.");
       setForgotEmail("");
-
     } catch (error) {
       console.error(error);
-      // mesma mensagem por segurança
+
       setForgotMessage("Se o e-mail existir, você receberá instruções.");
       setForgotEmail("");
     }
   };
 
-
-  // agora inclui nome_usuario também
-  const [formData, setFormData] = useState({
-    nome_usuario: "",
-    email: "",
-    senha: ""
-  });
-
-  // Atualiza campos do form
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  // LOGIN
-  const handleLogin = async () => {
-    try {
-      const response = await api.post("/auth/login", {
-        email: formData.email,
-        senha: formData.senha,
-      });
-
-      const token = response.data.access_token;
-
-      if (!token) {
-        alert("Token não recebido. Verifique o backend.");
-        return;
-      }
-
-      //Salvar token
-      localStorage.setItem("token", token);
-
-      //Decodificar token JWT
-      const payload = JSON.parse(atob(token.split(".")[1]));
-
-      // acessa campos enviados pelo backend
-      localStorage.setItem("userName", payload.nome);
-      localStorage.setItem("userLevel", payload.nivel);
-
-      //Redirecionar
-      navigate("/home");
-    } catch (error) {
-      console.error(error);
-      alert(error.response?.data?.erro || "Verifique suas credenciais.");
-    }
-  };
-
-
-  // CADASTRAR NOVO USUÁRIO
-  const handleRegister = async (e) => {
-    e.preventDefault();
-
-    try {
-      // rota /auth/registrar NÃO exige token
-      const response = await api.post("/auth/registrar", {
-        nome_usuario: formData.nome_usuario,
-        email: formData.email,
-        senha: formData.senha,
-        nivel_acesso: "admin",
-      });
-
-      alert(response.data.mensagem || "Usuário registrado com sucesso!");
-
-      // limpa os campos
-      setFormData({ nome_usuario: "", email: "", senha: "" });
-    } catch (error) {
-      console.error(error);
-      alert(
-        "Erro ao cadastrar usuário: " +
-        (error.response?.data?.erro || "Erro desconhecido")
-      );
-    }
-  };
-
   return (
-    <div className="login-wrapper">
+    <div className="login-page">
+      <Notification
+        message={notification.message}
+        type={notification.type}
+        onClose={() => setNotification({ message: "", type: "success" })}
+      />
 
-      {/* Logo acima do cartão */}
-      <img src={logo} alt="Tropical Mix" className="login-logo" />
+      <section className="login-brand-panel">
+        <div className="brand-content">
+          <img src={logo} alt="Tropical Mix" className="brand-logo" />
 
-      <form className="login-card">
-        <h1>Login</h1>
-
-        {/* NOME DO USUÁRIO 
-        <input
-          placeholder="Nome do usuário"
-          type="text"
-          name="nome_usuario"
-          value={formData.nome_usuario}
-          onChange={handleChange}
-        />
-*/}
-        {/* EMAIL */}
-        <input
-          placeholder="E-mail"
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-        />
-
-        {/* SENHA */}
-        <input
-          placeholder="Senha"
-          type="password"
-          name="senha"
-          value={formData.senha}
-          onChange={handleChange}
-        />
-
-        {/* BOTÃO LOGIN */}
-        <button
-          className="button-login"
-          type="button"
-          onClick={handleLogin}
-        >
-          Entrar
-        </button>
-
-        <button
-          type="button"
-          className="forgot-password"
-          onClick={() => setForgotOpen(true)}
-        >
-          Esqueci minha senha
-        </button>
-      </form>
-
-      {/* modal de esqueci a senha */}
-      {forgotOpen && (
-        <div className="modal-overlay">
-          <div className="modal-box">
-            <h2>Redefinir senha</h2>
-            <p style={{ marginBottom: 12 }}>
-              Informe seu e-mail para enviar o pedido de redefinição.
+          <div>
+            <span className="brand-tag">Sistema de Gestão</span>
+            <h1>Tropical Mix</h1>
+            <p>
+              Controle vendas, estoque, clientes e fornecedores em uma única
+              plataforma.
             </p>
+          </div>
+        </div>
+      </section>
 
+      <section className="login-form-panel">
+        <form
+          className="login-card"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleLogin();
+          }}
+        >
+          <div className="login-card-header">
+            <h2>Entrar no sistema</h2>
+            <p>Informe suas credenciais para acessar o painel.</p>
+          </div>
+
+          <div className="login-field">
+            <label>E-mail</label>
             <input
+              placeholder="seuemail@exemplo.com"
               type="email"
-              placeholder="Seu e-mail"
-              value={forgotEmail}
-              onChange={(e) => setForgotEmail(e.target.value)}
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              autoComplete="email"
             />
-            {forgotMessage && (
-              <p className="forgot-info">
-                {forgotMessage}
-              </p>
-            )}
+          </div>
 
+          <div className="login-field">
+            <label>Senha</label>
+            <input
+              placeholder="Digite sua senha"
+              type="password"
+              name="senha"
+              value={formData.senha}
+              onChange={handleChange}
+              autoComplete="current-password"
+            />
+          </div>
 
-            <div className="modal-actions">
+          <button className="button-login" type="submit">
+            Entrar
+          </button>
+
+          <button
+            type="button"
+            className="forgot-password"
+            onClick={() => {
+              setForgotOpen(true);
+              setForgotMessage("");
+              setForgotEmail("");
+            }}
+          >
+            Esqueci minha senha
+          </button>
+        </form>
+      </section>
+
+      {forgotOpen && (
+        <div className="login-modal-overlay">
+          <div className="login-modal-box">
+            <div className="login-modal-header">
+              <div>
+                <h2>Redefinir senha</h2>
+                <p>Informe seu e-mail para solicitar a redefinição.</p>
+              </div>
+
               <button
-                className="cancel-btn" onClick={() => {
+                type="button"
+                className="login-modal-close"
+                onClick={() => {
+                  setForgotOpen(false);
+                  setForgotMessage("");
+                  setForgotEmail("");
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="login-field">
+              <label>E-mail</label>
+              <input
+                type="email"
+                placeholder="seuemail@exemplo.com"
+                value={forgotEmail}
+                onChange={(e) => setForgotEmail(e.target.value)}
+              />
+            </div>
+
+            {forgotMessage && <p className="forgot-info">{forgotMessage}</p>}
+
+            <div className="login-modal-actions">
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={() => {
                   setForgotOpen(false);
                   setForgotMessage("");
                   setForgotEmail("");
@@ -196,14 +216,18 @@ function Login() {
               >
                 Cancelar
               </button>
-              <button className="save-btn" onClick={handleForgotPassword}>
+
+              <button
+                type="button"
+                className="save-btn"
+                onClick={handleForgotPassword}
+              >
                 Enviar
               </button>
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 }

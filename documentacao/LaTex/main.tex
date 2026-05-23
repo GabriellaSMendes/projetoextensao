@@ -47,7 +47,7 @@ brazil
 % ----------------------------------------------------------
 % CONFIGURAÇÃO DO CABEÇALHO PERSONALIZADO 
 % ----------------------------------------------------------
-\fancypagestyle{capitulos}{
+\fancypagestyle{Capítulos}{
   \fancyhf{} % limpa cabeçalho e rodapé
   \fancyhead[L]{\itshape\small \nouppercase{\leftmark}}% nome do capítulo menor e em itálico
   \fancyhead[R]{\small\thepage} % número da página menor
@@ -64,7 +64,7 @@ brazil
 % CAPA E FOLHA DE ROSTO
 % ----------------------------------------------------------
 
-\input{LaTex/capa}
+\input{documentacao/LaTex/capa}
 \imprimirfolhaderosto*
 
 
@@ -72,7 +72,7 @@ brazil
 % RESUMOS
 % ----------------------------------------------------------
 
-\input{LaTex/Capítulos/Resumos}
+\input{documentacao/LaTex/Capítulos/Resumos}
 
 % ----------------------------------------------------------
 % LISTAS
@@ -95,31 +95,31 @@ brazil
 % CORPO DO TEXTO 
 % ----------------------------------------------------------
 \mainmatter
-\pagestyle{capitulos}
+\pagestyle{Capítulos}
 
 
 % ----------------------------------------------------------
 % CAPÍTULOS
 % ----------------------------------------------------------
 
-\input{LaTex/Capítulos/Introdução}
-\input{LaTex/Capítulos/REVISÃO DA LITERATURA}
-\input{LaTex/Capítulos/GESTÃO DO PROJETO}
-\input{LaTex/Capítulos/DESENVOLVIMENTO DO PROJETO}
-\input{LaTex/Capítulos/VIABILIDADE FINANCEIRA}
-\input{LaTex/Capítulos/CONSIDERAÇÕES FINAIS}
+\input{documentacao/LaTex/Capítulos/Introdução}
+\input{documentacao/LaTex/Capítulos/REVISÃO DA LITERATURA}
+\input{documentacao/LaTex/Capítulos/GESTÃO DO PROJETO}
+\input{documentacao/LaTex/Capítulos/DESENVOLVIMENTO DO PROJETO}
+\input{documentacao/LaTex/Capítulos/VIABILIDADE FINANCEIRA}
+\input{documentacao/LaTex/Capítulos/CONSIDERAÇÕES FINAIS}
 
 % ----------------------------------------------------------
 % APÊNDICES
 % ----------------------------------------------------------
 
-\input{LaTex/Capítulos/APÊNDICES}
+\input{documentacao/LaTex/Capítulos/APÊNDICES}
 
 % ----------------------------------------------------------
 % ANEXOS
 % ----------------------------------------------------------
 
-\input{LaTex/Capítulos/ANEXOS}
+\input{documentacao/LaTex/Capítulos/ANEXOS}
 
 % ----------------------------------------------------------
 % REFERÊNCIAS

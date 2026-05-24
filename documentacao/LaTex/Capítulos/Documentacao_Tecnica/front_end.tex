@@ -117,13 +117,73 @@ Dessa forma, os padrões visuais e comportamentais adotados no front-end contrib
 
 \subsection{Telas desenvolvidas}
 
+As telas desenvolvidas no front-end do sistema Tropical Mix foram organizadas de acordo com os principais fluxos operacionais da aplicação. Cada tela foi estruturada para atender a uma funcionalidade específica, mantendo padronização visual, integração com a API e consistência na experiência de uso.
+
+A aplicação contempla telas públicas e telas protegidas. A tela de login representa o ponto de entrada do sistema, enquanto as demais páginas internas dependem da autenticação do usuário para serem acessadas. Essa organização está alinhada ao modelo de rotas protegidas definido no front-end, no qual páginas como início, estoque, vendas, clientes, fornecedores, cadastro, perfil e relatório são acessadas apenas após a validação do token de autenticação.
+
+As interfaces foram desenvolvidas considerando os requisitos funcionais definidos para o sistema, como autenticação de usuários, controle de estoque, registro de vendas, gerenciamento de clientes, fornecedores e usuários, além da visualização de informações gerenciais. Também foram considerados aspectos de usabilidade, como organização dos dados em tabelas, uso de filtros, modais para formulários, mensagens de retorno e padronização dos elementos visuais.
+
 \subsubsection{Tela de login}
+
+A tela de login é responsável por controlar o acesso inicial ao sistema Tropical Mix. Nessa interface, o usuário informa suas credenciais de acesso, compostas por e-mail e senha, para que a autenticação seja realizada junto ao back-end.
+
+Após o envio dos dados, o front-end realiza uma requisição para a rota de autenticação da API. Quando as credenciais são validadas, o token retornado pelo back-end é armazenado no \texttt{localStorage} do navegador. Esse token passa a ser utilizado nas demais requisições protegidas do sistema, permitindo que o usuário acesse as páginas internas da aplicação.
+
+Além do token, a tela também armazena informações derivadas do conteúdo do JWT, como o nome do usuário e seu nível de acesso. Esses dados são utilizados posteriormente na interface, especialmente na barra de navegação, para exibir informações do usuário autenticado e controlar a apresentação de funcionalidades restritas.
+
+A interface de login também contempla a opção de redefinição de senha, acionada por meio do botão ``Esqueci minha senha''. Ao selecionar essa opção, é exibido um modal para preenchimento do e-mail do usuário. A resposta apresentada ao usuário é genérica, informando que, caso o e-mail exista, serão enviadas instruções de recuperação. Essa abordagem contribui para evitar a exposição indevida de informações sobre contas cadastradas.
+
+Visualmente, a tela foi desenvolvida com foco na identificação da marca e na simplicidade do fluxo de entrada. A logo da Tropical Mix é exibida acima do formulário, enquanto o cartão central concentra os campos de autenticação e as ações disponíveis. O uso de fundo em degradê, botões destacados e campos centralizados contribui para uma apresentação mais profissional e objetiva.
 
 \subsubsection{Tela inicial}
 
+A tela inicial, também denominada Home, é apresentada ao usuário após a autenticação bem-sucedida no sistema. Sua função principal é atuar como ponto de acesso às principais áreas da aplicação, organizando visualmente os módulos disponíveis e facilitando a navegação entre as funcionalidades.
+
+Essa página apresenta uma mensagem de boas-vindas ao sistema Tropical Mix e cards de navegação direcionados às áreas de usuários e cadastros, estoque, clientes, fornecedores e vendas. Cada card possui título, breve descrição e link para a respectiva rota interna, permitindo que o usuário acesse rapidamente o módulo desejado.
+
+A estrutura da tela inicial foi desenvolvida com foco na simplicidade e na orientação do usuário. Em vez de apresentar grande volume de dados logo após o login, a página concentra-se em oferecer caminhos claros para as principais operações do sistema. Essa decisão favorece a usabilidade, especialmente para usuários que precisam executar tarefas operacionais de forma objetiva.
+
+Do ponto de vista técnico, a tela utiliza componentes de navegação do \texttt{react-router-dom}, por meio do componente \texttt{Link}. Esse recurso permite que cada card direcione o usuário para uma rota específica da aplicação sem recarregar completamente a página, mantendo o comportamento de Single Page Application.
+
+A tela inicial também segue os padrões visuais definidos para o projeto, utilizando fundo claro, cards com bordas arredondadas, sombras sutis e elementos destacados na paleta institucional da aplicação. Essa padronização contribui para manter a consistência visual entre a página inicial e os demais módulos internos do sistema.
+
 \subsubsection{Tela de estoque}
 
+A tela de estoque é responsável pela visualização e pelo gerenciamento dos produtos cadastrados no sistema Tropical Mix. Essa interface concentra informações essenciais para o controle operacional, como nome do produto, categoria, sabor, quantidade atual, próxima validade, status e último fornecedor vinculado.
+
+A listagem dos produtos é apresentada em formato de tabela, permitindo ao usuário consultar rapidamente os itens disponíveis. Cada linha representa um produto cadastrado e reúne dados provenientes da API de estoque. A tela também apresenta um contador com a quantidade de itens listados, o que auxilia na compreensão do volume de registros exibidos após a aplicação de filtros.
+
+Um dos principais recursos da tela é o painel lateral de filtros avançados. Esse painel permite segmentar os produtos por diferentes critérios, como texto livre, status, categoria, sabor, marca e fornecedor. Os filtros por categoria e status utilizam seleção por caixas de marcação, enquanto outros campos utilizam entradas pesquisáveis com sugestões, permitindo que o usuário digite parte do valor desejado ou selecione opções existentes. Essa abordagem facilita a busca em cenários com maior quantidade de produtos cadastrados.
+
+A tela também utiliza indicadores visuais para destacar situações relevantes no controle de estoque. Produtos com quantidade reduzida recebem uma identificação de estoque baixo, enquanto produtos com lotes vencidos ou próximos da validade são sinalizados por etiquetas de status. Esses elementos auxiliam na tomada de decisão, pois permitem identificar rapidamente produtos que exigem reposição, atenção quanto ao vencimento ou alguma ação administrativa.
+
+O cadastro de novos produtos é realizado por meio de um modal, aberto a partir do botão de adição. O formulário foi organizado em seções, separando os dados gerais do produto da entrada inicial de estoque. Entre os campos disponíveis estão nome do produto, categoria, sabor, marca, custo unitário, fornecedor, número do lote, quantidade inicial e data de vencimento. Essa separação contribui para tornar o preenchimento mais claro e reduzir erros durante o cadastro.
+
+A tela também contempla validações iniciais no front-end, como a obrigatoriedade de informar nome do produto, categoria, fornecedor, quantidade inicial e custo unitário. Além disso, a data de vencimento é validada para evitar o cadastro de produtos já vencidos. Essas validações não substituem as regras aplicadas no back-end, mas funcionam como uma primeira camada de orientação ao usuário.
+
+Do ponto de vista de integração, a tela de estoque realiza requisições para diferentes rotas da API. São consumidos dados de produtos, categorias, fornecedores e usuários, utilizados tanto na tabela principal quanto nos filtros e formulários. No cadastro de um novo produto, a interface também possui lógica para obter ou criar categorias e fornecedores, permitindo que novos valores sejam incorporados ao sistema durante o próprio fluxo de cadastro.
+
+Além da visualização e do cadastro, a tela permite acessar os detalhes de um produto específico por meio do botão ``Detalhes''. Essa ação abre a página de detalhe do produto em uma nova aba, possibilitando uma análise mais aprofundada sem interromper completamente a visualização da listagem geral do estoque.
+
+Dessa forma, a tela de estoque representa um dos principais módulos operacionais do sistema, pois centraliza o acompanhamento dos produtos, apoia o controle de validade, facilita a localização de registros e integra ações de cadastro, consulta e navegação para detalhes.
+
 \subsubsection{Tela de detalhe do produto}
+
+A tela de detalhe do produto foi desenvolvida para apresentar informações consolidadas de um item específico do estoque, permitindo uma análise mais aprofundada do produto selecionado na listagem principal. Diferentemente da tela geral de estoque, que apresenta uma visão resumida dos produtos cadastrados, essa interface concentra dados individuais, histórico de entradas e informações relacionadas aos lotes disponíveis.
+
+O acesso a essa tela ocorre a partir do botão ``Detalhes'', disponível na tabela da tela de estoque. Ao selecionar essa opção, o sistema abre uma página específica do produto, permitindo que o usuário consulte suas informações sem perder a referência da listagem geral. Essa decisão de navegação favorece a comparação entre produtos e evita interrupções no fluxo principal de consulta.
+
+Na parte superior da página, são exibidas informações gerais do produto, como nome, categoria, sabor, marca, estoque atual, custo unitário e custo total do estoque. O custo total é calculado a partir dos lotes exibidos, considerando a quantidade disponível e o valor unitário de cada lote. Dessa forma, a interface permite uma visão financeira aproximada do estoque disponível daquele produto.
+
+A tela também apresenta um indicador relacionado à validade dos lotes. Esse recurso considera tanto lotes vencidos quanto lotes próximos do vencimento, definidos como aqueles com data de vencimento em até 45 dias. Quando acionado, o indicador permite filtrar a tabela de lotes para exibir apenas os registros que exigem maior atenção, facilitando a identificação de produtos que podem gerar perdas ou demandar ação operacional.
+
+A tabela de lotes apresenta informações detalhadas sobre cada entrada de estoque vinculada ao produto, incluindo validade, número do lote, fornecedor, quantidade recebida, quantidade disponível, custo unitário, custo total do lote e data de entrada. Essa organização permite rastrear a origem e a situação de cada lote, contribuindo para maior controle sobre validade, saldo e custo de reposição.
+
+Além da consulta, a tela permite registrar uma nova entrada de estoque por meio do botão ``Registrar entrada''. Ao acionar essa opção, é exibido um modal para preenchimento das informações do novo abastecimento, como fornecedor, quantidade recebida, valor unitário, data de vencimento e número do lote. Após o envio, a interface realiza uma requisição para a API de estoque e atualiza os dados da página, mantendo os cards e a tabela de lotes sincronizados com as informações mais recentes.
+
+Essa tela também apoia a lógica de controle por lote, que é especialmente importante para produtos com validade. Ao separar os abastecimentos de um mesmo produto, o sistema permite acompanhar diferentes datas de vencimento e quantidades disponíveis, em vez de tratar o produto apenas como um saldo único. Essa abordagem contribui para um controle mais preciso e para a identificação de lotes vencidos ou próximos do vencimento.
+
+Dessa forma, a tela de detalhe do produto complementa a tela principal de estoque, oferecendo uma visão operacional mais completa sobre cada item cadastrado. Sua implementação favorece o acompanhamento de entradas, validade, custo e disponibilidade, aspectos essenciais para a gestão de produtos perecíveis ou sujeitos a controle por lote.
 
 \subsubsection{Tela de vendas}
 

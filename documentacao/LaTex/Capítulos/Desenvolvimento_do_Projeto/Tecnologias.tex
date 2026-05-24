@@ -10,7 +10,7 @@ A escolha pelo React deve-se à sua eficiência no gerenciamento do estado da ap
 
 Para a estruturação e estilização das páginas, foram utilizadas as tecnologias \textbf{HTML5} e \textbf{CSS3}, permitindo a criação de layouts responsivos que se adaptam a diferentes dispositivos, como computadores, tablets e smartphones. A comunicação entre o \textit{front-end} e o \textit{back-end} é realizada por meio de requisições HTTP utilizando a biblioteca \textbf{Axios}, que possibilita a troca de dados de forma assíncrona e eficiente.  
 
-Além das funcionalidades de navegação e controle de estoque e vendas, o \textit{front-end} também inclui o módulo de um painel dinâmico, \textbf{Dashboard}, um painel interativo voltado à geração de relatórios e à exibição de indicadores de desempenho. Esse painel consome dados disponibilizados pela API do \textit{back-end} e apresenta informações estratégicas, como volume de vendas, produtos com menor estoque e desempenho por período, em gráficos e tabelas dinâmicas.  
+Além das funcionalidades de navegação e controle de estoque e vendas, o \textit{front-end} também inclui o módulo de geração de relatórios com informações temporais em relação aos indicadores de desempenho do cliente. Esse painel consome dados disponibilizados pela API do \textit{back-end} e apresenta informações estratégicas, como volume de vendas, produtos com menor estoque e desempenho por período, em gráficos e tabelas dinâmicas.  
 
 Dessa forma, o \textit{front-end} não apenas oferece uma interface intuitiva e agradável ao usuário, mas também serve como ferramenta de apoio à gestão, centralizando visualmente as informações mais relevantes para a tomada de decisão.
 
@@ -22,7 +22,7 @@ Entre as principais funcionalidades desenvolvidas nessa camada, destacam-se:
 \begin{itemize}
     \item Gerenciamento de usuários e autenticação, com controle de perfis de acesso;
     \item Registro e controle de vendas e movimentações de estoque;
-    \item Processamento de dados para geração de relatórios e indicadores exibidos no painel do \textit{front-end};
+    \item Processamento de dados para geração de relatórios e indicadores exibidos nas páginas do \textit{front-end};
     \item Integração com o banco de dados \textbf{MySQL} para armazenamento e consulta das informações.
 \end{itemize}
 
@@ -41,9 +41,9 @@ Além disso, a estrutura relacional do MySQL possibilita consultas otimizadas pa
 
 \subsection{Infraestrutura}
 
-A infraestrutura planejada para o sistema Tropical Mix visa garantir estabilidade e segurança ao ambiente de execução da aplicação. Durante o desenvolvimento, a aplicação será executada em ambiente local pelos integrantes da equipe, utilizando servidores Flask para o back-end e o serviço de hospedagem local do React para o front-end.
+A infraestrutura usada para o sistema Tropical Mix visa garantir estabilidade e segurança ao ambiente de execução da aplicação. Durante o desenvolvimento, a aplicação será executada em ambiente local pelos integrantes da equipe, utilizando servidores Flask para o back-end e o serviço de hospedagem local do React para o front-end.
 
-Para a fase de implantação, considera-se a utilização de um serviço de computação em nuvem, como a \textbf{Amazon Web Services (AWS)} ou o \textbf{Render}, que oferecem planos gratuitos e compatíveis com aplicações em Flask e React. O banco de dados MySQL poderá ser hospedado em serviços como o \textbf{Railway} ou o \textbf{PlanetScale}, garantindo persistência remota e acessibilidade para todos os desenvolvedores.
+Para a fase de implantação, utilizamos o serviço de computação em nuvem, \textbf{Amazon Web Services (AWS)} que oferece planos gratuitos e compatíveis com aplicações em Flask e React. O banco de dados MySQL vai ser hospedado no serviço \textbf{Amazon RDS}, garantindo persistência remota e acessibilidade para todos os desenvolvedores.
 
 A arquitetura proposta segue o modelo cliente-servidor, em que o front-end (cliente) se comunica com o back-end (servidor Flask) via API REST, como mostra a Figura~\ref{fig:cliente-servidor}. O ambiente de nuvem permitirá a configuração de endpoints públicos e o gerenciamento de logs, autenticação e escalabilidade sob demanda.
 

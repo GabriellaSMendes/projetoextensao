@@ -38,15 +38,82 @@ A comunicação com o back-end é realizada por meio da biblioteca \texttt{axios
 
 A estilização da interface foi desenvolvida com CSS, utilizando arquivos de estilo separados por componente ou página. Essa separação contribui para a organização visual do projeto e permite que cada tela mantenha suas próprias regras de apresentação, respeitando, ao mesmo tempo, o padrão visual definido para o sistema.
 
-\subsection{Tecnologias e bibliotecas utilizadas}
-
 \subsection{Roteamento e proteção de rotas}
+A navegação entre as páginas do sistema foi implementada com o auxílio da biblioteca \texttt{react-router-dom}, responsável por controlar as rotas internas da aplicação. Esse recurso permite associar diferentes caminhos da URL a componentes específicos, possibilitando que o usuário transite entre as telas do sistema sem a necessidade de recarregamento completo da página.
+
+No arquivo \texttt{App.jsx}, foram definidas as principais rotas do sistema, incluindo a tela de login, a página inicial, o controle de estoque, o registro de vendas, o gerenciamento de clientes, fornecedores, perfil de usuário, cadastro e relatório. A rota inicial, representada por \texttt{/}, direciona o usuário para a tela de autenticação, enquanto as demais rotas representam áreas internas da aplicação.
+
+Para restringir o acesso às páginas internas, foi implementado o componente \texttt{ProtectedRoute}. Esse componente verifica se existe um token de autenticação armazenado no \texttt{localStorage} do navegador. Caso o token não esteja presente, o usuário é redirecionado automaticamente para a tela de login. Caso contrário, o conteúdo da página solicitada é renderizado normalmente.
+
+Além da proteção de acesso, o componente \texttt{ProtectedRoute} também centraliza a exibição de elementos comuns às telas autenticadas, como a barra de navegação e o rodapé. Dessa forma, todas as páginas internas mantêm uma estrutura visual padronizada, evitando a repetição desses componentes em cada tela individualmente.
+
+Esse modelo contribui para a organização da aplicação, pois separa a tela pública de login das telas protegidas do sistema. Também favorece a manutenção do código, uma vez que alterações nos elementos comuns de navegação podem ser realizadas em um único ponto da aplicação.
 
 \subsection{Comunicação com a API}
 
+A comunicação entre o front-end e o back-end foi implementada por meio de requisições HTTP, utilizando a biblioteca \texttt{axios}. Essa biblioteca permite que a interface envie e receba dados da API de forma assíncrona, possibilitando operações como autenticação, listagem de registros, cadastro, edição e consulta de informações.
+
+No sistema Tropical Mix, as chamadas à API são realizadas a partir das páginas da aplicação, de acordo com a funcionalidade executada pelo usuário. Na tela de login, por exemplo, o front-end envia as credenciais informadas pelo usuário para a rota de autenticação do back-end. Quando a autenticação é bem-sucedida, o token retornado pela API é armazenado no \texttt{localStorage}, permitindo que as demais requisições protegidas sejam realizadas posteriormente.
+
+Nas telas internas, o token armazenado é enviado no cabeçalho das requisições por meio do campo \texttt{Authorization}, utilizando o padrão \texttt{Bearer Token}. Esse procedimento permite que o back-end identifique o usuário autenticado e valide se ele possui permissão para acessar ou modificar os dados solicitados.
+
+A tela de estoque, por exemplo, realiza requisições para carregar produtos, categorias e fornecedores. Essas informações são utilizadas para preencher a tabela principal, os filtros laterais e os campos dos formulários de cadastro. Também são realizadas requisições para registrar novos produtos, criar categorias e fornecedores quando necessário, além de atualizar o estado visual da interface após cada operação.
+
+De forma semelhante, a tela de vendas consome dados de clientes, produtos e pedidos. Para exibir as vendas registradas, a interface busca a lista de pedidos e, em seguida, consulta os detalhes de cada venda, permitindo calcular valores totais e apresentar informações resumidas ao usuário. No registro de uma nova venda, o front-end monta um objeto com o cliente, o método de pagamento e os itens adicionados ao carrinho, enviando esse conjunto de dados para a API responsável pelo cadastro do pedido.
+
+As telas de clientes e fornecedores seguem o mesmo princípio de comunicação, utilizando requisições para listar registros existentes, cadastrar novos dados e atualizar informações previamente registradas. Após operações bem-sucedidas, os dados são recarregados para manter a interface sincronizada com o estado atual do banco de dados.
+
+Esse modelo de comunicação contribui para a separação de responsabilidades entre as camadas da aplicação. O front-end concentra-se na apresentação, interação e validação inicial dos dados, enquanto o back-end é responsável por aplicar as regras de negócio, persistir informações e retornar respostas estruturadas para a interface.
+
 \subsection{Componentes reutilizáveis}
 
+A implementação do front-end também contempla o uso de componentes reutilizáveis, com o objetivo de reduzir duplicidade de código, padronizar a interface e facilitar a manutenção da aplicação. Em uma aplicação baseada em React, os componentes representam partes independentes da interface que podem ser utilizadas em diferentes telas, recebendo propriedades e comportamentos conforme a necessidade de cada contexto.
+
+No sistema Tropical Mix, foram implementados componentes comuns para navegação, rodapé, notificações e confirmação de ações. Esses elementos são utilizados em múltiplas páginas da aplicação e contribuem para manter uma experiência visual consistente para o usuário.
+
+O componente de navegação, representado pela barra superior do sistema, concentra os links principais da aplicação, permitindo o acesso às telas de início, estoque, clientes, fornecedores, vendas e relatório. Além disso, o componente apresenta informações relacionadas ao usuário autenticado, como o nome armazenado no navegador, e disponibiliza opções de acesso ao perfil, cadastro de usuário e saída do sistema. A exibição de determinadas opções considera o nível de acesso do usuário, diferenciando funcionalidades disponíveis para administradores e vendedores.
+
+O rodapé foi implementado como um componente separado, utilizado juntamente com a navegação nas rotas protegidas. Essa separação evita a necessidade de repetir a mesma estrutura em cada página interna, favorecendo a organização e a padronização visual da aplicação.
+
+Também foi desenvolvido um componente de notificação, utilizado para exibir mensagens de sucesso, erro, aviso ou informação. Esse componente substitui parte das mensagens nativas do navegador e permite apresentar retornos visuais mais integrados ao padrão da interface. Dessa forma, ações como cadastro, atualização, falha de validação ou erro de comunicação podem ser comunicadas ao usuário de maneira mais clara e menos intrusiva.
+
+Outro elemento reutilizável é o modal de confirmação, utilizado em ações que exigem validação explícita do usuário antes de serem concluídas. Esse componente é especialmente importante para operações que podem alterar o estado dos dados, como ocultar, reativar ou remover registros. O uso desse tipo de confirmação contribui para reduzir ações acidentais e melhora a segurança da interação.
+
+Além dos componentes gerais, algumas telas implementam componentes locais para campos de sugestão e filtros pesquisáveis. Esses campos permitem que o usuário digite livremente ou selecione opções existentes, geralmente exibidas em ordem alfabética. Esse padrão foi utilizado em filtros e formulários com o objetivo de facilitar a busca por produtos, fornecedores, categorias, marcas, sabores e demais informações recorrentes no sistema.
+
+A adoção de componentes reutilizáveis contribui para uma estrutura de front-end mais modular. Com isso, alterações de comportamento ou de estilo podem ser realizadas de forma centralizada, reduzindo o esforço de manutenção e favorecendo a evolução da aplicação.
+
 \subsection{Padrões visuais e experiência do usuário}
+
+A interface do sistema Tropical Mix foi desenvolvida buscando manter consistência visual, clareza na navegação e facilidade de uso. Como o sistema é voltado ao gerenciamento operacional de estoque, vendas, clientes e fornecedores, a experiência do usuário foi considerada um aspecto relevante para reduzir erros durante o uso e tornar as principais ações mais acessíveis.
+
+O padrão visual adotado utiliza uma identidade baseada em tons de roxo, lilás, branco e amarelo, cores associadas à marca Tropical Mix e aplicadas de forma recorrente em botões, barras de navegação, cabeçalhos de modais, filtros e indicadores visuais. Essa padronização permite que diferentes telas sejam reconhecidas como partes de um mesmo sistema, evitando inconsistências visuais entre os módulos.
+
+A Figura~\ref{fig:paleta-cores-interface} apresenta a paleta de cores utilizada na interface da aplicação. O roxo-vinho foi definido como cor institucional principal, o rosa escuro como cor secundária de apoio, o rosa claro como cor de apoio e o amarelo como cor de ação e destaque. Essa organização contribui para a definição de uma hierarquia visual, orientando o uso das cores conforme sua função na interface.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{Capítulos/img/Documentacao Tecnica/paleta_de_cores_da_interface.png}
+    \caption{Paleta de cores utilizada na interface do sistema Tropical Mix.}
+    \label{fig:paleta-cores-interface}
+    \fonte{Elaborado pelos autores.}
+\end{figure}
+
+As páginas internas seguem uma estrutura semelhante, composta por título principal, área de ações, tabela de registros, filtros laterais e modais para cadastro ou edição. Esse padrão foi aplicado em telas como estoque, vendas, clientes e fornecedores, facilitando o aprendizado da interface pelo usuário. Uma vez compreendida a lógica de uma tela, a navegação nas demais se torna mais intuitiva.
+
+Os botões de ação também seguem uma hierarquia visual. Ações principais, como adicionar novo registro ou salvar informações, são destacadas com cores mais evidentes. Já ações secundárias, como cancelar, limpar filtros ou fechar modais, recebem menor destaque visual. Essa diferenciação contribui para orientar o usuário sobre a importância de cada ação disponível na interface.
+
+A aplicação também utiliza filtros avançados em painéis laterais, permitindo a busca e segmentação dos dados exibidos nas tabelas. Em diferentes telas, foram implementados filtros por campos como nome, categoria, fornecedor, cliente, vendedor, produto, forma de pagamento, período e faixa de valor. Em alguns casos, os filtros utilizam campos pesquisáveis com sugestões, permitindo que o usuário digite parte do termo desejado ou selecione uma opção existente.
+
+Nas telas com maior quantidade de informações, como estoque e vendas, foram aplicados recursos visuais para destacar situações relevantes. No estoque, por exemplo, produtos com baixa quantidade podem receber indicação visual específica, enquanto lotes vencidos ou próximos do vencimento são representados por etiquetas de status. Esses elementos auxiliam o usuário a identificar rapidamente situações que exigem atenção.
+
+Os modais foram utilizados para concentrar formulários e ações específicas sem retirar o usuário do contexto principal da tela. Dessa forma, operações como adicionar produto, registrar venda, cadastrar fornecedor ou visualizar detalhes podem ocorrer sobre a própria página, mantendo a navegação mais fluida. Em formulários mais extensos, as informações foram agrupadas por seções, como dados do produto, entrada inicial de estoque, dados da venda e carrinho.
+
+A experiência do usuário também foi aprimorada por meio de mensagens de retorno visual. O componente de notificação informa o resultado de ações como cadastro, edição, validação de campos e erros de comunicação. Esse recurso contribui para tornar a interação mais clara, pois o usuário recebe uma resposta imediata após executar uma ação.
+
+Além disso, a utilização de confirmações em ações sensíveis reduz a possibilidade de alterações acidentais. Ao solicitar confirmação antes de determinadas operações, o sistema oferece uma etapa adicional de segurança na interação, especialmente em funcionalidades que modificam o estado dos dados.
+
+Dessa forma, os padrões visuais e comportamentais adotados no front-end contribuem para uma interface mais organizada, consistente e adequada ao uso cotidiano da aplicação, priorizando clareza, previsibilidade e facilidade de manutenção.
 
 \subsection{Telas desenvolvidas}
 

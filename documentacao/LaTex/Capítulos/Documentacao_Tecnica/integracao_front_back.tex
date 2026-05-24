@@ -1,13 +1,101 @@
 \section{Integração entre Front-end e Back-end}
 
+A integração entre o front-end e o back-end do sistema Tropical Mix foi estruturada com base em uma arquitetura cliente-servidor, na qual a interface web atua como cliente e a API desenvolvida em Flask atua como servidor da aplicação. Essa separação permite que a camada de apresentação seja responsável pela interação com o usuário, enquanto a camada de aplicação concentra o processamento das regras de negócio, autenticação, validações e comunicação com o banco de dados.
+
+A troca de informações entre as camadas ocorre por meio de requisições HTTP, utilizando dados no formato JSON. Esse formato foi adotado por ser amplamente utilizado em APIs REST e por permitir uma comunicação estruturada entre sistemas desenvolvidos com tecnologias distintas. No contexto do projeto, o front-end foi desenvolvido em React, enquanto o back-end utiliza Python com Flask, sendo a comunicação entre ambos realizada por meio da biblioteca \texttt{axios}.
+
+A integração entre as camadas é essencial para o funcionamento da aplicação, pois as telas do sistema dependem dos dados fornecidos pela API para exibir produtos, clientes, fornecedores, vendas, usuários e indicadores gerenciais. Da mesma forma, ações realizadas na interface, como cadastros, edições e registros de vendas, são enviadas ao back-end para processamento e persistência no banco de dados.
+
 \subsection{Fluxo geral de comunicação}
+
+O fluxo geral de comunicação da aplicação inicia-se na interação do usuário com a interface web. Ao acessar uma tela, preencher um formulário, aplicar filtros ou acionar um botão de cadastro, o front-end executa uma função responsável por enviar uma requisição HTTP para uma rota específica da API.
+
+Essas requisições podem utilizar diferentes métodos HTTP, de acordo com a operação realizada. As operações de consulta utilizam, em geral, o método \texttt{GET}; os cadastros utilizam o método \texttt{POST}; as atualizações utilizam o método \texttt{PUT} ou \texttt{PATCH}; e as remoções, quando aplicáveis, utilizam o método \texttt{DELETE}. Essa organização segue o padrão de APIs REST, no qual cada método representa uma intenção específica sobre determinado recurso.
+
+No front-end, as requisições são realizadas por meio da biblioteca \texttt{axios}. As páginas da aplicação chamam os endpoints disponibilizados pelo back-end e recebem respostas estruturadas em JSON. Após o recebimento dos dados, a interface atualiza seus estados internos e renderiza novamente os componentes necessários, permitindo que o usuário visualize as informações mais recentes.
+
+No back-end, as rotas são organizadas em módulos específicos, registrados por meio de \textit{blueprints} do Flask. Cada conjunto de rotas possui um prefixo relacionado à sua responsabilidade, como autenticação, estoque, clientes, fornecedores, pedidos, dashboard e usuários. Essa divisão contribui para a organização da API e facilita a manutenção do código.
+
+De forma geral, o fluxo pode ser representado pela sequência: o usuário interage com a interface; o front-end envia uma requisição HTTP para a API; o back-end processa a solicitação, aplica regras de negócio e consulta ou altera dados no banco; por fim, a API retorna uma resposta ao front-end, que atualiza a interface conforme o resultado obtido.
+
+Esse modelo garante separação de responsabilidades entre as camadas. O front-end não acessa diretamente o banco de dados, pois toda comunicação com os dados ocorre por intermédio do back-end. Essa abordagem aumenta a segurança, facilita a validação das regras de negócio e mantém a estrutura da aplicação mais organizada.
 
 \subsection{Autenticação e armazenamento do token}
 
+A autenticação do sistema Tropical Mix foi implementada com base no uso de token JWT, utilizado para controlar o acesso dos usuários às áreas internas da aplicação. Esse mecanismo permite que o back-end valide a identidade do usuário após o login e autorize o acesso às rotas protegidas da API.
+
+O fluxo de autenticação inicia-se na tela de login. Nessa etapa, o usuário informa seu e-mail e sua senha, e o front-end envia esses dados para a rota de autenticação do back-end. Quando as credenciais são validadas, a API retorna um token de acesso, que passa a representar a sessão autenticada do usuário na aplicação.
+
+Após o recebimento do token, o front-end o armazena no \texttt{localStorage} do navegador. Esse armazenamento permite que o token seja reaproveitado durante a navegação entre as telas internas, sem a necessidade de realizar login novamente a cada mudança de página. Além do token, também são armazenadas informações derivadas do JWT, como o nome do usuário e seu nível de acesso, utilizadas pela interface para personalização e controle de exibição de funcionalidades.
+
+A proteção das páginas internas é realizada no front-end por meio do componente \texttt{ProtectedRoute}. Esse componente verifica a existência do token no \texttt{localStorage} antes de permitir a renderização das páginas protegidas. Caso o token não esteja presente, o usuário é redirecionado automaticamente para a tela de login. Caso exista um token armazenado, a página solicitada é exibida juntamente com os componentes comuns da aplicação, como a barra de navegação e o rodapé.
+
+Nas requisições realizadas para rotas protegidas da API, o token é enviado no cabeçalho HTTP \texttt{Authorization}, seguindo o padrão \texttt{Bearer Token}. Dessa forma, o back-end consegue identificar a requisição como autenticada e aplicar as validações necessárias antes de processar a operação solicitada.
+
+O nível de acesso do usuário também é utilizado na interface para diferenciar funcionalidades disponíveis. Usuários com perfil de administrador podem visualizar opções específicas, como o cadastro de usuários, enquanto usuários com perfil de vendedor possuem acesso mais restrito. Essa diferenciação contribui para o controle de permissões e para a segurança operacional do sistema.
+
+Por fim, o processo de saída do sistema remove do armazenamento local as informações relacionadas à autenticação e redireciona o usuário para a tela de login. Com isso, as páginas protegidas deixam de ser acessíveis até que uma nova autenticação seja realizada.
+
 \subsection{Consumo de endpoints}
+
+O consumo de endpoints representa a principal forma de comunicação entre as telas do front-end e os recursos disponibilizados pelo back-end. No sistema Tropical Mix, cada funcionalidade da interface depende de rotas específicas da API para consultar, criar, atualizar ou remover informações relacionadas aos módulos da aplicação.
+
+A API foi organizada em grupos de rotas conforme a responsabilidade de cada recurso. Entre os principais conjuntos consumidos pelo front-end, destacam-se as rotas de autenticação, estoque, fornecedores, clientes, pedidos, dashboard e usuários. Essa divisão permite que cada tela acesse apenas os endpoints necessários ao seu funcionamento, mantendo a comunicação entre as camadas mais organizada.
+
+Na tela de login, o front-end consome a rota de autenticação para validar as credenciais do usuário. Após o login bem-sucedido, o token retornado é armazenado no navegador e utilizado nas demais chamadas protegidas. Também há consumo de rota relacionada à redefinição de senha, utilizada quando o usuário aciona a opção de recuperação de acesso.
+
+Na tela de estoque, são consumidos endpoints relacionados a produtos, categorias, fornecedores e usuários. A listagem de produtos é utilizada para preencher a tabela principal e os filtros da interface. As categorias e fornecedores são utilizados tanto nos filtros quanto nos formulários de cadastro. Além disso, o front-end realiza chamadas para cadastrar novos produtos, criar categorias e fornecedores quando necessário e atualizar o status de produtos.
+
+Na tela de vendas, são consumidos endpoints de pedidos, clientes e produtos. A interface busca os pedidos registrados, consulta os detalhes de cada venda e calcula o valor total a partir dos itens retornados pela API. Para registrar uma nova venda, o front-end envia ao back-end os dados do cliente, a forma de pagamento e os itens adicionados ao carrinho.
+
+As telas de clientes e fornecedores consomem endpoints próprios para listar, cadastrar e atualizar registros. Essas operações mantêm os cadastros auxiliares sincronizados com o banco de dados e permitem que essas informações sejam utilizadas posteriormente em outros módulos, como vendas e estoque.
+
+O consumo dos endpoints ocorre de forma assíncrona, permitindo que a interface continue responsiva enquanto aguarda o retorno da API. Após a resposta, os dados recebidos são armazenados nos estados dos componentes React e utilizados para atualizar tabelas, formulários, filtros, cards e demais elementos visuais da aplicação.
 
 \subsection{Tratamento de respostas da API}
 
+O tratamento das respostas da API é uma etapa essencial para garantir que o front-end interprete corretamente os resultados das operações realizadas no back-end. No sistema Tropical Mix, as respostas recebidas são utilizadas para atualizar a interface, informar o usuário sobre o resultado das ações e manter os dados exibidos sincronizados com o banco de dados.
+
+Quando uma requisição é concluída com sucesso, o front-end utiliza os dados retornados para atualizar seus estados internos. Em operações de consulta, como listagem de produtos, clientes, fornecedores ou pedidos, os registros retornados pela API são armazenados em variáveis de estado e exibidos nas tabelas correspondentes. Em operações de cadastro ou edição, a interface normalmente recarrega a listagem após a conclusão da ação, garantindo que os dados exibidos reflitam a versão mais recente armazenada no back-end.
+
+As respostas bem-sucedidas também são utilizadas para apresentar mensagens de confirmação ao usuário. Por meio do componente de notificação, a interface informa quando uma ação foi concluída corretamente, como o cadastro de um produto, o registro de uma venda ou a atualização de um fornecedor. Esse retorno visual contribui para tornar a interação mais clara e previsível.
+
+Em caso de erro, o front-end busca interpretar as informações retornadas pela API, priorizando mensagens específicas enviadas pelo back-end, como campos obrigatórios ausentes, registros não encontrados, restrições de integridade ou falhas de validação. Quando não há uma mensagem específica disponível, a interface apresenta uma mensagem genérica de erro, evitando que a falha fique sem retorno para o usuário.
+
+O tratamento de erros também contempla situações de falha de comunicação, nas quais a API não responde conforme esperado. Nesses casos, o erro é registrado no console do navegador para auxiliar a depuração durante o desenvolvimento, enquanto o usuário recebe uma mensagem visual informando que a operação não pôde ser concluída.
+
+Além disso, algumas respostas da API influenciam diretamente o comportamento da interface. No login, por exemplo, a resposta bem-sucedida contém o token de autenticação, que passa a ser armazenado e utilizado nas requisições seguintes. Na tela de vendas, os detalhes dos pedidos retornados pela API são utilizados para calcular totais e exibir os itens vendidos. Na tela de estoque, os dados retornados determinam a exibição de status como estoque baixo, vencido, próximo da validade ou regular.
+
+Dessa forma, o tratamento das respostas da API não se limita à exibição dos dados recebidos. Ele também participa do controle de fluxo da aplicação, da atualização visual dos componentes, da comunicação de erros ao usuário e da manutenção da consistência entre interface, regras de negócio e banco de dados.
+
 \subsection{Dependências entre telas e rotas do back-end}
 
+A integração entre as telas do front-end e as rotas do back-end foi estruturada de acordo com as responsabilidades de cada módulo da aplicação. Cada tela consome um conjunto específico de endpoints, que fornece os dados necessários para exibição, cadastro, edição ou processamento das operações realizadas pelo usuário.
+
+A tela de login depende das rotas de autenticação para validar as credenciais informadas e receber o token JWT utilizado nas demais requisições protegidas. Sem essa etapa, o usuário não consegue acessar as páginas internas, uma vez que o front-end verifica a existência do token antes de renderizar as rotas protegidas.
+
+A tela de estoque depende principalmente das rotas relacionadas a produtos, categorias, fornecedores e abastecimentos. A listagem de produtos é utilizada para preencher a tabela principal, enquanto categorias e fornecedores alimentam os filtros e os campos de formulário. No cadastro de um novo produto, a interface também pode acionar rotas auxiliares para criar categorias ou fornecedores ainda não existentes, garantindo continuidade no fluxo de cadastro.
+
+A tela de detalhe do produto depende de rotas específicas para consultar os dados consolidados de um produto e suas entradas de estoque. Essa dependência permite que a interface apresente informações individualizadas, como saldo atual, lotes, fornecedores, validade, custo unitário e custo total. Além disso, o registro de novas entradas depende da rota de abastecimento, responsável por processar a entrada de produtos e atualizar as informações associadas.
+
+A tela de vendas depende das rotas de pedidos, clientes e produtos. Os clientes são necessários para vincular a venda a um comprador, enquanto os produtos são utilizados para compor os itens do pedido. Após a seleção dos itens e da forma de pagamento, o front-end envia os dados do pedido para o back-end, que realiza o processamento da venda e a atualização do estoque conforme as regras definidas.
+
+As telas de clientes e fornecedores dependem de suas respectivas rotas para consulta, cadastro e atualização dos registros. Essas telas possuem relação indireta com outros módulos, uma vez que clientes são utilizados no registro de vendas e fornecedores são utilizados nos fluxos de estoque e abastecimento.
+
+A tela de gerenciamento de usuários depende das rotas de usuários e autenticação. Essas rotas são responsáveis por permitir o cadastro e a administração de usuários autorizados, além de aplicar regras de permissão conforme o nível de acesso. Dessa forma, funcionalidades administrativas podem ser controladas tanto pela interface quanto pelas validações realizadas no servidor.
+
+Essa distribuição de dependências reforça a separação entre as camadas da aplicação. O front-end atua como camada de apresentação e interação, enquanto o back-end centraliza o acesso aos dados, as regras de negócio, as validações e a persistência no banco de dados.
+
 \subsection{Limitações atuais da integração}
+
+Embora a integração entre front-end e back-end permita o funcionamento dos principais fluxos do sistema Tropical Mix, algumas funcionalidades ainda dependem de ajustes complementares para alcançar maior consistência entre as camadas da aplicação.
+
+Uma das limitações observadas está relacionada à evolução simultânea das telas, rotas e estrutura do banco de dados. Durante o desenvolvimento, algumas funcionalidades foram refinadas no front-end antes que todas as rotas correspondentes estivessem completamente consolidadas no back-end. Isso exige alinhamento constante entre as equipes para garantir que os nomes dos campos, formatos de resposta e regras de validação permaneçam compatíveis.
+
+Também há dependência direta entre o controle por lote no front-end e a estrutura retornada pela API. Para que a interface apresente corretamente informações como lotes vencidos, lotes próximos da validade, quantidade disponível por lote e custo total do estoque, é necessário que o back-end disponibilize esses dados de forma estruturada. Caso contrário, parte da lógica precisa ser temporariamente tratada na camada de interface, o que não é ideal para a manutenção do sistema.
+
+Outra limitação envolve o gerenciamento de usuários. A interface já contempla funcionalidades relacionadas ao cadastro e ao controle de acesso, porém a consolidação de um fluxo administrativo completo depende da definição final das rotas de listagem, edição, desativação e redefinição de senha. Esse ponto exige alinhamento entre front-end, back-end e banco de dados, especialmente por envolver regras de segurança e permissões.
+
+Além disso, algumas mensagens de erro ainda podem variar conforme a resposta retornada pelo back-end. Para melhorar a experiência do usuário, é importante que as rotas da API mantenham um padrão consistente de resposta, especialmente em situações de validação, erro de permissão, ausência de registros ou falhas de integridade. Essa padronização facilita o tratamento das respostas no front-end e evita mensagens genéricas.
+
+Por fim, destaca-se que as limitações identificadas fazem parte do processo de integração de uma aplicação em desenvolvimento, especialmente em projetos divididos por equipes. A continuidade dos ajustes deve priorizar a padronização dos contratos entre as camadas, isto é, a definição clara dos campos enviados, dos dados retornados, dos códigos de status HTTP e das mensagens esperadas em cada operação.

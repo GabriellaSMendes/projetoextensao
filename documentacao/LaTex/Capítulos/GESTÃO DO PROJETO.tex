@@ -105,17 +105,15 @@ Considerando o contexto acadêmico e a disponibilidade dos integrantes, as sprin
 
 O acompanhamento das atividades foi realizado por meio de um quadro Kanban no GitHub Projects, no qual foram registradas tarefas relacionadas à documentação, front-end, back-end, banco de dados, hospedagem, testes e validação. A Tabela~\ref{tab:sprints-projeto} apresenta uma síntese da organização das sprints do projeto, consolidando as principais atividades acompanhadas no quadro.
 
-\begin{longtable}{|p{1.8cm}|p{2.4cm}|p{3.8cm}|p{6.3cm}|p{3.4cm}|}
+\begin{table}[H]
+\centering
 \caption{Sprints do projeto.}
-\label{tab:sprints-projeto} \\
-
+\label{tab:sprints-projeto}
+\scriptsize
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|p{1.8cm}|p{2.4cm}|p{3.8cm}|p{6.3cm}|p{3.4cm}|}
 \hline
 \textbf{Sprint} & \textbf{Período} & \textbf{Objetivo geral} & \textbf{Atividades principais} & \textbf{Entregas} \\ \hline
-\endfirsthead
-
-\hline
-\textbf{Sprint} & \textbf{Período} & \textbf{Objetivo geral} & \textbf{Atividades principais} & \textbf{Entregas} \\ \hline
-\endhead
 
 Sprint 1 &
 23/09 -- 24/10 &
@@ -159,26 +157,61 @@ Testes, revisão e documentação final. &
 Realização de testes unitários, testes internos e testes com usuário; adição de referências na documentação; revisão da documentação técnica; ajustes finais no front-end, back-end e banco de dados; organização da entrega final do projeto. &
 Testes realizados, documentação final em andamento e projeto preparado para entrega. \\ \hline
 
+\end{tabular}%
+}
 \fonte{Elaborado pelos autores com base no quadro Kanban do projeto.}
-\end{longtable}
+\end{table}
 
 \section{Ferramentas de Comunicação e Colaboração}
 
-Para garantir o alinhamento entre os integrantes, foram utilizadas diversas ferramentas colaborativas:
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.9\textwidth]{documentacao/LaTex/Capítulos/img/Gestão/tabela_ferramentas.png}
-  \caption{Tabela de ferramentas}
-  \fonte{Elaborado pelos autores.}
-  \label{fig:ferramentas}
-\end{figure}
+Para garantir o alinhamento entre os integrantes, foram utilizadas ferramentas colaborativas voltadas à comunicação, controle de versão, documentação e acompanhamento das tarefas. Essas ferramentas auxiliaram na organização do projeto, no registro das decisões e na integração entre as diferentes frentes de desenvolvimento.
+
+A Tabela~\ref{tab:ferramentas-colaboracao} apresenta as principais ferramentas utilizadas pela equipe durante o desenvolvimento do sistema Tropical Mix.
+
+\begin{table}[H]
+\centering
+\caption{Ferramentas de comunicação e colaboração utilizadas no projeto.}
+\label{tab:ferramentas-colaboracao}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|p{4cm}|p{11cm}|}
+\hline
+\textbf{Ferramenta} & \textbf{Descrição} \\ \hline
+
+GitHub & 
+Plataforma utilizada para hospedagem do código-fonte, controle de versão, colaboração entre os integrantes e acompanhamento das tarefas por meio do GitHub Projects. \\ \hline
+
+Google Meet & 
+Ferramenta utilizada para reuniões online, alinhamentos quinzenais, compartilhamento de tela e revisão conjunta de funcionalidades e documentos. \\ \hline
+
+WhatsApp & 
+Canal utilizado para comunicação rápida entre os integrantes, troca de links, envio de avisos, acompanhamento de pendências e alinhamentos diários. \\ \hline
+
+Reuniões presenciais semanais & 
+Encontros realizados durante o horário de aula, com acompanhamento do professor orientador, para validação do andamento do projeto e definição das próximas atividades. \\ \hline
+
+Overleaf & 
+Plataforma utilizada para escrita colaborativa da documentação acadêmica em LaTeX, permitindo edição simultânea e padronização do relatório técnico. \\ \hline
+
+Notion & 
+Ferramenta utilizada para apoio ao planejamento, registro de anotações, organização de ideias e documentação complementar do projeto. \\ \hline
+
+\end{tabular}%
+}
+\fonte{Elaborado pelos autores.}
+\end{table}
 
 \section{Repositório da Aplicação}
 
-O código-fonte e a documentação do projeto estão armazenados em um repositório público no GitHub, o que garante controle de versão, colaboração simultânea e transparência no desenvolvimento. O repositório pode ser acessado pelo seguinte link:
+O código-fonte e a documentação do projeto foram armazenados em um repositório público no GitHub, com o objetivo de garantir controle de versão, colaboração entre os integrantes e rastreabilidade das alterações realizadas ao longo do desenvolvimento. O uso do repositório permitiu acompanhar a evolução do sistema, registrar modificações no código e organizar as entregas relacionadas às diferentes frentes do projeto.
+
+O repositório pode ser acessado pelo seguinte endereço:
 
 \begin{center}
 \url{https://github.com/GabriellaSMendes/projetoextensao.git}
 \end{center}
 
-A estrutura do repositório segue boas práticas de organização, contendo pastas específicas para \texttt{frontend}, \texttt{backend}, \texttt{database} e \texttt{LaTeX}, além de arquivos de configuração e documentação complementares.
+A estrutura do repositório foi organizada de forma modular, contendo diretórios específicos para as principais partes da aplicação. A pasta \texttt{frontend} concentra os arquivos relacionados à interface web desenvolvida em React. A pasta \texttt{backend} reúne a API desenvolvida em Python com Flask. A pasta \texttt{database} armazena scripts e arquivos relacionados à estrutura do banco de dados. Já a pasta \texttt{LaTeX} contém os arquivos utilizados na elaboração da documentação acadêmica do projeto.
+
+Além dessas pastas principais, o repositório também contém arquivos de configuração, materiais complementares e documentos de apoio ao desenvolvimento. Essa organização contribui para a manutenibilidade do projeto, facilita a localização dos arquivos e permite que os integrantes atuem em diferentes áreas sem comprometer a estrutura geral da aplicação.
+
+O GitHub também foi utilizado como ferramenta de apoio à gestão das tarefas, por meio do recurso GitHub Projects. Esse recurso possibilitou o acompanhamento das atividades em formato de quadro Kanban, permitindo visualizar tarefas pendentes, em andamento e concluídas. Dessa forma, o repositório não atuou apenas como ambiente de armazenamento do código, mas também como instrumento de organização e acompanhamento do desenvolvimento.

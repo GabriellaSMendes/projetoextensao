@@ -187,14 +187,85 @@ Dessa forma, a tela de detalhe do produto complementa a tela principal de estoqu
 
 \subsubsection{Tela de vendas}
 
+A tela de vendas foi desenvolvida para registrar, consultar e acompanhar os pedidos realizados no sistema Tropical Mix. Essa interface centraliza as operações relacionadas às vendas, permitindo visualizar os registros já existentes, aplicar filtros de busca, consultar detalhes de pedidos e cadastrar novas vendas.
+
+A listagem das vendas é apresentada em formato de tabela, contendo informações como data do pedido, cliente, vendedor, forma de pagamento, itens vendidos e valor total. Para compor essas informações, o front-end consulta a lista de pedidos e, posteriormente, busca os detalhes de cada pedido, permitindo calcular o total da venda a partir dos itens vinculados.
+
+A tela possui um painel lateral de filtros avançados, utilizado para facilitar a localização de registros específicos. Entre os critérios disponíveis, estão busca textual, forma de pagamento, intervalo de datas, cliente, vendedor, itens vendidos e faixa de valor. Alguns desses campos utilizam sugestões pesquisáveis, permitindo maior flexibilidade na filtragem dos dados e melhor usabilidade em cenários com maior volume de vendas registradas.
+
+O cadastro de uma nova venda é realizado por meio de um modal, aberto a partir do botão de adição. Nesse fluxo, o usuário seleciona o cliente, a forma de pagamento e os produtos que serão incluídos no pedido. A interface também permite a criação de um novo cliente durante o processo de venda, caso ele ainda não esteja cadastrado no sistema. Essa funcionalidade reduz a necessidade de interromper o fluxo de registro para acessar outra tela.
+
+A seleção dos produtos foi organizada de forma progressiva, considerando nome, sabor e marca. A partir dessas informações, o sistema identifica o produto correspondente e permite adicioná-lo ao carrinho da venda. Antes da inclusão, a interface verifica se os campos necessários foram preenchidos e se a quantidade solicitada não excede a quantidade disponível em estoque. Essa validação auxilia o usuário durante o preenchimento e reduz a possibilidade de inconsistências.
+
+Os itens adicionados à venda são exibidos em um carrinho, no qual são apresentadas informações como produto, quantidade, preço unitário e subtotal. O valor total da venda é calculado a partir da soma dos subtotais dos itens adicionados. Esse recurso permite que o usuário confira os dados antes de finalizar o pedido.
+
+Ao finalizar a venda, o front-end monta uma estrutura de dados contendo o cliente, a forma de pagamento e a lista de itens do pedido. Essas informações são enviadas para a API responsável pelo registro da venda. Após o processamento pelo back-end, o estoque é atualizado conforme as regras de negócio implementadas, e a interface recarrega a listagem para refletir a nova operação.
+
+A tela também contempla a visualização de detalhes de uma venda já registrada. Ao acessar os detalhes, o usuário pode consultar os itens que compõem o pedido, suas quantidades, preços unitários e subtotais. Essa funcionalidade contribui para a rastreabilidade das operações e facilita conferências posteriores.
+
+Dessa forma, a tela de vendas integra consulta, filtragem, cadastro e detalhamento de pedidos em um único módulo. Sua implementação contribui para o controle das transações comerciais da loja, mantendo a relação entre cliente, vendedor, produtos vendidos, forma de pagamento e atualização do estoque.
+
 \subsubsection{Tela de clientes}
+
+A tela de clientes foi desenvolvida para permitir o gerenciamento dos registros de clientes vinculados às operações comerciais da loja Tropical Mix. Essa interface possibilita a consulta, cadastro e edição de clientes, mantendo informações necessárias para o registro de vendas e para a identificação dos compradores no sistema.
+
+A listagem dos clientes é apresentada em formato de tabela, seguindo o mesmo padrão visual utilizado em outros módulos administrativos da aplicação. Entre os dados exibidos, estão informações como nome ou razão social, CPF ou CNPJ, telefone, e-mail e endereço. Essa estrutura permite que o usuário consulte rapidamente os clientes cadastrados e localize registros específicos quando necessário.
+
+A tela também contempla recursos de filtragem, permitindo a busca por diferentes campos relacionados ao cadastro do cliente. O uso de filtros contribui para melhorar a usabilidade da interface, especialmente em cenários com maior volume de registros. Essa abordagem mantém a coerência com os demais módulos do sistema, nos quais a segmentação dos dados é utilizada como recurso de apoio à navegação e à consulta.
+
+O cadastro e a edição de clientes são realizados por meio de modal, evitando que o usuário seja redirecionado para outra página durante a operação. Esse comportamento mantém o contexto da tela principal e torna o fluxo de uso mais direto. O formulário reúne os principais dados cadastrais do cliente, como nome ou razão social, CPF ou CNPJ, telefone, e-mail e endereço.
+
+Do ponto de vista de integração, a tela se comunica com a API para listar, cadastrar e atualizar os registros de clientes. Após a realização de uma operação, a listagem é atualizada para refletir as informações mais recentes armazenadas no banco de dados. Esse comportamento mantém a interface sincronizada com a camada de persistência.
+
+A tela de clientes também possui relação direta com a tela de vendas, uma vez que o registro de uma venda exige a seleção de um cliente. Dessa forma, o cadastro adequado desses dados contribui para a consistência das transações comerciais registradas no sistema.
 
 \subsubsection{Tela de fornecedores}
 
+A tela de fornecedores foi implementada para possibilitar o cadastro, consulta e atualização dos fornecedores relacionados aos produtos e às entradas de estoque. Essa interface tem papel importante no controle operacional, pois permite vincular os abastecimentos de produtos aos respectivos fornecedores.
+
+A estrutura da tela segue o padrão utilizado nos demais módulos administrativos, com título, área de ações, tabela de registros, filtros laterais e modal de cadastro ou edição. Na tabela principal, são exibidos os principais dados dos fornecedores, como razão social, CNPJ, telefone e e-mail.
+
+O painel de filtros permite localizar fornecedores por diferentes critérios, incluindo nome, CNPJ, telefone e e-mail. Os campos de filtro utilizam sugestões pesquisáveis, permitindo que o usuário digite parte da informação ou selecione uma opção existente. Esse recurso facilita a localização de registros em bases com maior quantidade de fornecedores cadastrados.
+
+O cadastro de fornecedores é realizado por meio de modal. O formulário solicita os dados principais do fornecedor e permite que as informações sejam registradas sem que o usuário precise sair da tela atual. O mesmo modal também é utilizado para edição, alterando seu comportamento conforme exista ou não um fornecedor selecionado para atualização.
+
+A tela realiza comunicação com a API para buscar a lista de fornecedores, cadastrar novos registros e atualizar dados existentes. Após cada operação, os dados são recarregados para manter a tabela atualizada. Esse comportamento contribui para a consistência entre a interface e os dados armazenados.
+
+Além de sua função cadastral, a tela de fornecedores possui relação direta com o controle de estoque. Ao cadastrar um produto ou registrar uma entrada, o sistema permite vincular o item a um fornecedor, o que favorece a rastreabilidade das entradas de mercadoria e o acompanhamento da origem dos produtos. A implementação atual da tela inclui modal com campos de razão social, CNPJ, telefone e e-mail, além de ações diferenciadas para cadastro e edição do fornecedor. :contentReference[oaicite:0]{index=0}
+
 \subsubsection{Tela de relatório}
+
+============================================FAZER DEPOISSSS============================================
 
 \subsubsection{Tela de gerenciamento de usuários}
 
+A tela de gerenciamento de usuários tem como objetivo controlar o acesso de pessoas autorizadas ao sistema Tropical Mix. Essa funcionalidade está relacionada à segurança da aplicação, pois permite administrar quais usuários podem acessar o sistema e qual nível de permissão será atribuído a cada um.
+
+Na implementação atual, a funcionalidade de cadastro de usuários permite informar nome, e-mail, senha e nível de acesso. O nível de acesso pode ser definido como vendedor ou administrador, sendo utilizado posteriormente para controlar a exibição de funcionalidades específicas na interface, como o acesso à opção de cadastro de usuários na barra de navegação.
+
+A tela possui validação inicial de senha, exigindo que o valor informado atenda a critérios mínimos de segurança. Caso a senha não esteja adequada, a interface apresenta uma mensagem de erro antes do envio dos dados ao back-end. Essa validação atua como uma primeira camada de orientação ao usuário, embora a segurança definitiva dependa também das regras aplicadas no servidor.
+
+O cadastro é realizado por meio de requisição à API, com envio do token de autenticação no cabeçalho da chamada. Dessa forma, a operação fica vinculada ao usuário autenticado e pode ser controlada conforme as permissões definidas no back-end. Após o cadastro, o usuário é redirecionado para a página inicial.
+
+Apesar da existência da tela de cadastro, foi identificada a necessidade de evoluir essa funcionalidade para uma tela administrativa mais completa de gerenciamento de usuários. A proposta de ajuste prevê a substituição da ideia de apenas cadastrar usuários por uma interface capaz de listar, cadastrar, editar e desativar usuários, sem que o administrador precise definir manualmente a senha inicial. Essa melhoria também prevê a exibição de dados como nome, e-mail, CPF, nível de acesso e status, além do uso de fluxo de primeiro acesso por e-mail. :contentReference[oaicite:3]{index=3}
+
+Com essa evolução, o gerenciamento de usuários passaria a seguir o mesmo padrão visual e operacional das demais telas administrativas do sistema, com tabela de registros, botão de adição, modal de cadastro e edição, além de regras para impedir ações que comprometam o histórico de vendas e movimentações. Essa adaptação contribui para maior segurança, rastreabilidade e organização do controle de acesso ao sistema.
+
+
 \subsection{Tratamento de erros e feedback ao usuário}
 
-\subsection{Pendências e limitações do front-end}
+O tratamento de erros e o retorno visual ao usuário foram considerados aspectos importantes na implementação do front-end do sistema Tropical Mix. Como a aplicação depende da interação constante entre usuário, interface e API, é necessário que o sistema informe de forma clara quando uma ação foi concluída com sucesso, quando há campos obrigatórios não preenchidos ou quando ocorre alguma falha de comunicação com o back-end.
+
+Para isso, foi implementado um componente reutilizável de notificação, utilizado em diferentes telas da aplicação. Esse componente permite exibir mensagens de sucesso, erro, aviso ou informação, de acordo com o tipo de retorno obtido durante a operação. Visualmente, as notificações aparecem sobre a interface, em posição fixa, com cores e estilos diferenciados conforme a natureza da mensagem.
+
+O uso desse componente substitui parte das mensagens nativas do navegador, como o \texttt{alert()}, permitindo uma experiência mais integrada ao padrão visual do sistema. Dessa forma, ações como salvar produto, cadastrar fornecedor, registrar venda, validar campos obrigatórios ou informar falhas de comunicação são apresentadas de maneira mais clara e menos intrusiva ao usuário.
+
+Além das notificações, algumas telas utilizam validações diretamente no front-end antes do envio dos dados para a API. Na tela de estoque, por exemplo, o sistema verifica se campos obrigatórios foram preenchidos antes do cadastro de um produto, como nome, categoria, fornecedor, quantidade inicial e custo unitário. Também há validação para evitar o cadastro de produto com data de vencimento anterior à data atual.
+
+Na tela de vendas, a interface verifica se o cliente foi selecionado e se há itens no carrinho antes de permitir a finalização do pedido. Também é realizada a validação da quantidade solicitada, impedindo que o usuário adicione ao carrinho uma quantidade superior ao estoque disponível. Essas verificações contribuem para reduzir erros operacionais e orientar o usuário durante o preenchimento dos formulários.
+
+O sistema também utiliza modais de confirmação em ações sensíveis. Esse recurso é empregado em operações que modificam o estado de registros, como ocultar ou reativar produtos. Antes da execução da ação, o usuário precisa confirmar sua intenção, reduzindo a possibilidade de alterações acidentais.
+
+Apesar das validações existentes no front-end, é importante destacar que elas não substituem as validações do back-end. A camada de interface atua como uma primeira etapa de orientação e prevenção de erros, enquanto o back-end permanece responsável por aplicar regras de negócio, validar permissões e garantir a integridade dos dados armazenados.
+
+Dessa forma, o tratamento de erros e feedback ao usuário contribui para uma experiência de uso mais segura, compreensível e consistente, permitindo que o usuário acompanhe o resultado das ações executadas e corrija eventuais problemas durante a interação com o sistema.

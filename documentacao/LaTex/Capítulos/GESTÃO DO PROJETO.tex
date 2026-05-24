@@ -1,44 +1,166 @@
 \chapter{Gestão do Projeto}
 
-A gestão do projeto foi conduzida de forma colaborativa, buscando garantir o cumprimento dos prazos e a qualidade das entregas. A equipe utilizou metodologias ágeis adaptadas ao contexto acadêmico, priorizando a comunicação constante, a divisão clara de responsabilidades e o acompanhamento contínuo das atividades por meio de ferramentas de controle de tarefas.
+A gestão do projeto foi conduzida de forma colaborativa, considerando a divisão de responsabilidades entre os integrantes da equipe, o acompanhamento contínuo das atividades e a necessidade de cumprir os prazos definidos para as entregas acadêmicas. Por se tratar de um projeto desenvolvido em equipe e com diferentes frentes técnicas, como front-end, back-end, banco de dados e documentação, a organização das tarefas foi essencial para manter a evolução do sistema e garantir a integração entre as partes.
+
+Foram adotados princípios de metodologias ágeis, adaptados ao contexto acadêmico e à disponibilidade dos integrantes. As atividades foram distribuídas em ciclos de desenvolvimento, com definição de prioridades, acompanhamento das entregas e revisão contínua das funcionalidades implementadas. Embora o processo não tenha seguido rigorosamente todos os rituais formais de um framework ágil, a equipe utilizou práticas como divisão de tarefas, acompanhamento por quadro Kanban, reuniões de alinhamento e versionamento contínuo do código.
+
+A gestão também envolveu o uso de ferramentas colaborativas para comunicação, documentação, controle de versão e acompanhamento das atividades. Esses recursos contribuíram para organizar o fluxo de trabalho, registrar decisões importantes e facilitar a integração entre os membros da equipe durante o desenvolvimento do sistema Tropical Mix.
 
 \section{Organização da Equipe}
 
-A equipe é composta por cinco integrantes, divididos de acordo com suas habilidades técnicas e funções específicas no desenvolvimento do projeto. Apesar da segmentação por áreas, todas as etapas foram realizadas de forma integrada, com revisões coletivas e apoio mútuo entre os membros. A Figura~\ref{fig:integrantes} apresenta a composição e os papéis de cada integrante.
+A equipe do projeto foi composta por cinco integrantes, com responsabilidades distribuídas de acordo com as áreas técnicas envolvidas no desenvolvimento do sistema. A divisão considerou as principais frentes do projeto, incluindo gerenciamento das atividades, desenvolvimento do front-end, implementação do back-end, modelagem do banco de dados, documentação e integração entre as camadas da aplicação.
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.9\textwidth]{documentacao/LaTex/Capítulos/img/Gestão/tabela_integrantes.png}
-  \caption{Tabela de Integrantes do Projeto}
-  \fonte{Elaborado pelos autores.}
-  \label{fig:integrantes}
-\end{figure}
+Apesar da divisão por áreas, o desenvolvimento ocorreu de forma colaborativa, com revisões conjuntas, apoio entre os membros e alinhamentos frequentes para garantir a compatibilidade entre as partes implementadas. Essa organização foi importante para manter a continuidade das entregas e facilitar a identificação de dependências entre interface, API e banco de dados.
+
+A Tabela~\ref{tab:integrantes-projeto} apresenta os integrantes da equipe, suas funções principais e as responsabilidades associadas a cada atuação no projeto.
+
+\begin{table}[H]
+\centering
+\caption{Integrantes do projeto e responsabilidades.}
+\label{tab:integrantes-projeto}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|p{4cm}|p{4cm}|p{8cm}|}
+\hline
+\textbf{Integrante} & \textbf{Função principal} & \textbf{Responsabilidades e tecnologias utilizadas} \\ \hline
+
+Gabriella Santos Mendes & 
+Gerente de Projeto / Desenvolvedora Front-end & 
+Planejamento e acompanhamento das atividades; desenvolvimento da interface do usuário utilizando JavaScript, React, HTML e CSS; integração com o back-end. \\ \hline
+
+Gustavo Almeida de Oliveira & 
+Desenvolvedor Back-end & 
+Implementação da lógica de negócio e das rotas da API utilizando Python com Flask; integração com o banco de dados. \\ \hline
+
+Isabelle Silva Severino & 
+Administradora de Banco de Dados (DBA) & 
+Modelagem e implementação do banco de dados MySQL; criação de tabelas, relacionamentos e consultas. \\ \hline
+
+Matheus Fogaça Sarretto & 
+Desenvolvedor Back-end & 
+Apoio no desenvolvimento da API em Python com Flask; estruturação das funcionalidades e testes do servidor. \\ \hline
+
+Matheus Victor Feliciano Jupi & 
+Desenvolvedor Front-end & 
+Desenvolvimento de componentes e páginas em React, com uso de HTML e CSS; implementação de funcionalidades visuais e integração com a API. \\ \hline
+
+\end{tabular}%
+}
+\fonte{Elaborado pelos autores.}
+\end{table}
 
 
 \section{Metodologias de Gestão e Desenvolvimento}
 
-O grupo adotou princípios das metodologias ágeis, em especial o \textbf{Scrum}, para organizar as entregas e acompanhar o progresso do projeto. As atividades foram planejadas e acompanhadas por meio do \textbf{Kanban do GitHub Projects}, ferramenta que permitiu a visualização do fluxo de trabalho e a priorização das tarefas. 
+O desenvolvimento do sistema Tropical Mix foi conduzido com base em princípios de metodologias ágeis, adaptados ao contexto acadêmico, à disponibilidade dos integrantes e aos prazos estabelecidos para o projeto. A equipe utilizou práticas como divisão de tarefas, definição de prioridades, acompanhamento contínuo das entregas e reuniões de alinhamento para orientar o avanço das funcionalidades.
 
-As entregas foram divididas em marcos principais:
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.9\textwidth]{documentacao/LaTex/Capítulos/img/Gestão/tabela_marcos.png}
-  \caption{Tabela de Marcos do Projeto}
-  \fonte{Elaborado pelos autores.}
-  \label{fig:marcos}
-\end{figure}
+Embora o processo não tenha seguido integralmente todos os rituais formais de uma metodologia ágil específica, foram adotados elementos inspirados no Scrum e no Kanban. O planejamento foi organizado em ciclos de desenvolvimento, denominados sprints, com objetivos definidos para cada período. Já o acompanhamento das tarefas foi realizado com apoio do GitHub Projects, por meio de um quadro Kanban que permitiu visualizar atividades pendentes, em andamento e concluídas.
+
+Essa abordagem favoreceu a organização do trabalho em equipe, a identificação de dependências entre as áreas técnicas e o acompanhamento do progresso do sistema. Como o projeto envolveu diferentes frentes, como front-end, back-end, banco de dados, documentação e integração, a gestão das atividades foi fundamental para reduzir retrabalho e manter o alinhamento entre os integrantes.
+
+As entregas do projeto foram organizadas em marcos principais, conforme apresentado na Tabela~\ref{tab:marcos-projeto}.
+
+\begin{table}[H]
+\centering
+\caption{Marcos principais do projeto.}
+\label{tab:marcos-projeto}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|p{4cm}|p{3cm}|p{9cm}|}
+\hline
+\textbf{Marco} & \textbf{Data prevista} & \textbf{Descrição} \\ \hline
+
+Prova de Conceito & 
+10/10/2025 & 
+Estruturação inicial do sistema, com implementação das tecnologias base e definição da arquitetura. \\ \hline
+
+Entrega da Documentação & 
+07/11/2025 & 
+Elaboração e padronização dos capítulos do relatório técnico. \\ \hline
+
+Entrega do MVP & 
+05/12/2025 & 
+Versão funcional do sistema com as principais funcionalidades de controle de estoque e vendas. \\ \hline
+
+Integração e Testes & 
+20/04/2026 & 
+Validação das funcionalidades integradas do sistema e realização de testes internos e com usuários. \\ \hline
+
+Homologação do Sistema & 
+17/05/2026 & 
+Correções finais, ajustes de desempenho e homologação da versão estável. \\ \hline
+
+Entrega Final do Projeto & 
+27/05/2026 & 
+Entrega oficial do projeto completo, incluindo documentação técnica. \\ \hline
+
+\end{tabular}%
+}
+\fonte{Elaborado pelos autores.}
+\end{table}
 
 \subsection{Sprints}
 
-O desenvolvimento foi organizado em ciclos curtos de trabalho (\textit{sprints}), cada um com metas e entregas específicas. O acompanhamento das tarefas ocorreu por meio de reuniões semanais presenciais e quinzenais online, além do uso de canais digitais para comunicação diária.
+O desenvolvimento do projeto foi organizado em ciclos de trabalho denominados sprints, utilizados como referência para distribuir as atividades ao longo do período de execução. Cada sprint contemplou objetivos específicos, atividades previstas e entregas esperadas, permitindo à equipe acompanhar a evolução do sistema de forma progressiva.
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.9\textwidth]{documentacao/LaTex/Capítulos/img/Gestão/tabela_sprints.png}
-  \caption{Tabela de Sprints do Projeto}
-  \fonte{Elaborado pelos autores.}
-  \label{fig:sprints}
-\end{figure}
+Considerando o contexto acadêmico e a disponibilidade dos integrantes, as sprints foram adaptadas conforme as demandas do projeto, os prazos de entrega e as dependências entre as áreas técnicas. Dessa forma, algumas atividades foram replanejadas ao longo do desenvolvimento, especialmente nos momentos de integração entre front-end, back-end e banco de dados.
+
+O acompanhamento das atividades foi realizado por meio de um quadro Kanban no GitHub Projects, no qual foram registradas tarefas relacionadas à documentação, front-end, back-end, banco de dados, hospedagem, testes e validação. A Tabela~\ref{tab:sprints-projeto} apresenta uma síntese da organização das sprints do projeto, consolidando as principais atividades acompanhadas no quadro.
+
+\begin{longtable}{|p{1.8cm}|p{2.4cm}|p{3.8cm}|p{6.3cm}|p{3.4cm}|}
+\caption{Sprints do projeto.}
+\label{tab:sprints-projeto} \\
+
+\hline
+\textbf{Sprint} & \textbf{Período} & \textbf{Objetivo geral} & \textbf{Atividades principais} & \textbf{Entregas} \\ \hline
+\endfirsthead
+
+\hline
+\textbf{Sprint} & \textbf{Período} & \textbf{Objetivo geral} & \textbf{Atividades principais} & \textbf{Entregas} \\ \hline
+\endhead
+
+Sprint 1 &
+23/09 -- 24/10 &
+Planejamento e estruturação inicial do projeto. &
+Levantamento do problema; pesquisa de sistemas concorrentes; definição inicial do escopo; criação da documentação do desenho da aplicação; criação do modelo de documentação em LaTeX; configuração inicial dos ambientes de front-end, back-end e banco de dados. &
+Prova de conceito, documentação inicial e ambientes configurados. \\ \hline
+
+Sprint 2 &
+25/10 -- 21/11 &
+Modelagem e construção da base técnica da aplicação. &
+Criação do modelo conceitual e lógico do banco de dados; criação do esquema e das tabelas principais; início da documentação do banco de dados; criação dos endpoints iniciais da API; implementação da lógica de registro e login de usuário; criação da estrutura SPA com as páginas necessárias. &
+Base do sistema estruturada, banco modelado e primeiras rotas implementadas. \\ \hline
+
+Sprint 3 &
+22/11 -- 05/12 &
+Implementação do MVP e dos fluxos principais. &
+Desenvolvimento das telas de login e cadastro; integração com API de login e registro; criação de componentes do front-end; criação da tela home; desenvolvimento inicial da tela de estoque; implementação das operações de criação, leitura, atualização e exclusão para estoque e vendas no back-end; conexão do front-end com a API. &
+MVP funcional com autenticação, telas iniciais, estoque e vendas. \\ \hline
+
+Sprint 4 &
+06/12 -- 31/01 &
+Integração, hospedagem e expansão das funcionalidades. &
+Hospedagem do projeto em ambiente AWS; ajustes da API para a nova hospedagem; alinhamento entre hospedagem e banco de dados; criação da rota para relatório; criação de relatório de estoque ou vendas; povoamento do banco com dados de produtos da loja; ajustes na API e nas integrações. &
+Aplicação hospedada, banco populado e integração entre camadas ajustada. \\ \hline
+
+Sprint 5 &
+01/02 -- 31/03 &
+Refinamento das telas e ampliação dos módulos administrativos. &
+Adição de filtros nas telas; implementação de dropdowns; padronização das formas de adicionar produtos; desenvolvimento da tela de fornecedores; ajustes nas tabelas de produto e estoque; ajustes no código e nas rotas; implementação da página de gerenciamento de usuários; ajustes na tabela de usuários. &
+Módulos administrativos ampliados, filtros implementados e estrutura de usuários ajustada. \\ \hline
+
+Sprint 6 &
+01/04 -- 30/04 &
+Aprimoramento do controle de estoque e validação dos fluxos. &
+Implementação de regras para não adicionar ou vender produtos fora da validade; criação de view de notificação de validade; desenvolvimento da tela principal de produtos e da tela de detalhes; implementação da tela de clientes; criação do campo de notificações; ajustes de usabilidade e validação dos fluxos principais. &
+Controle de validade aprimorado, telas de produtos e clientes implementadas e notificações adicionadas. \\ \hline
+
+Sprint 7 &
+01/05 -- 27/05 &
+Testes, revisão e documentação final. &
+Realização de testes unitários, testes internos e testes com usuário; adição de referências na documentação; revisão da documentação técnica; ajustes finais no front-end, back-end e banco de dados; organização da entrega final do projeto. &
+Testes realizados, documentação final em andamento e projeto preparado para entrega. \\ \hline
+
+\fonte{Elaborado pelos autores com base no quadro Kanban do projeto.}
+\end{longtable}
 
 \section{Ferramentas de Comunicação e Colaboração}
 

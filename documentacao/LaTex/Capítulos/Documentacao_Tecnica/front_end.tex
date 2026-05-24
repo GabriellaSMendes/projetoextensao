@@ -1,8 +1,42 @@
 \section{Implementação do Front-end}
 
+O front-end do sistema Tropical Mix foi desenvolvido com o objetivo de disponibilizar uma interface web intuitiva, responsiva e integrada aos serviços do back-end. Essa camada é responsável pela interação direta com o usuário, permitindo o acesso às funcionalidades de autenticação, consulta e gerenciamento de produtos, registro de vendas, cadastro de clientes, fornecedores e usuários, além da visualização de informações relacionadas ao estoque e às operações comerciais.
+
+A implementação da interface seguiu a arquitetura definida para o projeto, na qual a camada de apresentação se comunica com a camada de aplicação por meio de requisições HTTP e troca de dados em formato JSON. Essa separação contribui para a modularidade do sistema, permitindo que o front-end seja desenvolvido e mantido de forma independente em relação às regras de negócio implementadas no back-end.
+
 \subsection{Visão geral da implementação}
 
+A implementação do front-end foi organizada com base no uso da biblioteca React, em conjunto com JavaScript, HTML e CSS. O React foi utilizado por possibilitar a construção de interfaces baseadas em componentes reutilizáveis, favorecendo a organização do código, a separação de responsabilidades e a manutenção evolutiva da aplicação.
+
+A aplicação foi estruturada como uma Single Page Application (SPA), ou seja, uma aplicação web em que a navegação entre telas ocorre de forma dinâmica, sem a necessidade de recarregamento completo da página a cada mudança de rota. Esse modelo proporciona uma experiência de uso mais fluida, uma vez que os componentes são renderizados conforme a navegação do usuário e os dados necessários são obtidos por meio de chamadas à API.
+
+No contexto do sistema Tropical Mix, o front-end contempla telas voltadas à autenticação de usuários, página inicial, controle de estoque, registro de vendas, gerenciamento de clientes, fornecedores, usuários e relatórios. Além disso, foram implementados componentes reutilizáveis para navegação, rodapé, notificações e janelas de confirmação, com o objetivo de manter a padronização visual e comportamental da aplicação.
+
+A camada de interface também considera regras de acesso, uma vez que determinadas telas devem estar disponíveis apenas para usuários autenticados. Para isso, foi implementado um mecanismo de proteção de rotas no próprio front-end, baseado na verificação da existência do token de autenticação armazenado no navegador. Dessa forma, usuários não autenticados são redirecionados para a tela de login, preservando o fluxo de acesso definido para o sistema.
+
 \subsection{Estrutura de pastas do front-end}
+
+A estrutura do front-end foi organizada de forma modular, separando arquivos de configuração, componentes reutilizáveis, páginas, serviços e estilos. Essa organização facilita a localização dos arquivos, a manutenção do código e a divisão das responsabilidades entre os elementos da aplicação.
+
+Na raiz do front-end, encontram-se os arquivos de configuração do projeto, como o \texttt{package.json}, responsável por registrar as dependências utilizadas, e o \texttt{vite.config.js}, utilizado na configuração do ambiente de desenvolvimento com Vite. A aplicação utiliza dependências como \texttt{react}, \texttt{react-dom}, \texttt{react-router-dom}, \texttt{axios} e \texttt{react-icons}, além de bibliotecas de apoio ao processo de desenvolvimento e validação do código.
+
+A pasta \texttt{src} concentra o código-fonte principal da aplicação. Dentro dela, o arquivo \texttt{main.jsx} é responsável por inicializar a aplicação React e renderizar o componente principal. O arquivo \texttt{App.jsx}, por sua vez, centraliza a definição das rotas da aplicação e a lógica de proteção de acesso às páginas internas.
+
+A pasta \texttt{components} armazena elementos reutilizáveis da interface, como a barra de navegação, o rodapé, o componente de notificação e o modal de confirmação. Esses componentes são utilizados em diferentes telas da aplicação, reduzindo duplicidade de código e contribuindo para a consistência visual do sistema.
+
+A pasta \texttt{pages} reúne as telas principais do sistema, como Login, Home, Estoque, Vendas, Clientes, Fornecedores, Cadastro, Perfil e Relatório. Cada página possui sua própria estrutura de implementação e arquivo de estilo, permitindo que as funcionalidades sejam desenvolvidas de maneira isolada, sem comprometer o funcionamento das demais partes da aplicação.
+
+\subsection{Tecnologias e bibliotecas utilizadas}
+
+O desenvolvimento do front-end utilizou o React como principal biblioteca para construção da interface. Essa escolha está alinhada à proposta arquitetural do sistema, que prevê uma camada de apresentação moderna, interativa e baseada em componentes. O uso de componentes permite dividir a interface em partes menores e reutilizáveis, o que favorece a manutenção, a legibilidade do código e a evolução do sistema.
+
+O projeto também utiliza o Vite como ferramenta de construção e execução em ambiente de desenvolvimento. O Vite fornece um ambiente leve e rápido para aplicações modernas em JavaScript, simplificando o processo de inicialização, atualização e empacotamento do front-end.
+
+Para o controle de navegação entre páginas, foi utilizada a biblioteca \texttt{react-router-dom}. Essa biblioteca permite definir rotas para a aplicação, associando cada endereço a um componente de página específico. No sistema Tropical Mix, esse recurso é utilizado para organizar o acesso às telas de login, início, estoque, vendas, clientes, fornecedores, cadastro de usuários, perfil e relatório.
+
+A comunicação com o back-end é realizada por meio da biblioteca \texttt{axios}, utilizada para o envio de requisições HTTP à API. Essa biblioteca facilita a execução de operações como listagem, cadastro, edição e consulta de dados, além de permitir o envio do token de autenticação no cabeçalho das requisições protegidas.
+
+A estilização da interface foi desenvolvida com CSS, utilizando arquivos de estilo separados por componente ou página. Essa separação contribui para a organização visual do projeto e permite que cada tela mantenha suas próprias regras de apresentação, respeitando, ao mesmo tempo, o padrão visual definido para o sistema.
 
 \subsection{Tecnologias e bibliotecas utilizadas}
 

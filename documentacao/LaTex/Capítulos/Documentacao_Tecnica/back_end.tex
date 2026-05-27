@@ -2,12 +2,102 @@
 
 \subsection{Visão geral}
 
+A API (Interface de Programação de Aplicações) do back-end foi desenvolvida utilizando a linguagem Python e o microframework Flask, seguindo a arquitetura RESTful. O sistema foi projetado sob o padrão \textit{Application Factory}, permitindo a criação de múltiplas instâncias da aplicação e facilitando a escalabilidade e a modularização do código através de \textit{Blueprints}.
+
+A persistência de dados é gerenciada por um banco de dados relacional MySQL (\textit{schema} \texttt{tropicalmix\_db\_2}), com o intermédio do ORM (\textit{Object-Relational Mapping}) SQLAlchemy. Uma das principais características arquiteturais desta implementação é a delegação da integridade do estoque e cálculos de subtotais diretamente para o banco de dados por meio de \textit{Triggers} e colunas geradas (\textit{Generated Columns}), garantindo alta consistência, transações seguras (ACID) e um back-end mais leve.
+
 \subsection{Estrutura de pastas}
+
+O projeto segue uma hierarquia modular que separa as configurações globais, a modelagem de dados e a lógica de controle das requisições (\textit{controllers}). A estrutura principal é organizada da seguinte forma:
+
+\begin{itemize}
+    \item \texttt{run.py}: Ponto de entrada da aplicação que inicializa o servidor Flask.
+
+    \item \texttt{app/}: Diretório central (\textit{core}) da aplicação.
+
+    \begin{itemize}
+        \item \texttt{\_\_init\_\_.py}: Fábrica da aplicação. Inicializa extensões (Banco de Dados, JWT) e registra os \textit{Blueprints}.
+
+        \item \texttt{config.py}: Classe de configurações (variáveis de ambiente, URI do banco, chaves secretas).
+
+        \item \texttt{models.py}: Definição do mapeamento objeto-relacional (classes Python equivalentes às tabelas do MySQL).
+    \end{itemize}
+
+    \item \texttt{routes/}: Diretório que contém os \textit{Blueprints} da aplicação, separando as rotas por domínio de negócio.
+
+    \begin{itemize}
+        \item \texttt{auth\_routes.py}: Autenticação e geração de tokens.
+
+        \item \texttt{cliente\_routes.py} / \texttt{fornecedor\_routes.py}: Gestão de parceiros comerciais.
+
+        \item \texttt{estoque\_routes.py}: Catálogo de categorias, produtos e registros de abastecimento.
+
+        \item \texttt{pedido\_routes.py}: Processamento e registro de saídas/vendas.
+
+        \item \texttt{dashboard\_routes.py}: Geração de indicadores de desempenho (KPIs) e gráficos agregados.
+
+        \item \texttt{usuario\_routes.py}: Gestão de acesso e operadores do sistema.
+    \end{itemize}
+\end{itemize}
 
 \subsection{Rotas implementadas}
 
+O sistema expõe diversos \textit{endpoints} para suprir as necessidades do front-end, agrupados por prefixos na URL:
+
+\begin{itemize}
+    \item \texttt{/api/auth}: Possui a rota de login, responsável por validar credenciais e emitir o \textit{Access Token}.
+
+    \item \texttt{/api/dashboard}: Rotas de leitura (\texttt{GET}) que retornam dados agregados, como faturamento total, alertas de estoque e geração de imagens de gráficos via Pandas e Matplotlib.
+
+    \item \texttt{/api/estoque}: Rotas de CRUD para categorias e produtos, além do endpoint \texttt{/abastecer} (\texttt{POST}), que registra a entrada de novas mercadorias.
+
+    \item \texttt{/api/clientes} e \texttt{/api/fornecedores}: Endpoints padronizados para criação, listagem, detalhamento, atualização e exclusão de cadastros.
+
+    \item \texttt{/api/pedidos}: Centraliza o fechamento de vendas (\texttt{POST}). Recebe o carrinho de compras, cria o cabeçalho do pedido e os itens vinculados.
+
+    \item \texttt{/api/usuarios}: Rotas restritas para administração da equipe e controle do nível de acesso.
+\end{itemize}
+
 \subsection{Autenticação e autorização}
+
+A segurança da API baseia-se no padrão JWT (\textit{JSON Web Tokens}), implementado por meio da biblioteca \textit{Flask-JWT-Extended}. Todas as rotas de negócio são protegidas pelo decorador \texttt{@jwt\_required()}, exigindo que o cliente envie um token válido no cabeçalho HTTP (\texttt{Authorization: Bearer <token>}).
+
+As senhas dos usuários nunca são armazenadas em texto plano; utiliza-se algoritmos de hashing seguros (como o Bcrypt ou o módulo de segurança do Werkzeug) tanto no cadastro quanto na validação.
+
+Além da autenticação, o sistema conta com Autorização Baseada em Papéis (RBAC). Um decorador customizado, denominado \texttt{@admin\_required()}, foi desenvolvido para interceptar requisições nas rotas de gestão de usuários, liberando o acesso apenas se o atributo \texttt{nivel\_acesso} do usuário logado corresponder a \texttt{admin}.
 
 \subsection{Regras de negócio implementadas}
 
+O back-end garante a fidelidade das operações através das seguintes regras:
+
+\begin{itemize}
+    \item \textbf{Bloqueio de Produtos Vencidos}: O sistema valida a data de vencimento (\texttt{data\_vencimento}) dos produtos tanto na rota de registro de pedidos quanto no abastecimento. Se o item estiver com data inferior ao dia corrente, a operação é bloqueada na camada Python, retornando erro de validação.
+
+    \item \textbf{Integridade Transacional e de Estoque}: Ao registrar um pedido, o back-end apenas insere os dados no banco usando \texttt{db.session.commit()}. Os \textit{Triggers} configurados no MySQL (\texttt{BEFORE INSERT}, \texttt{AFTER INSERT}, etc.) assumem a responsabilidade de validar se há saldo suficiente e de abater a quantidade na tabela Produto. Se o saldo for insuficiente, o banco lança uma exceção \texttt{SQLSTATE '45000'}, que é capturada pelo Python para realizar o \textit{Rollback} completo da requisição, garantindo a atomicidade.
+
+    \item \textbf{Logs de Movimentação}: Entradas (abastecimento) e saídas (pedidos) geram automaticamente registros na tabela \texttt{movimentacao\_estoque} através de gatilhos no banco de dados.
+
+    \item \textbf{Proteção contra Exclusão Indevida}: O sistema impede a deleção de produtos, clientes ou fornecedores caso exista histórico financeiro ou de movimentação atrelado a eles (garantia de integridade referencial).
+\end{itemize}
+
 \subsection{Tratamento de erros}
+
+Para garantir a resiliência da aplicação, todas as rotas operacionais (\texttt{POST}, \texttt{PUT}, \texttt{DELETE}) estão envoltas em blocos estruturados de tentativa e exceção (\texttt{try/except}). Quando uma falha é detectada --- seja por violação de regras de negócio, falha de integridade do banco (\texttt{IntegrityError}) ou erros inesperados ---, o comando \texttt{db.session.rollback()} é invocado para reverter qualquer alteração pendente.
+
+A API responde seguindo a semântica dos \textit{Status Codes} HTTP:
+
+\begin{itemize}
+    \item \texttt{200 / 201}: Operações bem-sucedidas ou criação de recursos.
+
+    \item \texttt{400 (Bad Request)}: Dados ausentes, mal formatados ou violação de regra de negócio (ex: produto vencido ou falta de estoque).
+
+    \item \texttt{401 (Unauthorized)} / \texttt{403 (Forbidden)}: Tokens inválidos, expirados ou ausência de privilégios administrativos.
+
+    \item \texttt{404 (Not Found)}: Recursos não localizados no banco (ex: cliente ou produto inexistente).
+
+    \item \texttt{409 (Conflict)}: Tentativa de inserção de dados únicos duplicados (ex: CPF/CNPJ ou Email já existentes).
+
+    \item \texttt{500 (Internal Server Error)}: Falhas sistêmicas imprevistas.
+\end{itemize}
+
+As respostas de erro retornam um objeto JSON padronizado (ex: \texttt{\{"erro": "Mensagem descritiva"\}}), facilitando o tratamento na camada de interface do usuário (front-end).

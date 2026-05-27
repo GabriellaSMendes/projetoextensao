@@ -1,13 +1,375 @@
 \section{Implementação do Banco de Dados}
 
-\subsection{Visão geral}
+\subsection{Dicionário de Dados}
 
-\subsection{Modelo lógico}
+A presente seção apresenta o dicionário de dados do sistema \textbf{Tropical Mix}, contendo a descrição das principais tabelas utilizadas no banco de dados da aplicação. Cada tabela foi estruturada de acordo com as necessidades funcionais do sistema, contemplando campos, tipos de dados, restrições e descrições de suas respectivas finalidades.
 
-\subsection{Tabelas principais}
+%====================================================
+% TABELA: CATEGORIA
+%====================================================
 
-\subsection{Relacionamentos}
+\subsubsection{Tabela: Categoria}
 
-\subsection{Triggers, procedures e regras automatizadas}
+A tabela \textbf{Categoria} é responsável pelo armazenamento das categorias dos produtos cadastrados no sistema. Sua finalidade é permitir a organização e classificação dos produtos comercializados pela empresa, facilitando processos de gerenciamento, consulta e controle de estoque.
 
-\subsection{Controle de integridade}
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \begin{tabular}{|p{2.5cm}|p{2.5cm}|p{3cm}|p{4.5cm}|}
+        \hline
+        \textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\
+        \hline
+
+        id\_categoria & INT & PK, AI & Identificador único da categoria \\
+        \hline
+
+        nome & VARCHAR(100) & NOT NULL & Nome da categoria \\
+        \hline
+
+        descricao & VARCHAR(255) & NULL & Descrição da categoria \\
+        \hline
+
+    \end{tabular}
+
+    \caption{Tabela: Categoria}
+    \label{tab:categoria}
+\end{table}
+
+%====================================================
+% TABELA: PRODUTO
+%====================================================
+
+\subsubsection{Tabela: Produto}
+
+A tabela \textbf{Produto} armazena as informações relacionadas aos produtos comercializados pela empresa. Nela são registrados dados como nome, marca, sabor, preço, quantidade em estoque e categoria, possibilitando o gerenciamento completo do estoque e das vendas realizadas pelo sistema.
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \begin{tabular}{|p{2.5cm}|p{2.5cm}|p{3cm}|p{4.5cm}|}
+        \hline
+        \textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\
+        \hline
+
+        id\_produto & INT & PK, AI & Identificador único do produto \\
+        \hline
+
+        nome\_produto & VARCHAR(150) & NOT NULL & Nome do produto \\
+        \hline
+
+        sabor & VARCHAR(50) & NULL & Sabor do produto \\
+        \hline
+
+        marca & VARCHAR(100) & NULL & Marca do produto \\
+        \hline
+
+        qtdd\_atual & INT & DEFAULT 0 & Quantidade disponível em estoque \\
+        \hline
+
+        data\_vencimento & DATE & NULL & Data de vencimento do produto \\
+        \hline
+
+        preco\_unitario & DECIMAL(10,2) & NOT NULL & Valor unitário do produto \\
+        \hline
+
+        dt\_cadastro & DATETIME & DEFAULT CURRENT\_TIMESTAMP & Data de cadastro do produto \\
+        \hline
+
+        id\_categoria & INT & FK, NOT NULL & Referência da categoria do produto \\
+        \hline
+
+        ativo & BOOLEAN & DEFAULT TRUE & Status de ativação do produto \\
+        \hline
+
+    \end{tabular}
+
+    \caption{Tabela: Produto}
+    \label{tab:produto}
+\end{table}
+
+%====================================================
+% TABELA: USUÁRIO
+%====================================================
+
+\subsubsection{Tabela: Usuário}
+
+A tabela \textbf{Usuário} é responsável pelo armazenamento dos dados dos usuários do sistema. Essa estrutura permite o controle de autenticação, identificação e definição de níveis de acesso dos colaboradores que utilizam a aplicação.
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \begin{tabular}{|p{2.5cm}|p{2.5cm}|p{3cm}|p{4.5cm}|}
+        \hline
+        \textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\
+        \hline
+
+        id\_usuario & INT & PK, AI & Identificador único do usuário \\
+        \hline
+
+        nome\_usuario & VARCHAR(100) & NOT NULL & Nome do usuário \\
+        \hline
+
+        cpf & VARCHAR(14) & NULL & CPF do usuário \\
+        \hline
+
+        email & VARCHAR(150) & UNIQUE, NOT NULL & Email do usuário \\
+        \hline
+
+        senha & VARCHAR(255) & NOT NULL & Senha de acesso \\
+        \hline
+
+        nivel\_acesso & ENUM & DEFAULT 'vendedor' & Nível de acesso do usuário \\
+        \hline
+
+    \end{tabular}
+
+    \caption{Tabela: Usuário}
+    \label{tab:usuario}
+\end{table}
+
+%====================================================
+% TABELA: CLIENTE
+%====================================================
+
+\subsubsection{Tabela: Cliente}
+
+A tabela \textbf{Cliente} armazena as informações cadastrais dos clientes da empresa. Os dados registrados permitem identificar clientes vinculados às vendas, facilitando o controle comercial e histórico de pedidos realizados.
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \begin{tabular}{|p{2.5cm}|p{2.5cm}|p{3cm}|p{4.5cm}|}
+        \hline
+        \textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\
+        \hline
+
+        id\_cliente & INT & PK, AI & Identificador único do cliente \\
+        \hline
+
+        razao\_social & VARCHAR(100) & NOT NULL & Nome ou razão social do cliente \\
+        \hline
+
+        cpf\_cnpj & VARCHAR(14) & NULL & CPF ou CNPJ do cliente \\
+        \hline
+
+        telefone & VARCHAR(20) & NULL & Telefone de contato \\
+        \hline
+
+        email & VARCHAR(150) & NULL & Email do cliente \\
+        \hline
+
+        endereco & VARCHAR(255) & NULL & Endereço do cliente \\
+        \hline
+
+        dt\_cadastro & DATETIME & DEFAULT CURRENT\_TIMESTAMP & Data de cadastro do cliente \\
+        \hline
+
+    \end{tabular}
+
+    \caption{Tabela: Cliente}
+    \label{tab:cliente}
+\end{table}
+    \end{tabular}
+
+\end{table}
+
+
+\subsubsection{Tabela: Pedido}
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \begin{tabular}{|p{2.5cm}|p{2.5cm}|p{3cm}|p{4.5cm}|}
+        \hline
+        \textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\
+        \hline
+
+        id\_pedido & INT & PK, AI & Identificador único do pedido \\
+        \hline
+
+        id\_cliente & INT & FK, NOT NULL & Referência do cliente \\
+        \hline
+
+        id\_usuario & INT & FK, NOT NULL & Referência do usuário responsável \\
+        \hline
+
+        dt\_pedido & DATETIME & DEFAULT CURRENT\_TIMESTAMP & Data do pedido \\
+        \hline
+
+        mtd\_pagamento & ENUM & NULL & Método de pagamento utilizado \\
+        \hline
+    \end{tabular}
+
+    \caption{Tabela: Pedido}
+    \label{tab:pedido}
+\end{table}
+
+
+\subsubsection{Tabela: Tipo Movimentação}
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \begin{tabular}{|p{2.5cm}|p{2.5cm}|p{3cm}|p{4.5cm}|}
+        \hline
+        \textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\
+        \hline
+
+        id\_tipo\_movimentacao & INT & PK, AI & Identificador do tipo de movimentação \\
+        \hline
+
+        tipo\_movimentacao & VARCHAR(150) & NULL & Tipo de movimentação do estoque \\
+        \hline
+    \end{tabular}
+
+    \caption{Tabela: Tipo Movimentação}
+    \label{tab:tipo_movimentacao}
+\end{table}
+
+\subsubsection{Tabela: Movimentação Estoque}
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \begin{tabular}{|p{2.5cm}|p{2.5cm}|p{3cm}|p{4.5cm}|}
+        \hline
+        \textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\
+        \hline
+
+        id\_estoque & INT & PK, AI & Identificador da movimentação \\
+        \hline
+
+        id\_produto & INT & FK, NOT NULL & Referência do produto \\
+        \hline
+
+        id\_usuario & INT & FK, NOT NULL & Referência do usuário responsável \\
+        \hline
+
+        id\_tipo\_movimentacao & INT & FK, NOT NULL & Referência do tipo de movimentação \\
+        \hline
+
+        qtdd\_movimentacao & INT & DEFAULT 0 & Quantidade movimentada \\
+        \hline
+
+        ultima\_atualizacao & DATETIME & DEFAULT CURRENT\_TIMESTAMP & Data da movimentação \\
+        \hline
+
+    \end{tabular}
+
+    \caption{Tabela: Movimentação Estoque}
+    \label{tab:estoque}
+\end{table}
+
+
+\subsubsection{Tabela: Item Pedido}
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \begin{tabular}{|p{2.5cm}|p{2.5cm}|p{3cm}|p{4.5cm}|}
+        \hline
+        \textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\
+        \hline
+
+        id\_item\_pedido & INT & PK, AI & Identificador do item do pedido \\
+        \hline
+
+        id\_pedido & INT & FK, NOT NULL & Referência do pedido \\
+        \hline
+
+        id\_produto & INT & FK, NOT NULL & Referência do produto \\
+        \hline
+
+        qtdd\_pedido & INT & NOT NULL & Quantidade solicitada \\
+        \hline
+
+        preco\_unitario & DECIMAL(10,2) & NULL & Valor unitário do produto \\
+        \hline
+
+        subtotal & DECIMAL(10,2) & GENERATED & Valor total do item \\
+        \hline
+
+    \end{tabular}
+
+    \caption{Tabela: Item Pedido}
+    \label{tab:item_pedido}
+\end{table}
+
+
+\subsubsection{Tabela: Fornecedor}
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \begin{tabular}{|p{2.5cm}|p{2.5cm}|p{3cm}|p{4.5cm}|}
+        \hline
+        \textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\
+        \hline
+
+        id\_fornecedor & INT & PK, AI & Identificador único do fornecedor \\
+        \hline
+
+        razao\_social & VARCHAR(150) & NOT NULL & Nome ou razão social do fornecedor \\
+        \hline
+
+        cnpj & VARCHAR(18) & UNIQUE & CNPJ do fornecedor \\
+        \hline
+
+        telefone & VARCHAR(20) & NULL & Telefone do fornecedor \\
+        \hline
+
+        email & VARCHAR(150) & NULL & Email do fornecedor \\
+        \hline
+
+    \end{tabular}
+
+    \caption{Tabela: Fornecedor}
+    \label{tab:fornecedor}
+\end{table}
+
+
+\subsubsection{Tabela: Abastecimento}
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \begin{tabular}{|p{2.5cm}|p{2.5cm}|p{3cm}|p{4.5cm}|}
+        \hline
+        \textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\
+        \hline
+
+        id\_abastecimento & INT & PK, AI & Identificador do abastecimento \\
+        \hline
+
+        id\_fornecedor & INT & FK, NOT NULL & Referência do fornecedor \\
+        \hline
+
+        id\_produto & INT & FK, NOT NULL & Referência do produto \\
+        \hline
+
+        numero\_lote & VARCHAR(50) & NULL & Número do lote do produto \\
+        \hline
+
+        dt\_abastecimento & DATETIME & DEFAULT CURRENT\_TIMESTAMP & Data do abastecimento \\
+        \hline
+
+        qtdd\_recebida & INT & NOT NULL & Quantidade recebida \\
+        \hline
+
+        qtdd\_disponivel & INT & NULL & Quantidade disponível do lote \\
+        \hline
+
+        valor\_unitario & DECIMAL(10,2) & NULL & Valor unitário do produto \\
+        \hline
+
+        data\_vencimento & DATE & NULL & Data de vencimento do lote \\
+        \hline
+
+        id\_usuario & INT & FK, NOT NULL & Usuário responsável pelo abastecimento \\
+        \hline
+
+    \end{tabular}
+
+    \caption{Tabela: Abastecimento}
+    \label{tab:abastecimento}
+\end{table}

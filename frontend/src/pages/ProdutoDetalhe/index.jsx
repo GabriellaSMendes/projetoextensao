@@ -288,10 +288,10 @@ function ProdutoDetalhe() {
 
                             <div
                                 className={`validade-card-info ${lotesVencidos.length > 0
-                                        ? "validade-vencido"
-                                        : lotesProximosVencimento.length > 0
-                                            ? "validade-alerta"
-                                            : ""
+                                    ? "validade-vencido"
+                                    : lotesProximosVencimento.length > 0
+                                        ? "validade-alerta"
+                                        : ""
                                     }`}
                                 onClick={() => setFiltrarVencimentosProximos(!filtrarVencimentosProximos)}
                             >
@@ -466,8 +466,8 @@ function ProdutoDetalhe() {
                                     <td>{formatarDataHora(mov.ultima_atualizacao)}</td>
                                     <td>{mov.tipo_movimentacao}</td>
                                     <td>
-                                        {mov.tipo_movimentacao === "entrada" ? "+" : "-"}
-                                        {mov.qtdd_movimentacao}
+                                        {mov.tipo_movimentacao?.toLowerCase() === "entrada" ? "+" : "-"}
+                                        {Math.abs(Number(mov.qtdd_movimentacao))}
                                     </td>
                                     <td>{mov.usuario}</td>
                                 </tr>

@@ -241,13 +241,11 @@ def criar_produto():
         if not fornecedor:
             return jsonify({"erro": "Fornecedor inválido"}), 404
 
-    nova_qtdd_atual = qtdd_inicial
-
     novo_produto = Produto(
         nome_produto=dados.get('nome_produto'),
         sabor=dados.get('sabor'),
         marca=dados.get('marca'),
-        qtdd_atual=nova_qtdd_atual,
+        qtdd_atual=0,
         data_vencimento=data_vencimento,
         preco_unitario=dados.get('preco_unitario'),
         custo_unitario=dados.get('custo_unitario'),

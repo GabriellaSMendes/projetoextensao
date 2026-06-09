@@ -469,6 +469,11 @@
   color: #b30000;
 }
 
+.status-badge.validade-alerta {
+  background: #fdecec;
+  color: #b30000;
+}
+
 .row-inativo {
   opacity: 0.48;
   background: #f4f4f4 !important;

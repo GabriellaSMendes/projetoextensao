@@ -370,9 +370,12 @@ function Vendas() {
         const detalhe = detalhes[index]?.data;
         const itens = detalhe?.itens || [];
 
-        const total = itens.reduce((acc, item) => {
+        const subtotal = itens.reduce((acc, item) => {
           return acc + Number(item.subtotal || 0);
         }, 0);
+
+        const desconto = Number(detalhe?.desconto || pedido.desconto || 0);
+        const total = Number(detalhe?.total ?? Math.max(subtotal - desconto, 0));
 
         const itemPrincipal = itens[0]?.nome_produto || "";
 
@@ -395,6 +398,8 @@ function Vendas() {
           mtd_pagamento_label: traduzMetodo(pedido.mtd_pagamento),
           itensResumo,
           itemPrincipal,
+          subtotal,
+          desconto,
           total,
         };
       });
@@ -1280,69 +1285,106 @@ function Vendas() {
           </div>
         )}
 
-        {
-          detalhesOpen && vendaSelecionada && (
-            <div className="modal-overlay">
-              <div className="modal-box">
+        {detalhesOpen && vendaSelecionada && (
+          <div className="modal-overlay">
+            <div className="modal-box venda-detalhes-modal">
+              <div className="modal-header-venda detalhes-header">
+                <div>
+                  <h2>Detalhes da venda #{vendaSelecionada.id_pedido}</h2>
+                  <p>Resumo da venda, itens vendidos, desconto e valor final.</p>
+                </div>
 
-                <h2>Detalhes da venda #{vendaSelecionada.id_pedido}</h2>
+                <button
+                  type="button"
+                  className="modal-close-x"
+                  onClick={() => setDetalhesOpen(false)}
+                >
+                  ×
+                </button>
+              </div>
 
-                <p>
-                  <strong>Data: </strong>
-                  {vendaSelecionada.dt_pedido
-                    ? new Date(vendaSelecionada.dt_pedido).toLocaleDateString("pt-BR")
-                    : "-"}
-                </p>
+              <div className="venda-detalhes-content">
+                <section className="detalhes-info-grid">
+                  <div className="detalhe-info-card">
+                    <span>Data da venda</span>
+                    <strong>
+                      {vendaSelecionada.dt_pedido
+                        ? new Date(vendaSelecionada.dt_pedido).toLocaleDateString("pt-BR")
+                        : "-"}
+                    </strong>
+                  </div>
 
-                <p>
-                  <strong>Cliente: </strong>
-                  {vendaSelecionada.cliente || "-"}
-                </p>
+                  <div className="detalhe-info-card">
+                    <span>Cliente</span>
+                    <strong>{vendaSelecionada.cliente || "-"}</strong>
+                  </div>
 
-                <p>
-                  <strong>Vendedor: </strong>
-                  {vendaSelecionada.vendedor || "-"}
-                </p>
+                  <div className="detalhe-info-card">
+                    <span>Vendedor</span>
+                    <strong>{vendaSelecionada.vendedor || "-"}</strong>
+                  </div>
 
-                <p>
-                  <strong>Método de pagamento: </strong>
-                  {traduzMetodo(vendaSelecionada.mtd_pagamento)}
-                </p>
+                  <div className="detalhe-info-card">
+                    <span>Pagamento</span>
+                    <strong>{traduzMetodo(vendaSelecionada.mtd_pagamento)}</strong>
+                  </div>
+                </section>
 
-                <h3 style={{ marginTop: 20 }}>Itens</h3>
+                <section className="venda-section detalhes-itens-section">
+                  <div className="venda-section-title">
+                    <span>1</span>
+                    <h3>Itens da venda</h3>
+                  </div>
 
-                <ul className="carrinho-lista">
-                  {(vendaSelecionada.itens || []).map((item) => (
-                    <li key={item.id_produto} className="item-linha">
-                      <span className="item-nome">
-                        {item.nome_produto} — {item.qtdd_pedido}x R$ {Number(item.preco_unitario).toFixed(2)}
-                      </span>
+                  <div className="detalhes-itens-lista">
+                    {(vendaSelecionada.itens || []).map((item) => (
+                      <div key={item.id_produto} className="detalhes-item-card">
+                        <div>
+                          <strong>{item.nome_produto}</strong>
+                          <span>
+                            {item.qtdd_pedido}x {formatR$(Number(item.preco_unitario))}
+                          </span>
+                        </div>
 
-                      <span className="item-qtd">
-                        Subtotal: R$ {Number(item.subtotal).toFixed(2)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                        <div className="detalhes-item-subtotal">
+                          <span>Subtotal</span>
+                          <strong>{formatR$(Number(item.subtotal))}</strong>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
 
-                <p style={{ marginTop: 20, fontWeight: "bold" }}>
-                  Total: R$ {
-                    (vendaSelecionada.itens || [])
-                      .reduce((acc, item) => acc + Number(item.subtotal || 0), 0)
-                      .toFixed(2)
-                  }
-                </p>
+                <section className="detalhes-total-card">
+                  <div>
+                    <span>Subtotal</span>
+                    <strong>{formatR$(Number(vendaSelecionada.subtotal || 0))}</strong>
+                  </div>
 
-                <div className="modal-actions">
-                  <button className="cancel-btn" onClick={() => setDetalhesOpen(false)}>
+                  <div>
+                    <span>Desconto</span>
+                    <strong>{formatR$(Number(vendaSelecionada.desconto || 0))}</strong>
+                  </div>
+
+                  <div className="detalhes-total-final">
+                    <span>Total da venda</span>
+                    <strong>{formatR$(Number(vendaSelecionada.total || 0))}</strong>
+                  </div>
+                </section>
+
+                <div className="venda-modal-actions detalhes-actions">
+                  <button
+                    type="button"
+                    className="save-btn"
+                    onClick={() => setDetalhesOpen(false)}
+                  >
                     Fechar
                   </button>
                 </div>
-
               </div>
             </div>
-          )
-        }
+          </div>
+        )}
       </div >
     </div >
   );

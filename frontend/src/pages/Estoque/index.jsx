@@ -809,7 +809,7 @@ function Estoque() {
                   {produtoVencido(p) ? (
                     <span className="status-badge vencido">Vencido</span>
                   ) : produtoProximoValidade(p) ? (
-                    <span className="status-badge alerta">
+                    <span className="status-badge validade-alerta">
                       Vence em {diasAteVencimento(p)} dia(s)
                     </span>
                   ) : produtoComEstoqueBaixo(p) ? (

@@ -349,18 +349,6 @@ function Usuarios() {
                   <option value="admin">Admin</option>
                 </select>
               </div>
-
-              <div className="checkbox-status">
-                <label>
-                  <input
-                    type="checkbox"
-                    name="ativo"
-                    checked={formData.ativo}
-                    onChange={handleChange}
-                  />
-                  Usuário ativo
-                </label>
-              </div>
             </div>
 
             <div className="modal-actions usuario-modal-actions">

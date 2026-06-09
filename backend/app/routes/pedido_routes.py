@@ -21,6 +21,7 @@ def listar_pedidos():
             "id_pedido": p.id_pedido,
             "dt_pedido": p.dt_pedido.isoformat() if p.dt_pedido else None,
             "mtd_pagamento": p.mtd_pagamento,
+            "desconto": str(p.desconto or 0),
             "cliente": p.cliente.razao_social if p.cliente else None,
             "vendedor": p.vendedor.nome_usuario if p.vendedor else None
         })
@@ -117,19 +118,33 @@ def detalhar_pedido(id_pedido):
         return jsonify({"erro": "Pedido não encontrado"}), 404
 
     itens_json = []
+    subtotal_pedido = 0
+
     for item in pedido.itens:
+        preco_unitario = float(item.preco_unitario or 0)
+        quantidade = int(item.qtdd_pedido or 0)
+        subtotal_item = preco_unitario * quantidade
+
+        subtotal_pedido += subtotal_item
+
         itens_json.append({
             "id_produto": item.id_produto,
             "nome_produto": item.produto.nome_produto if item.produto else None,
-            "qtdd_pedido": item.qtdd_pedido,
-            "preco_unitario": str(item.preco_unitario),
-            "subtotal": str(item.preco_unitario * item.qtdd_pedido)
+            "qtdd_pedido": quantidade,
+            "preco_unitario": str(preco_unitario),
+            "subtotal": str(subtotal_item)
         })
+
+    desconto = float(pedido.desconto or 0)
+    total_pedido = max(subtotal_pedido - desconto, 0)
 
     return jsonify({
         "id_pedido": pedido.id_pedido,
         "dt_pedido": pedido.dt_pedido.isoformat() if pedido.dt_pedido else None,
         "mtd_pagamento": pedido.mtd_pagamento,
+        "desconto": str(desconto),
+        "subtotal": str(subtotal_pedido),
+        "total": str(total_pedido),
         "cliente": pedido.cliente.razao_social if pedido.cliente else None,
         "vendedor": pedido.vendedor.nome_usuario if pedido.vendedor else None,
         "itens": itens_json

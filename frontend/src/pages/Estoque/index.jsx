@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import Notification from "../../components/Notification";
 import ConfirmModal from "../../components/ConfirmModal";
@@ -19,8 +20,40 @@ function formatarDataBR(data) {
 
 const LIMITE_ESTOQUE_BAIXO = 20;
 
+
 function produtoComEstoqueBaixo(produto) {
   return Number(produto.qtdd_atual) > 0 && Number(produto.qtdd_atual) <= LIMITE_ESTOQUE_BAIXO;
+}
+
+const LIMITE_PROXIMO_VENCIMENTO = 45;
+
+function getValidadeProduto(produto) {
+  return produto.validade_lote || produto.data_vencimento || "";
+}
+
+function diasAteVencimento(produto) {
+  const validade = getValidadeProduto(produto);
+
+  if (!validade) return null;
+
+  const hoje = new Date();
+  const vencimento = new Date(`${validade}T00:00:00`);
+
+  hoje.setHours(0, 0, 0, 0);
+  vencimento.setHours(0, 0, 0, 0);
+
+  const diffMs = vencimento - hoje;
+  return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+}
+
+function produtoVencido(produto) {
+  const dias = diasAteVencimento(produto);
+  return dias !== null && dias < 0;
+}
+
+function produtoProximoValidade(produto) {
+  const dias = diasAteVencimento(produto);
+  return dias !== null && dias >= 0 && dias <= LIMITE_PROXIMO_VENCIMENTO;
 }
 
 function CampoSugestao({ label, name, value, onChange, options, placeholder }) {
@@ -105,6 +138,7 @@ function CampoSugestao({ label, name, value, onChange, options, placeholder }) {
 }
 
 function Estoque() {
+  const navigate = useNavigate();
   const [filtrosAbertos, setFiltrosAbertos] = useState(false);
   const [fornecedores, setFornecedores] = useState([]);
   const [filtroCategoria, setFiltroCategoria] = useState([]);
@@ -118,6 +152,7 @@ function Estoque() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [produtoEditando, setProdutoEditando] = useState(null);
+  const [produtoDetalhe, setProdutoDetalhe] = useState(null);
   const [confirmModal, setConfirmModal] = useState({
     aberto: false,
     produto: null
@@ -228,11 +263,11 @@ function Estoque() {
 
         const statusProduto = [];
 
-        if (p.lotes_vencidos > 0) {
+        if (produtoVencido(p)) {
           statusProduto.push("vencido");
         }
 
-        if (p.lotes_vencidos <= 0 && p.lotes_proximos_validade > 0) {
+        if (!produtoVencido(p) && produtoProximoValidade(p)) {
           statusProduto.push("proximo_validade");
         }
 
@@ -241,8 +276,8 @@ function Estoque() {
         }
 
         if (
-          p.lotes_vencidos <= 0 &&
-          p.lotes_proximos_validade <= 0 &&
+          !produtoVencido(p) &&
+          !produtoProximoValidade(p) &&
           !produtoComEstoqueBaixo(p)
         ) {
           statusProduto.push("ok");
@@ -281,11 +316,11 @@ function Estoque() {
     nome_produto: "",
     sabor: "",
     marca: "",
+    custo_unitario: "",
     preco_unitario: "",
     categoria_nome: "",
     fornecedor_nome: "",
     quantidade: "",
-    custo_unitario_lote: "",
     numero_lote: "",
     data_vencimento: ""
   });
@@ -405,8 +440,13 @@ function Estoque() {
         return;
       }
 
+      if (!formData.custo_unitario) {
+        mostrarNotificacao("Informe o custo unitário.", "warning");
+        return;
+      }
+
       if (!formData.preco_unitario) {
-        mostrarNotificacao("Informe o custo unitário padrão.", "warning");
+        mostrarNotificacao("Informe o preço de venda.", "warning");
         return;
       }
 
@@ -424,14 +464,12 @@ function Estoque() {
           nome_produto: formData.nome_produto,
           sabor: formData.sabor,
           marca: formData.marca,
+          custo_unitario: Number(formData.custo_unitario.replace(",", ".")),
           preco_unitario: Number(formData.preco_unitario.replace(",", ".")),
           id_categoria: idCategoria,
-
           id_fornecedor: idFornecedor,
           qtdd_entrada: Number(formData.quantidade),
-          valor_unitario: formData.custo_unitario_lote
-            ? Number(formData.custo_unitario_lote.replace(",", "."))
-            : Number(formData.preco_unitario.replace(",", ".")),
+          valor_unitario: Number(formData.custo_unitario.replace(",", ".")),
           numero_lote: formData.numero_lote || null,
           data_vencimento: formData.data_vencimento || null
         },
@@ -448,6 +486,7 @@ function Estoque() {
         nome_produto: "",
         sabor: "",
         marca: "",
+        custo_unitario: "",
         preco_unitario: "",
         categoria_nome: "",
         fornecedor_nome: "",
@@ -470,8 +509,8 @@ function Estoque() {
     }
   };
 
-  const abrirDetalheProduto = (idProduto) => {
-    window.open(`/estoque/produtos/${idProduto}`, "_blank");
+  const abrirDetalheProduto = (produto) => {
+    navigate(`/estoque/produtos/${produto.id_produto}`);
   };
 
   const abrirConfirmacaoStatusProduto = (produto) => {
@@ -704,6 +743,7 @@ function Estoque() {
                   sabor: "",
                   marca: "",
                   preco_unitario: "",
+                  custo_unitario: "",
                   categoria_nome: "",
                   fornecedor_nome: "",
                   quantidade: "",
@@ -762,18 +802,18 @@ function Estoque() {
                 <div className="col center saldo-col">{p.qtdd_atual}</div>
 
                 <div className="col">
-                  {p.proxima_validade ? formatarDataBR(p.proxima_validade) : "-"}
+                  {getValidadeProduto(p) ? formatarDataBR(getValidadeProduto(p)) : "-"}
                 </div>
 
                 <div className="col">
-                  {p.lotes_vencidos > 0 ? (
-                    <span className="status-badge vencido">
-                      {p.lotes_vencidos} vencido(s)
-                    </span>
-                  ) : p.lotes_proximos_validade > 0 ? (
+                  {produtoVencido(p) ? (
+                    <span className="status-badge vencido">Vencido</span>
+                  ) : produtoProximoValidade(p) ? (
                     <span className="status-badge alerta">
-                      {p.lotes_proximos_validade} próximo(s)
+                      Vence em {diasAteVencimento(p)} dia(s)
                     </span>
+                  ) : produtoComEstoqueBaixo(p) ? (
+                    <span className="status-badge alerta">Estoque baixo</span>
                   ) : (
                     <span className="status-badge ok">OK</span>
                   )}
@@ -784,7 +824,7 @@ function Estoque() {
                 <div className="col action">
                   <button
                     className="edit-btn"
-                    onClick={() => abrirDetalheProduto(p.id_produto)}
+                    onClick={() => abrirDetalheProduto(p)}
                   >
                     Detalhes
                   </button>
@@ -867,6 +907,17 @@ function Estoque() {
 
               <div>
                 <label>Custo unitário</label>
+                <input
+                  type="text"
+                  name="custo_unitario"
+                  value={formData.custo_unitario}
+                  onChange={handleChange}
+                  placeholder="Ex: 80.00"
+                />
+              </div>
+
+              <div>
+                <label>Preço de venda</label>
                 <input
                   type="text"
                   name="preco_unitario"

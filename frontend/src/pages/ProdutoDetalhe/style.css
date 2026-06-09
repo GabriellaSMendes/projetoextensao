@@ -41,36 +41,6 @@
   transform: translateY(-2px);
 }
 
-.produto-card {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  background: #fff;
-  border: 1px solid #ead7e9;
-  border-radius: 14px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  margin-bottom: 28px;
-  align-items: center;
-}
-
-.produto-card div {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.card-label {
-  font-size: 12px;
-  color: #7b1f50;
-  font-weight: 600;
-}
-
-.produto-card strong {
-  color: #4e1633;
-  font-size: 16px;
-}
-
 .historico-section {
   border-top: 1px solid #e4d7df;
   padding-top: 24px;
@@ -344,4 +314,162 @@
   color: #4e1633;
   font-size: 11px;
   font-weight: 700;
+}
+
+.produto-card {
+  background: #ffffff;
+  border: 1px solid #ead7e9;
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 4px 14px rgba(78, 22, 51, 0.06);
+}
+
+.produto-card-section {
+  width: 100%;
+}
+
+.section-title-row {
+  margin-bottom: 12px;
+}
+
+.section-title-row h3 {
+  margin: 0;
+  color: #4e1633;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.card-label {
+  color: #7b1f50;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.produto-info-grid strong,
+.valor-resumo-card strong {
+  color: #3b0f27;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.produto-info-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  gap: 16px 34px;
+  align-items: stretch;
+}
+
+.produto-info-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.produto-info-grid .validade-card-info {
+  grid-column: 4;
+  grid-row: 1 / span 2;
+  justify-content: center;
+  min-height: 96px;
+}
+
+.card-label {
+  color: #7b1f50;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.produto-info-grid strong {
+  color: #3b0f27;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.valores-section {
+  border-top: 1px solid #f0dce8;
+  padding-top: 18px;
+}
+
+.produto-valores-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.valor-resumo-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #faf5f9;
+  border: 1px solid #ead7e9;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.valor-resumo-card strong {
+  color: #3b0f27;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.valor-resumo-card.destaque {
+  background: #fff8e6;
+  border-color: #ffd262;
+}
+
+.valor-resumo-card.destaque strong {
+  color: #4e1633;
+}
+
+.validade-card-info {
+  cursor: pointer;
+  border-radius: 12px;
+  padding: 14px 16px;
+  background: #faf5f9;
+  border: 1px solid #ead7e9;
+  transition: 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.validade-card-info:hover {
+  background: #f3e6ef;
+}
+
+.validade-card-info small {
+  color: #7b1f50;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.validade-alerta strong {
+  color: #b36b00;
+}
+
+.validade-vencido strong {
+  color: #b30000;
+}
+
+@media (max-width: 1100px) {
+  .produto-info-grid,
+  .produto-valores-grid {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+
+  .produto-info-grid .validade-card-info {
+    grid-column: auto;
+    grid-row: auto;
+    min-height: auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .produto-info-grid,
+  .produto-valores-grid {
+    grid-template-columns: 1fr;
+  }
 }

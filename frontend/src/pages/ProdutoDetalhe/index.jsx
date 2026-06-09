@@ -213,6 +213,10 @@ function ProdutoDetalhe() {
         return total + quantidade * custoUnitario;
     }, 0);
 
+    const valorVendaEstoque =
+        (Number(produto?.qtdd_atual) || 0) *
+        (Number(produto?.preco_unitario) || 0);
+
     if (erro) {
         return (
             <div className="produto-detalhe-page">
@@ -251,64 +255,98 @@ function ProdutoDetalhe() {
 
             {produto && (
                 <section className="produto-card">
-                    <div>
-                        <span className="card-label">Nome</span>
-                        <strong>{produto.nome_produto}</strong>
+                    <div className="produto-card-section">
+                        <div className="section-title-row">
+                            <h3>Dados do produto</h3>
+                        </div>
+
+                        <div className="produto-info-grid">
+                            <div>
+                                <span className="card-label">Nome</span>
+                                <strong>{produto.nome_produto}</strong>
+                            </div>
+
+                            <div>
+                                <span className="card-label">Categoria</span>
+                                <strong>{produto.nome_categoria || "-"}</strong>
+                            </div>
+
+                            <div>
+                                <span className="card-label">Sabor</span>
+                                <strong>{produto.sabor || "-"}</strong>
+                            </div>
+
+                            <div>
+                                <span className="card-label">Marca</span>
+                                <strong>{produto.marca || "-"}</strong>
+                            </div>
+
+                            <div>
+                                <span className="card-label">Estoque atual</span>
+                                <strong>{produto.qtdd_atual}</strong>
+                            </div>
+
+                            <div
+                                className={`validade-card-info ${lotesVencidos.length > 0
+                                        ? "validade-vencido"
+                                        : lotesProximosVencimento.length > 0
+                                            ? "validade-alerta"
+                                            : ""
+                                    }`}
+                                onClick={() => setFiltrarVencimentosProximos(!filtrarVencimentosProximos)}
+                            >
+                                <span className="card-label">Próximo da validade</span>
+
+                                <strong>
+                                    {lotesVencidos.length + lotesProximosVencimento.length}{" "}
+                                    {lotesVencidos.length + lotesProximosVencimento.length === 1 ? "lote" : "lotes"}
+                                </strong>
+
+                                <small>
+                                    {lotesVencidos.length > 0
+                                        ? `${lotesVencidos.length} vencido(s)`
+                                        : lotesProximosVencimento.length > 0
+                                            ? "Vencimento em até 45 dias"
+                                            : "Nenhum alerta de validade"}
+                                </small>
+                            </div>
+                        </div>
                     </div>
 
-                    <div>
-                        <span className="card-label">Categoria</span>
-                        <strong>{produto.nome_categoria || "-"}</strong>
-                    </div>
+                    <div className="produto-card-section valores-section">
+                        <div className="section-title-row">
+                            <h3>Resumo financeiro</h3>
+                        </div>
 
-                    <div>
-                        <span className="card-label">Sabor</span>
-                        <strong>{produto.sabor || "-"}</strong>
-                    </div>
+                        <div className="produto-valores-grid">
+                            <div className="valor-resumo-card">
+                                <span className="card-label">Custo unitário</span>
+                                <strong>
+                                    {produto.custo_unitario
+                                        ? `R$ ${Number(produto.custo_unitario).toFixed(2)}`
+                                        : "-"}
+                                </strong>
+                            </div>
 
-                    <div>
-                        <span className="card-label">Marca</span>
-                        <strong>{produto.marca || "-"}</strong>
-                    </div>
+                            <div className="valor-resumo-card">
+                                <span className="card-label">Preço de venda</span>
+                                <strong>
+                                    {produto.preco_unitario
+                                        ? `R$ ${Number(produto.preco_unitario).toFixed(2)}`
+                                        : "-"}
+                                </strong>
+                            </div>
 
-                    <div>
-                        <span className="card-label">Estoque atual</span>
-                        <strong>{produto.qtdd_atual}</strong>
-                    </div>
+                            <div className="valor-resumo-card">
+                                <span className="card-label">Custo total do estoque</span>
+                                <strong>R$ {custoTotalEstoque.toFixed(2)}</strong>
+                            </div>
 
-                    <div>
-                        <span className="card-label">Custo unitário</span>
-                        <strong>R$ {produto.preco_unitario}</strong>
-                    </div>
-
-                    <div>
-                        <span className="card-label">Custo total do estoque</span>
-                        <strong>
-                            R$ {custoTotalEstoque.toFixed(2)}
-                        </strong>
-                    </div>
-
-                    <div
-                        className={`validade-card-info ${lotesVencidos.length > 0
-                            ? "validade-vencido"
-                            : lotesProximosVencimento.length > 0
-                                ? "validade-alerta"
-                                : ""
-                            }`}
-                        onClick={() => setFiltrarVencimentosProximos(!filtrarVencimentosProximos)}
-                    >
-                        <span className="card-label">Próximo da validade</span>
-
-                        <strong>
-                            {lotesVencidos.length + lotesProximosVencimento.length}{" "}
-                            {lotesVencidos.length + lotesProximosVencimento.length === 1 ? "lote" : "lotes"}
-                        </strong>
-
-                        <small>
-                            {lotesVencidos.length > 0
-                                ? `${lotesVencidos.length} vencido(s)`
-                                : "Vencimento em até 45 dias"}
-                        </small>
+                            <div className="valor-resumo-card destaque">
+                                <span className="card-label">Valor potencial de venda</span>
+                                <strong>R$ {valorVendaEstoque.toFixed(2)}</strong>
+                            </div>
+                        </div>
                     </div>
                 </section>
             )}

@@ -1,27 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import api from "../../services/api";
 import Notification from "../../components/Notification";
 import ConfirmModal from "../../components/ConfirmModal";
 import "./style.css";
 
 function Usuarios() {
-  const [usuarios, setUsuarios] = useState([
-    {
-      id_usuario: 1,
-      nome_usuario: "Administrador",
-      cpf: "000.000.000-00",
-      email: "admin@email.com",
-      nivel_acesso: "admin",
-      ativo: true,
-    },
-    {
-      id_usuario: 2,
-      nome_usuario: "Vendedor Teste",
-      cpf: "111.111.111-11",
-      email: "vendedor@email.com",
-      nivel_acesso: "vendedor",
-      ativo: true,
-    },
-  ]);
+  const [usuarios, setUsuarios] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editando, setEditando] = useState(null);
@@ -31,8 +16,7 @@ function Usuarios() {
     cpf: "",
     email: "",
     senha: "",
-    nivel_acesso: "vendedor",
-    ativo: true,
+    nivel_acesso: "vendedor"
   });
 
   const [notification, setNotification] = useState({
@@ -69,8 +53,7 @@ function Usuarios() {
       cpf: "",
       email: "",
       senha: "",
-      nivel_acesso: "vendedor",
-      ativo: true,
+      nivel_acesso: "vendedor"
     });
     setModalOpen(true);
   };
@@ -82,13 +65,38 @@ function Usuarios() {
       cpf: usuario.cpf || "",
       email: usuario.email || "",
       senha: "",
-      nivel_acesso: usuario.nivel_acesso || "vendedor",
-      ativo: usuario.ativo,
+      nivel_acesso: usuario.nivel_acesso || "vendedor"
     });
     setModalOpen(true);
   };
 
-  const salvarUsuario = () => {
+  const carregarUsuarios = async () => {
+    try {
+      setLoading(true);
+
+      const token = localStorage.getItem("token");
+
+      const response = await api.get("/usuarios", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setUsuarios(response.data.usuarios || []);
+    } catch (error) {
+      console.error(error);
+      mostrarNotificacao(
+        error.response?.data?.erro || "Erro ao carregar usuários.",
+        "error"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    carregarUsuarios();
+  }, []);
+
+  const salvarUsuario = async () => {
     if (!formData.nome_usuario.trim()) {
       mostrarNotificacao("Informe o nome do usuário.", "warning");
       return;
@@ -104,72 +112,93 @@ function Usuarios() {
       return;
     }
 
-    if (editando) {
-      setUsuarios((prev) =>
-        prev.map((u) =>
-          u.id_usuario === editando.id_usuario
-            ? {
-                ...u,
-                nome_usuario: formData.nome_usuario,
-                cpf: formData.cpf,
-                email: formData.email,
-                nivel_acesso: formData.nivel_acesso,
-                ativo: formData.ativo,
-              }
-            : u
-        )
-      );
+    const payload = {
+      nome_usuario: formData.nome_usuario.trim(),
+      cpf: formData.cpf.trim() || null,
+      email: formData.email.trim(),
+      nivel_acesso: formData.nivel_acesso,
+    };
 
-      mostrarNotificacao("Usuário atualizado com sucesso.", "success");
-    } else {
-      const novoUsuario = {
-        id_usuario: Date.now(),
-        nome_usuario: formData.nome_usuario,
-        cpf: formData.cpf,
-        email: formData.email,
-        nivel_acesso: formData.nivel_acesso,
-        ativo: formData.ativo,
-      };
-
-      setUsuarios((prev) => [...prev, novoUsuario]);
-      mostrarNotificacao("Usuário cadastrado com sucesso.", "success");
+    if (!editando || formData.senha.trim()) {
+      payload.senha = formData.senha;
     }
 
-    setModalOpen(false);
-    setEditando(null);
+    try {
+      const token = localStorage.getItem("token");
+
+      if (editando) {
+        await api.put(`/usuarios/${editando.id_usuario}`, payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        mostrarNotificacao("Usuário atualizado com sucesso.", "success");
+      } else {
+        await api.post("/usuarios", payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        mostrarNotificacao("Usuário cadastrado com sucesso.", "success");
+      }
+
+      await carregarUsuarios();
+
+      setModalOpen(false);
+      setEditando(null);
+    } catch (error) {
+      console.error(error);
+      mostrarNotificacao(
+        error.response?.data?.erro ||
+        error.response?.data?.detalhes ||
+        "Erro ao salvar usuário.",
+        "error"
+      );
+    }
   };
 
-  const abrirConfirmacaoStatus = (usuario) => {
+  const abrirConfirmacaoExclusao = (usuario) => {
     setConfirmModal({
       aberto: true,
       usuario,
     });
   };
 
-  const alterarStatusUsuario = () => {
+  const excluirUsuario = async () => {
     const usuario = confirmModal.usuario;
 
-    if (!usuario) return;
+    if (!usuario) {
+      return;
+    }
 
-    setUsuarios((prev) =>
-      prev.map((u) =>
-        u.id_usuario === usuario.id_usuario
-          ? { ...u, ativo: !u.ativo }
-          : u
-      )
-    );
+    try {
+      const token = localStorage.getItem("token");
 
-    setConfirmModal({
-      aberto: false,
-      usuario: null,
-    });
+      await api.delete(`/usuarios/${usuario.id_usuario}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    mostrarNotificacao(
-      usuario.ativo
-        ? "Usuário desativado com sucesso."
-        : "Usuário reativado com sucesso.",
-      "success"
-    );
+      mostrarNotificacao("Usuário excluído com sucesso.", "success");
+
+      setConfirmModal({
+        aberto: false,
+        usuario: null,
+      });
+
+      await carregarUsuarios();
+    } catch (error) {
+      console.error(error);
+
+      mostrarNotificacao(
+        error.response?.data?.erro ||
+        error.response?.data?.detalhes ||
+        "Erro ao excluir usuário.",
+        "error"
+      );
+
+      setConfirmModal({
+        aberto: false,
+        usuario: null,
+      });
+    }
   };
 
   return (
@@ -200,18 +229,16 @@ function Usuarios() {
             <div className="col">E-mail</div>
             <div className="col">CPF</div>
             <div className="col">Nível</div>
-            <div className="col">Status</div>
             <div className="col action">Ações</div>
           </div>
 
-          {usuarios.length === 0 ? (
+          {loading ? (
+            <div className="loading">Carregando usuários...</div>
+          ) : usuarios.length === 0 ? (
             <div className="empty">Nenhum usuário cadastrado.</div>
           ) : (
             usuarios.map((usuario) => (
-              <div
-                className={`row ${usuario.ativo ? "" : "row-inativo"}`}
-                key={usuario.id_usuario}
-              >
+              <div className="row" key={usuario.id_usuario}>
                 <div className="col">{usuario.nome_usuario}</div>
                 <div className="col">{usuario.email}</div>
                 <div className="col">{usuario.cpf || "-"}</div>
@@ -220,15 +247,7 @@ function Usuarios() {
                     {usuario.nivel_acesso === "admin" ? "Admin" : "Vendedor"}
                   </span>
                 </div>
-                <div className="col">
-                  <span
-                    className={`status-badge ${
-                      usuario.ativo ? "ativo" : "inativo"
-                    }`}
-                  >
-                    {usuario.ativo ? "Ativo" : "Inativo"}
-                  </span>
-                </div>
+
                 <div className="col action">
                   <button
                     className="edit-btn"
@@ -238,10 +257,11 @@ function Usuarios() {
                   </button>
 
                   <button
-                    className={usuario.ativo ? "hide-btn" : "restore-btn"}
-                    onClick={() => abrirConfirmacaoStatus(usuario)}
+                    type="button"
+                    className="delete-btn"
+                    onClick={() => abrirConfirmacaoExclusao(usuario)}
                   >
-                    {usuario.ativo ? "Desativar" : "Reativar"}
+                    Excluir
                   </button>
                 </div>
               </div>
@@ -366,21 +386,14 @@ function Usuarios() {
           </div>
         </div>
       )}
-
       {confirmModal.aberto && confirmModal.usuario && (
         <ConfirmModal
-          title={
-            confirmModal.usuario.ativo
-              ? "Desativar usuário"
-              : "Reativar usuário"
-          }
-          message={`Deseja ${
-            confirmModal.usuario.ativo ? "desativar" : "reativar"
-          } o usuário "${confirmModal.usuario.nome_usuario}"?`}
-          confirmText={confirmModal.usuario.ativo ? "Desativar" : "Reativar"}
+          title="Excluir usuário"
+          message={`Deseja realmente excluir o usuário "${confirmModal.usuario.nome_usuario}"?`}
+          confirmText="Excluir"
           cancelText="Cancelar"
-          type={confirmModal.usuario.ativo ? "warning" : "info"}
-          onConfirm={alterarStatusUsuario}
+          type="warning"
+          onConfirm={excluirUsuario}
           onCancel={() =>
             setConfirmModal({
               aberto: false,

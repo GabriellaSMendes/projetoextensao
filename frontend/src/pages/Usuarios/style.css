@@ -305,3 +305,35 @@
 .usuarios-page .modal-overlay {
   z-index: 2000;
 }
+
+.col.action {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.delete-btn {
+  background-color: #f4d7df;
+  color: #7b1f50;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  min-width: 72px;
+  height: 36px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.delete-btn:hover {
+  background-color: #e8b8c8;
+  color: #4e1633;
+}
+
+.col.action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

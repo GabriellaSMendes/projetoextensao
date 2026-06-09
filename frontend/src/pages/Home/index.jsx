@@ -55,7 +55,7 @@ function Home() {
     modulos.unshift({
       titulo: "Usuários e Acessos",
       descricao: "Cadastre usuários e controle os perfis de acesso ao sistema.",
-      rota: "/cadastro",
+      rota: "/usuarios",
       icone: <FaUsersGear />,
       destaque: "Administração",
     });

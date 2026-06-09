@@ -49,7 +49,7 @@ function Cadastro() {
       const token = localStorage.getItem("token");
 
       const response = await api.post(
-        "/auth/registrar",
+        "/usuarios",
         {
           nome_usuario: formData.nome_usuario,
           email: formData.email,

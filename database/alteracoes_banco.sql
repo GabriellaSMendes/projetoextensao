@@ -15,3 +15,6 @@ ADD COLUMN custo_unitario DECIMAL(10,2) NULL AFTER preco_unitario;
 
 ALTER TABLE pedido
 ADD COLUMN desconto DECIMAL(10,2) NOT NULL DEFAULT 0.00 AFTER mtd_pagamento;
+
+ALTER TABLE cliente
+MODIFY COLUMN cpf_cnpj VARCHAR(18);

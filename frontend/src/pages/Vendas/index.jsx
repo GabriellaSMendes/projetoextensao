@@ -137,7 +137,7 @@ function Vendas() {
   const [filtroItens, setFiltroItens] = useState("");
   const [filtroValorMin, setFiltroValorMin] = useState("");
   const [filtroValorMax, setFiltroValorMax] = useState("");
-
+  const [desconto, setDesconto] = useState("");
   const [vendas, setVendas] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -425,18 +425,32 @@ function Vendas() {
   useEffect(() => {
     async function carregarUsuarios() {
       try {
-        // quando o backend criar a rota: /usuarios
-        // const token = localStorage.getItem("token");
-        // const resp = await api.get("/usuarios", {
-        //   headers: { Authorization: `Bearer ${token}` }
-        // });
-        // setUsuarios(resp.data);
-        // por enquanto vazio
-        setUsuarios([]);
+        const token = localStorage.getItem("token");
+        const nivel = localStorage.getItem("userLevel");
+
+        if (nivel !== "admin") {
+          setUsuarios([]);
+          return;
+        }
+
+        const resp = await api.get("/usuarios", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const listaUsuarios = resp.data.usuarios || [];
+
+        setUsuarios(listaUsuarios);
+
+        // garante que o select tenha um valor real
+        if (!vendedor && listaUsuarios.length > 0) {
+          setVendedor(String(listaUsuarios[0].id_usuario));
+        }
       } catch (err) {
         console.error("Erro ao carregar vendedores", err);
+        setUsuarios([]);
       }
     }
+
     carregarUsuarios();
   }, []);
 
@@ -503,10 +517,14 @@ function Vendas() {
     mostrarNotificacao("Item carregado para edição.", "info");
   };
 
-  const totalCarrinho = carrinho.reduce(
+  const subtotalCarrinho = carrinho.reduce(
     (acc, i) => acc + i.preco * i.quantidade,
     0
   );
+
+  const valorDesconto = Number(String(desconto || "0").replace(",", ".")) || 0;
+
+  const totalCarrinho = Math.max(subtotalCarrinho - valorDesconto, 0);
 
   // ------------------ SALVAR VENDA ------------------
   const salvarVenda = async () => {
@@ -522,15 +540,19 @@ function Vendas() {
 
     const payload = {
       id_cliente: Number(cliente),
+      id_usuario: vendedor ? Number(vendedor) : null,
       mtd_pagamento: pagamento,
+      desconto: valorDesconto,
       itens: carrinho.map((i) => ({
         id_produto: i.id_produto,
         qtdd_pedido: i.quantidade,
-      }))
+      })),
     };
 
     try {
       const token = localStorage.getItem("token");
+
+      console.log("Payload venda:", payload);
 
       await api.post("/pedidos", payload, {
         headers: { Authorization: `Bearer ${token}` },
@@ -560,6 +582,7 @@ function Vendas() {
     setPagamento("pix");
     setNovoCliente("");
     setShowNovoClienteForm(false);
+    setDesconto("");
 
     setModalOpen(true);
   };
@@ -880,15 +903,15 @@ function Vendas() {
                         value={vendedor}
                         onChange={(e) => setVendedor(e.target.value)}
                       >
-                        {usuarios.length === 0 && (
-                          <option value={vendedor}>{nomeUsuario}</option>
+                        {usuarios.length === 0 ? (
+                          <option value="">{nomeUsuario}</option>
+                        ) : (
+                          usuarios.map((u) => (
+                            <option key={u.id_usuario} value={String(u.id_usuario)}>
+                              {u.nome_usuario}
+                            </option>
+                          ))
                         )}
-
-                        {usuarios.map((u) => (
-                          <option key={u.id_usuario} value={u.id_usuario}>
-                            {u.nome}
-                          </option>
-                        ))}
                       </select>
                     </div>
                   </div>
@@ -1129,10 +1152,15 @@ function Vendas() {
                       </div>
 
                       <div>
-                        <span>Validade mais próxima</span>
+                        <span>Lote recomendado</span>
+                        <strong>{produtoFinal.numero_lote || "-"}</strong>
+                      </div>
+
+                      <div>
+                        <span>Validade do lote</span>
                         <strong>
-                          {produtoFinal.data_vencimento
-                            ? new Date(produtoFinal.data_vencimento).toLocaleDateString("pt-BR")
+                          {produtoFinal.validade_lote
+                            ? new Date(`${produtoFinal.validade_lote}T00:00:00`).toLocaleDateString("pt-BR")
                             : "-"}
                         </strong>
                       </div>
@@ -1207,7 +1235,23 @@ function Vendas() {
                     </select>
                   </div>
 
+                  <div className="campo-venda">
+                    <label>Desconto</label>
+                    <input
+                      type="text"
+                      value={desconto}
+                      onChange={(e) => setDesconto(e.target.value)}
+                      placeholder="Ex: 10.00"
+                    />
+                  </div>
+
                   <div className="total-venda-box">
+                    <span>Subtotal</span>
+                    <strong>{formatR$(subtotalCarrinho)}</strong>
+
+                    <span>Desconto</span>
+                    <strong>{formatR$(valorDesconto)}</strong>
+
                     <span>Total da venda</span>
                     <strong>{formatR$(totalCarrinho)}</strong>
                   </div>

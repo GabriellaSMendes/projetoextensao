@@ -1,5 +1,5 @@
 from flask import request, jsonify, Blueprint
-from app.models import db, Produto, Categoria, Fornecedor, Abastece
+from app.models import db, Produto, Categoria, Fornecedor, Abastece, MovimentacaoEstoque, TipoMovimentacao, Usuario
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.exc import IntegrityError
 from datetime import date
@@ -47,20 +47,25 @@ def listar_produtos():
     lista_json = []
     
     for p in produtos:
-        # Buscar o último abastecimento para descobrir o fornecedor recente
-        ultimo_abastecimento = (
+        lote_recomendado = (
             Abastece.query
-            .filter_by(id_produto=p.id_produto)
-            .order_by(Abastece.id_abastecimento.desc())
+            .filter(
+                Abastece.id_produto == p.id_produto,
+                Abastece.qtdd_disponivel > 0
+            )
+            .order_by(
+                Abastece.data_vencimento.asc(),
+                Abastece.id_abastecimento.asc()
+            )
             .first()
         )
 
-        if ultimo_abastecimento:
-            fornecedor = Fornecedor.query.get(ultimo_abastecimento.id_fornecedor)
+        if lote_recomendado:
+            fornecedor = Fornecedor.query.get(lote_recomendado.id_fornecedor)
             nome_fornecedor = fornecedor.razao_social if fornecedor else None
             id_fornecedor = fornecedor.id_fornecedor if fornecedor else None
-            numero_lote = ultimo_abastecimento.numero_lote
-            validade_lote = ultimo_abastecimento.data_vencimento
+            numero_lote = lote_recomendado.numero_lote
+            validade_lote = lote_recomendado.data_vencimento
         else:
             nome_fornecedor = None
             id_fornecedor = None
@@ -82,6 +87,7 @@ def listar_produtos():
             "nome_fornecedor": nome_fornecedor,
             "numero_lote": numero_lote,
             "validade_lote": validade_lote.isoformat() if validade_lote else None,
+            "qtdd_disponivel_lote": lote_recomendado.qtdd_disponivel if lote_recomendado else 0,
             "ativo": bool(p.ativo),
         })
     return jsonify(produtos=lista_json), 200
@@ -156,7 +162,7 @@ def listar_abastecimentos_produto(id_produto):
             "numero_lote": ab.numero_lote,
             "data_vencimento": ab.data_vencimento.isoformat() if ab.data_vencimento else None,
             "qtdd_recebida": ab.qtdd_recebida,
-            "qtdd_disponivel": ab.qtdd_recebida,
+            "qtdd_disponivel": ab.qtdd_disponivel if ab.qtdd_disponivel is not None else ab.qtdd_recebida,
             "valor_unitario": str(ab.valor_unitario) if ab.valor_unitario is not None else None,
             "dt_abastecimento": ab.dt_abastecimento.isoformat() if ab.dt_abastecimento else None
         })
@@ -168,7 +174,38 @@ def listar_abastecimentos_produto(id_produto):
 def listar_movimentacoes_produto(id_produto):
     Produto.query.get_or_404(id_produto)
 
-    return jsonify({"movimentacoes": []}), 200
+    movimentacoes = (
+        MovimentacaoEstoque.query
+        .filter_by(id_produto=id_produto)
+        .order_by(MovimentacaoEstoque.ultima_atualizacao.desc())
+        .all()
+    )
+
+    lista_json = []
+
+    for mov in movimentacoes:
+        tipo = TipoMovimentacao.query.get(mov.id_tipo_movimentacao)
+        usuario = Usuario.query.get(mov.id_usuario)
+
+        tipo_nome = tipo.tipo_movimentacao if tipo else "-"
+
+        lista_json.append({
+            "id_movimentacao": mov.id_estoque,
+
+            # Campos esperados pela tela atual
+            "tipo_movimentacao": tipo_nome,
+            "ultima_atualizacao": mov.ultima_atualizacao.isoformat() if mov.ultima_atualizacao else None,
+
+            # Campos extras para manter compatibilidade
+            "tipo": tipo_nome,
+            "data": mov.ultima_atualizacao.isoformat() if mov.ultima_atualizacao else None,
+
+            "id_tipo_movimentacao": mov.id_tipo_movimentacao,
+            "qtdd_movimentacao": mov.qtdd_movimentacao,
+            "usuario": usuario.nome_usuario if usuario else "-"
+        })
+
+    return jsonify({"movimentacoes": lista_json}), 200
 
 @estoque_bp.route('/produtos', methods=['POST'])
 @jwt_required()

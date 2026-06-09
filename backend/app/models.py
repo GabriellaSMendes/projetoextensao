@@ -22,7 +22,7 @@ class Cliente(db.Model):
     __tablename__ = 'cliente'
     id_cliente = db.Column(db.Integer, primary_key=True, autoincrement=True)
     razao_social = db.Column(db.String(100), nullable=False)
-    cpf_cnpj = db.Column(db.String(14))
+    cpf_cnpj = db.Column(db.String(18))
     telefone = db.Column(db.String(20))
     email = db.Column(db.String(150))
     endereco = db.Column(db.String(255))
@@ -113,6 +113,7 @@ class Abastece(db.Model):
     data_vencimento = db.Column(db.Date)
     qtdd_recebida = db.Column(db.Integer, nullable=False)
     valor_unitario = db.Column(db.Numeric(10, 2))
+    qtdd_disponivel = db.Column(db.Integer)
 class ItemPedido(db.Model): # Era VendaEstoque
     __tablename__ = 'item_pedido'
     id_item_pedido = db.Column(db.Integer, primary_key=True, autoincrement=True)

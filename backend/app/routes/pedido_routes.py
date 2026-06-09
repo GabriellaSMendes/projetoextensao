@@ -1,5 +1,5 @@
 from flask import request, jsonify, Blueprint
-from app.models import db, Pedido, ItemPedido, Cliente, Produto
+from app.models import db, Pedido, ItemPedido, Cliente, Produto, Usuario
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.orm import joinedload
 from datetime import date
@@ -38,8 +38,17 @@ def criar_pedido():
     id_cliente = dados.get('id_cliente')
     mtd_pagamento = dados.get('mtd_pagamento')
     itens_pedido = dados.get('itens')
+    desconto = dados.get("desconto", 0)
 
     id_usuario_logado = int(get_jwt_identity())
+    
+    usuario_logado = Usuario.query.get(id_usuario_logado)
+    id_usuario_payload = dados.get("id_usuario")
+
+    if usuario_logado and usuario_logado.nivel_acesso == "admin" and id_usuario_payload:
+        id_usuario_venda = int(id_usuario_payload)
+    else:
+        id_usuario_venda = id_usuario_logado
 
     if not id_cliente or not mtd_pagamento or not itens_pedido:
         return jsonify({"erro": "id_cliente, mtd_pagamento e itens são obrigatórios"}), 400
@@ -51,8 +60,9 @@ def criar_pedido():
         # Cria o cabeçalho do Pedido
         novo_pedido = Pedido(
             id_cliente=id_cliente,
-            id_usuario=id_usuario_logado,
-            mtd_pagamento=mtd_pagamento
+            id_usuario=id_usuario_venda,
+            mtd_pagamento=mtd_pagamento,
+            desconto=desconto or 0
         )
         db.session.add(novo_pedido)
 

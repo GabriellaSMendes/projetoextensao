@@ -1,235 +1,357 @@
 from flask import jsonify, Blueprint, send_file, request
-from app.models import db, Pedido, Produto, ItemPedido, MovimentacaoEstoque, TipoMovimentacao, Usuario
 from flask_jwt_extended import jwt_required
-from sqlalchemy import func, desc
-import pandas as pd
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-import io
-from matplotlib.figure import Figure
-from datetime import datetime
+from app.models import (
+    db,
+    Produto,
+    Categoria,
+    Fornecedor,
+    Abastece,
+    Pedido,
+    ItemPedido,
+    Cliente,
+    Usuario,
+    MovimentacaoEstoque,
+    TipoMovimentacao
+)
+from datetime import datetime, date
+from io import BytesIO
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Border, Side, Alignment
+from openpyxl.utils import get_column_letter
+
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
-def gerar_grafico(df, x, y, titulo):
-    # Cria figura isolada (NÃO usa plt)
-    fig = Figure(figsize=(5, 4))
-    ax = fig.subplots()
 
-    # Gera o gráfico
-    ax.bar(df[x], df[y], color="#ffd262")
-    ax.set_title(titulo)
-    ax.tick_params(axis="x", rotation=45)
+def converter_data(valor):
+    if not valor:
+        return None
 
-    # Salva no buffer
-    buffer = io.BytesIO()
-    fig.savefig(buffer, format="png", bbox_inches="tight")
-    buffer.seek(0)
+    try:
+        return datetime.strptime(valor, "%Y-%m-%d").date()
+    except ValueError:
+        return None
 
-    return buffer
 
-@dashboard_bp.route('/resumo', methods=['GET'])
+def formatar_data(valor):
+    if not valor:
+        return ""
+
+    if isinstance(valor, datetime):
+        return valor.strftime("%d/%m/%Y %H:%M")
+
+    if isinstance(valor, date):
+        return valor.strftime("%d/%m/%Y")
+
+    return str(valor)
+
+
+def aplicar_estilo_planilha(ws, titulo):
+    ws.insert_rows(1, 2)
+
+    ws["A1"] = titulo
+    ws["A1"].font = Font(bold=True, size=16, color="4E1633")
+
+    header_fill = PatternFill("solid", fgColor="F3E6EF")
+    header_font = Font(bold=True, color="4E1633")
+    border = Border(
+        bottom=Side(style="thin", color="C36196")
+    )
+
+    header_row = 3
+
+    for cell in ws[header_row]:
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.border = border
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+
+    for column in ws.columns:
+        max_length = 0
+        column_letter = get_column_letter(column[0].column)
+
+        for cell in column:
+            if cell.value is not None:
+                max_length = max(max_length, len(str(cell.value)))
+
+        ws.column_dimensions[column_letter].width = min(max_length + 3, 35)
+
+    ws.freeze_panes = "A4"
+
+
+def criar_workbook(nome_aba, titulo, cabecalhos, linhas):
+    wb = Workbook()
+    ws = wb.active
+    ws.title = nome_aba
+
+    ws.append(cabecalhos)
+
+    for linha in linhas:
+        ws.append(linha)
+
+    aplicar_estilo_planilha(ws, titulo)
+
+    arquivo = BytesIO()
+    wb.save(arquivo)
+    arquivo.seek(0)
+
+    return arquivo
+
+
+@dashboard_bp.route('/exportar', methods=['GET'])
 @jwt_required()
-def get_dashboard_summary():
-    """
-    Retorna os Indicadores Chave para a tela de relatório.
-    """
-    # Faturamento Total
-    total_faturamento = db.session.query(func.sum(ItemPedido.subtotal)).scalar() or 0
+def exportar_relatorio():
+    tipo = request.args.get("tipo", "vendas")
+    data_inicio = converter_data(request.args.get("data_inicio"))
+    data_fim = converter_data(request.args.get("data_fim"))
 
-    # Quantidade Total de Pedidos Realizados
-    total_pedidos = db.session.query(func.count(Pedido.id_pedido)).scalar() or 0
+    if tipo == "vendas":
+        return exportar_vendas(data_inicio, data_fim)
 
-    # Produtos com Estoque baixo
-    limite_baixo = 20
-    baixo_stock = db.session.query(func.count(Produto.id_produto)) \
-                      .filter(Produto.qtdd_atual < limite_baixo).scalar() or 0
+    if tipo == "estoque":
+        return exportar_estoque()
 
-    # Produto Mais Vendido
-    top_produto = db.session.query(
-        Produto.nome_produto,
-        func.sum(ItemPedido.qtdd_pedido).label('total_vendido')
-    ) \
-        .join(ItemPedido) \
-        .group_by(Produto.id_produto) \
-        .order_by(desc('total_vendido')) \
-        .first()
+    if tipo == "validade":
+        return exportar_validade()
 
-    return jsonify({
-        "faturamento_total": str(total_faturamento),
-        "total_pedidos": total_pedidos,
-        "alertas_stock_baixo": baixo_stock,
-        "produto_mais_vendido": {
-            "nome": top_produto[0] if top_produto else "Nenhum",
-            "quantidade": int(top_produto[1]) if top_produto else 0
-        }
-    }), 200
-    
- 
-#   GRÁFICO — Produtos por Categoria
-@dashboard_bp.get("/graficos/categorias")
-def grafico_categorias():
-    df = pd.read_sql("""
-        SELECT c.nome AS categoria,
-               COUNT(p.id_produto) AS total
-        FROM categoria c
-        LEFT JOIN produto p ON p.id_categoria = c.id_categoria
-        GROUP BY c.id_categoria;
-    """, db.engine)
+    if tipo == "movimentacoes":
+        return exportar_movimentacoes(data_inicio, data_fim)
 
-    if df.empty:
-        df = pd.DataFrame({"categoria": ["Nenhuma"], "total": [0]})
-
-    return send_file(
-        gerar_grafico(df, "categoria", "total", "Produtos por Categoria"),
-        mimetype="image/png"
-    )
+    return jsonify({"erro": "Tipo de relatório inválido."}), 400
 
 
-#   GRÁFICO — Estoque Baixo
-@dashboard_bp.get("/graficos/estoque_baixo")
-def grafico_estoque_baixo():
-    df = pd.read_sql("""
-        SELECT nome_produto AS nome,
-               qtdd_atual AS quantidade
-        FROM produto
-        WHERE qtdd_atual < 20;
-    """, db.engine)
-
-    if df.empty:
-        df = pd.DataFrame({"nome": ["Nenhum"], "quantidade": [0]})
-
-    return send_file(
-        gerar_grafico(df, "nome", "quantidade", "Estoque Baixo"),
-        mimetype="image/png"
-    )
-
-
-#   GRÁFICO — TOP 10 Produtos Vendidos
-@dashboard_bp.get("/graficos/top10")
-def grafico_top10():
-    df = pd.read_sql("""
-        SELECT p.nome_produto AS nome,
-               SUM(ip.qtdd_pedido) AS total_vendido
-        FROM item_pedido ip
-        JOIN produto p ON p.id_produto = ip.id_produto
-        GROUP BY ip.id_produto
-        ORDER BY total_vendido DESC
-        LIMIT 10;
-    """, db.engine)
-
-    if df.empty:
-        df = pd.DataFrame({"nome": ["Nenhum"], "total_vendido": [0]})
-
-    return send_file(
-        gerar_grafico(df, "nome", "total_vendido", "Top 10 Mais Vendidos"),
-        mimetype="image/png"
-    )
-
-
-#   GRÁFICO — Produtos próximos da validade
-@dashboard_bp.get("/validade")
-def produtos_validade():
-
-    df = pd.read_sql("""
-        SELECT 
-            p.nome_produto,
-            p.data_vencimento,
-            DATEDIFF(p.data_vencimento, CURDATE()) AS dias_restantes
-        FROM produto p
-        WHERE p.data_vencimento IS NOT NULL
-        ORDER BY dias_restantes ASC;
-    """, db.engine)
-
-    # Transformar em JSON
-    return jsonify(df.to_dict(orient="records")), 200
-
-@dashboard_bp.route('/relatorio-estoque', methods=['GET'])
-@jwt_required()
-def exportar_relatorio_estoque():
-    """
-    Exporta relatório de movimentações de estoque em formato .xlsx.
-
-    Filtros opcionais:
-    - data_inicio: YYYY-MM-DD
-    - data_fim: YYYY-MM-DD
-    - id_produto: número do produto
-    - tipo: entrada, saida, saída, ajuste, remoção etc.
-    """
-
-    data_inicio = request.args.get("data_inicio")
-    data_fim = request.args.get("data_fim")
-    id_produto = request.args.get("id_produto")
-    tipo = request.args.get("tipo")
-
+def exportar_vendas(data_inicio=None, data_fim=None):
     query = (
-        db.session.query(
-            MovimentacaoEstoque.id_estoque.label("ID Movimentação"),
-            Produto.nome_produto.label("Produto"),
-            TipoMovimentacao.tipo_movimentacao.label("Tipo de Movimentação"),
-            MovimentacaoEstoque.qtdd_movimentacao.label("Quantidade"),
-            Usuario.nome_usuario.label("Usuário"),
-            MovimentacaoEstoque.ultima_atualizacao.label("Data da Movimentação")
-        )
-        .join(Produto, MovimentacaoEstoque.id_produto == Produto.id_produto)
-        .join(
-            TipoMovimentacao,
-            MovimentacaoEstoque.id_tipo_movimentacao == TipoMovimentacao.id_tipo_movimentacao
-        )
-        .join(Usuario, MovimentacaoEstoque.id_usuario == Usuario.id_usuario)
+        db.session.query(Pedido)
+        .join(Cliente, Cliente.id_cliente == Pedido.id_cliente)
+        .join(Usuario, Usuario.id_usuario == Pedido.id_usuario)
+        .order_by(Pedido.dt_pedido.desc())
     )
 
     if data_inicio:
-        data_inicio_dt = datetime.strptime(data_inicio, "%Y-%m-%d")
-        query = query.filter(MovimentacaoEstoque.ultima_atualizacao >= data_inicio_dt)
+        query = query.filter(Pedido.dt_pedido >= datetime.combine(data_inicio, datetime.min.time()))
 
     if data_fim:
-        data_fim_dt = datetime.strptime(data_fim, "%Y-%m-%d")
-        query = query.filter(MovimentacaoEstoque.ultima_atualizacao <= data_fim_dt)
+        query = query.filter(Pedido.dt_pedido <= datetime.combine(data_fim, datetime.max.time()))
 
-    if id_produto:
-        query = query.filter(MovimentacaoEstoque.id_produto == int(id_produto))
+    pedidos = query.all()
 
-    if tipo:
-        query = query.filter(TipoMovimentacao.tipo_movimentacao.ilike(f"%{tipo}%"))
+    cabecalhos = [
+        "ID Pedido",
+        "Data",
+        "Cliente",
+        "Vendedor",
+        "Método de pagamento",
+        "Produto",
+        "Quantidade",
+        "Preço unitário",
+        "Subtotal item",
+        "Desconto do pedido"
+    ]
 
-    resultados = (
-        query
-        .order_by(MovimentacaoEstoque.ultima_atualizacao.desc())
+    linhas = []
+
+    for pedido in pedidos:
+        itens = ItemPedido.query.filter_by(id_pedido=pedido.id_pedido).all()
+
+        for item in itens:
+            produto = Produto.query.get(item.id_produto)
+
+            preco = float(item.preco_unitario or 0)
+            quantidade = int(item.qtdd_pedido or 0)
+            subtotal = preco * quantidade
+
+            linhas.append([
+                pedido.id_pedido,
+                formatar_data(pedido.dt_pedido),
+                pedido.cliente.razao_social if pedido.cliente else "",
+                pedido.vendedor.nome_usuario if pedido.vendedor else "",
+                pedido.mtd_pagamento,
+                produto.nome_produto if produto else "",
+                quantidade,
+                preco,
+                subtotal,
+                float(pedido.desconto or 0)
+            ])
+
+    arquivo = criar_workbook(
+        "Vendas",
+        "Relatório de Vendas",
+        cabecalhos,
+        linhas
+    )
+
+    return send_file(
+        arquivo,
+        as_attachment=True,
+        download_name="relatorio_vendas.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+
+def exportar_estoque():
+    produtos = Produto.query.order_by(Produto.nome_produto.asc()).all()
+
+    cabecalhos = [
+        "ID Produto",
+        "Produto",
+        "Categoria",
+        "Sabor",
+        "Marca",
+        "Estoque atual",
+        "Custo unitário",
+        "Preço de venda",
+        "Valor potencial de venda",
+        "Status"
+    ]
+
+    linhas = []
+
+    for produto in produtos:
+        estoque = int(produto.qtdd_atual or 0)
+        custo = float(produto.custo_unitario or 0)
+        preco = float(produto.preco_unitario or 0)
+
+        if produto.ativo:
+            status = "Ativo"
+        else:
+            status = "Inativo"
+
+        linhas.append([
+            produto.id_produto,
+            produto.nome_produto,
+            produto.categoria.nome if produto.categoria else "",
+            produto.sabor or "",
+            produto.marca or "",
+            estoque,
+            custo,
+            preco,
+            estoque * preco,
+            status
+        ])
+
+    arquivo = criar_workbook(
+        "Estoque",
+        "Relatório de Estoque",
+        cabecalhos,
+        linhas
+    )
+
+    return send_file(
+        arquivo,
+        as_attachment=True,
+        download_name="relatorio_estoque.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+
+def exportar_validade():
+    abastecimentos = (
+        Abastece.query
+        .filter(Abastece.qtdd_disponivel > 0)
+        .order_by(Abastece.data_vencimento.asc())
         .all()
     )
 
-    dados = []
-    for item in resultados:
-        dados.append({
-            "ID Movimentação": item[0],
-            "Produto": item[1],
-            "Tipo de Movimentação": item[2],
-            "Quantidade": item[3],
-            "Usuário": item[4],
-            "Data da Movimentação": item[5].strftime("%d/%m/%Y %H:%M") if item[5] else ""
-        })
+    cabecalhos = [
+        "Produto",
+        "Lote",
+        "Fornecedor",
+        "Quantidade recebida",
+        "Quantidade disponível",
+        "Data de vencimento",
+        "Dias restantes",
+        "Custo unitário"
+    ]
 
-    df = pd.DataFrame(dados)
+    linhas = []
+    hoje = date.today()
 
-    if df.empty:
-        df = pd.DataFrame([{
-            "Mensagem": "Nenhum registro encontrado para os filtros informados."
-        }])
+    for ab in abastecimentos:
+        produto = Produto.query.get(ab.id_produto)
+        fornecedor = Fornecedor.query.get(ab.id_fornecedor)
 
-    output = io.BytesIO()
+        dias_restantes = ""
+        if ab.data_vencimento:
+            dias_restantes = (ab.data_vencimento - hoje).days
 
-    with pd.ExcelWriter(output, engine="openpyxl") as writer:
-        df.to_excel(writer, index=False, sheet_name="Relatório Estoque")
+        linhas.append([
+            produto.nome_produto if produto else "",
+            ab.numero_lote or "",
+            fornecedor.razao_social if fornecedor else "",
+            int(ab.qtdd_recebida or 0),
+            int(ab.qtdd_disponivel or 0),
+            formatar_data(ab.data_vencimento),
+            dias_restantes,
+            float(ab.valor_unitario or 0)
+        ])
 
-    output.seek(0)
-
-    nome_arquivo = "relatorio_estoque.xlsx"
+    arquivo = criar_workbook(
+        "Validade",
+        "Relatório de Produtos por Validade",
+        cabecalhos,
+        linhas
+    )
 
     return send_file(
-        output,
+        arquivo,
         as_attachment=True,
-        download_name=nome_arquivo,
+        download_name="relatorio_validade.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+
+def exportar_movimentacoes(data_inicio=None, data_fim=None):
+    query = (
+        db.session.query(MovimentacaoEstoque)
+        .order_by(MovimentacaoEstoque.ultima_atualizacao.desc())
+    )
+
+    if data_inicio:
+        query = query.filter(
+            MovimentacaoEstoque.ultima_atualizacao >= datetime.combine(data_inicio, datetime.min.time())
+        )
+
+    if data_fim:
+        query = query.filter(
+            MovimentacaoEstoque.ultima_atualizacao <= datetime.combine(data_fim, datetime.max.time())
+        )
+
+    movimentacoes = query.all()
+
+    cabecalhos = [
+        "Data",
+        "Produto",
+        "Tipo",
+        "Quantidade",
+        "Usuário"
+    ]
+
+    linhas = []
+
+    for mov in movimentacoes:
+        produto = Produto.query.get(mov.id_produto)
+        tipo = TipoMovimentacao.query.get(mov.id_tipo_movimentacao)
+        usuario = Usuario.query.get(mov.id_usuario)
+
+        linhas.append([
+            formatar_data(mov.ultima_atualizacao),
+            produto.nome_produto if produto else "",
+            tipo.tipo_movimentacao if tipo else "",
+            int(mov.qtdd_movimentacao or 0),
+            usuario.nome_usuario if usuario else ""
+        ])
+
+    arquivo = criar_workbook(
+        "Movimentações",
+        "Relatório de Movimentações de Estoque",
+        cabecalhos,
+        linhas
+    )
+
+    return send_file(
+        arquivo,
+        as_attachment=True,
+        download_name="relatorio_movimentacoes.xlsx",
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )

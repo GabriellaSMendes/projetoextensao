@@ -1,148 +1,179 @@
-.dashboard-page {
-    padding: 32px;
-    font-family: "Poppins", sans-serif;
-    color: #4e1633;
+.relatorio-page {
+  width: 100%;
+  min-height: 100vh;
+  background: #ffffff;
+  color: #222;
 }
 
-/* HEADER */
-.dashboard-header h1 {
-    font-size: 32px;
-    margin-bottom: 6px;
-    color: #4e1633;
+.relatorio-main {
+  padding: 40px;
 }
 
-.dashboard-header p {
-    color: #7b1f50;
-    margin-bottom: 24px;
+.relatorio-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 24px;
 }
 
-/* CARDS */
-.cards-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 18px;
-    margin-bottom: 34px;
+.relatorio-header h1 {
+  margin: 0;
+  color: #4e1633;
+  font-size: 32px;
+  font-weight: 800;
 }
 
-.dash-card {
-    background: #ffffff;
-    border: 1px solid #f0d7ea;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
+.relatorio-header p {
+  margin: 6px 0 0;
+  color: #7b1f50;
+  font-size: 14px;
 }
 
-.dash-card h3 {
-    font-size: 16px;
-    margin-bottom: 8px;
-    color: #4e1633;
+.relatorio-card {
+  background: #ffffff;
+  border: 1px solid #ead7e9;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 4px 14px rgba(78, 22, 51, 0.06);
+  max-width: 980px;
 }
 
-.dash-card .valor {
-    font-size: 26px;
-    font-weight: bold;
-    color: #7b1f50;
+.relatorio-card-header {
+  border-bottom: 1px solid #ead7e9;
+  padding-bottom: 18px;
+  margin-bottom: 22px;
 }
 
-.dash-card .produto {
-    font-size: 20px;
-    font-weight: 600;
-    color: #4e1633;
+.relatorio-card-header h2 {
+  margin: 0;
+  color: #4e1633;
+  font-size: 24px;
+  font-weight: 800;
 }
 
-.dash-card .qtd {
-    font-size: 14px;
-    color: #7b1f50;
+.relatorio-card-header p {
+  margin: 6px 0 0;
+  color: #7b1f50;
+  font-size: 14px;
 }
 
-/* GRÁFICOS */
-.graficos-section h2 {
-    margin-bottom: 16px;
-    color: #4e1633;
+.relatorio-form-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 18px;
+  align-items: end;
 }
 
-.graficos-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 26px;
+.campo-relatorio label {
+  display: block;
+  margin-bottom: 8px;
+  color: #4e1633;
+  font-size: 14px;
+  font-weight: 700;
 }
 
-/* BOX DO GRÁFICO OU TABELA */
-.grafico-box {
-    background: #fff;
-    padding: 16px;
-    border-radius: 12px;
-    text-align: center;
-    border: 1px solid #e7d4e3;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
-
-    max-height: 460px;     /* 🔥 altura máxima */
-    overflow-y: auto;      /* 🔥 scroll interno */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.campo-relatorio input,
+.campo-relatorio select {
+  width: 100%;
+  height: 44px;
+  padding: 9px 12px;
+  border: 1px solid #d2c5d3;
+  border-radius: 8px;
+  background: #faf8fb;
+  color: #333333;
+  outline: none;
+  font-size: 14px;
 }
 
-.grafico-box img {
-    width: 100%;
-    max-height: 350px;     /* 🔥 tamanho reduzido */
-    object-fit: contain;
-    margin: 10px auto 0 auto;
+.campo-relatorio input:focus,
+.campo-relatorio select:focus {
+  border-color: #7b1f50;
+  box-shadow: 0 0 0 3px rgba(195, 97, 150, 0.18);
 }
 
-.grafico-box h4 {
-    margin-bottom: 8px;
-    font-size: 18px;
-    color: #4e1633;
+.relatorio-info-box {
+  margin-top: 22px;
+  padding: 18px;
+  border-radius: 12px;
+  border: 1px solid #ead7e9;
+  background: #faf5f9;
 }
 
-/* LOADING */
-.loading {
-    color: #7b1f50;
-    font-size: 18px;
-    margin-bottom: 20px;
+.relatorio-info-box span {
+  display: block;
+  color: #7b1f50;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
 }
 
-/* ======================= */
-/*      TABELA VALIDADE    */
-/* ======================= */
-
-.tabela-validade {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 12px;
-    font-size: 14px;
+.relatorio-info-box strong {
+  display: block;
+  color: #4e1633;
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 6px;
 }
 
-.tabela-validade th {
-    background: #7b1f50;
-    color: #fff;
-    padding: 8px;
-    text-align: left;
-    font-size: 14px;
+.relatorio-info-box p {
+  margin: 0;
+  color: #4e1633;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
-.tabela-validade td {
-    padding: 6px 8px; /* 🔥 linhas menores */
-    font-size: 13px;
-    border-bottom: 1px solid #f0d7ea;
+.relatorio-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 24px;
 }
 
-/* ALERTA (menos de 10 dias) */
-.tabela-validade tr.alerta td {
-    background: #fff3cd;
-    color: #7a5a00;
+.limpar-btn,
+.gerar-btn {
+  height: 48px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 800;
+  cursor: pointer;
+  font-size: 15px;
 }
 
-/* VENCIDO */
-.tabela-validade tr.vencido td {
-    background: #f8d7da;
-    color: #8a1020;
-    font-weight: bold;
+.limpar-btn {
+  background: #eeeeee;
+  color: #4e1633;
 }
 
-/* HOVER */
-.tabela-validade tr:hover td {
-    background: #f4e7f0;
+.limpar-btn:hover {
+  background: #e2dce1;
+}
+
+.gerar-btn {
+  background: #4e1633;
+  color: #ffffff;
+}
+
+.gerar-btn:hover {
+  background: #351024;
+}
+
+.limpar-btn:disabled,
+.gerar-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+  .relatorio-main {
+    padding: 28px 18px;
+  }
+
+  .relatorio-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .relatorio-actions {
+    grid-template-columns: 1fr;
+  }
 }

@@ -14,4 +14,4 @@ pymysql
 python-dotenv
 pandas
 matplotlib
-
+openpyxl==3.1.5

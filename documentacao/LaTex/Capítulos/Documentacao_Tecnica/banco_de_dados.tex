@@ -1,13 +1,429 @@
-\section{Implementação do Banco de Dados}
+\subsection{Implementação do Banco de Dados}
 
-\subsection{Visão geral}
+A implementação do banco de dados do sistema Tropical Mix foi realizada com base em um modelo relacional, utilizando o MySQL como sistema gerenciador de banco de dados. A estrutura foi planejada para armazenar e relacionar as informações necessárias ao funcionamento da aplicação, como produtos, categorias, usuários, clientes, fornecedores, pedidos, itens vendidos, abastecimentos e movimentações de estoque.
 
-\subsection{Modelo lógico}
+O banco de dados atua como camada de persistência da aplicação, garantindo que as informações registradas pelo sistema sejam armazenadas de forma estruturada, consistente e acessível pelas demais camadas do projeto. Para isso, foram utilizadas chaves primárias, chaves estrangeiras e restrições de integridade, permitindo manter o relacionamento correto entre as tabelas e evitar registros inconsistentes.
 
-\subsection{Tabelas principais}
+Além do armazenamento dos dados cadastrais, a estrutura do banco também apoia regras importantes do sistema, como o controle da quantidade atual dos produtos, o registro de entradas e saídas de estoque, o vínculo entre pedidos e clientes, e a identificação do usuário responsável pelas operações realizadas.
 
-\subsection{Relacionamentos}
+\subsubsection{Dicionário de Dados}
 
-\subsection{Triggers, procedures e regras automatizadas}
+O dicionário de dados apresenta a descrição das tabelas implementadas no banco de dados do sistema Tropical Mix. Para cada tabela, são descritos seus campos, tipos de dados, restrições e finalidades dentro da aplicação.
 
-\subsection{Controle de integridade}
+Essa documentação é importante porque facilita a compreensão da estrutura do banco de dados, apoia futuras manutenções e permite identificar como as informações do sistema estão organizadas. Dessa forma, o dicionário de dados funciona como uma referência técnica para compreender a relação entre as entidades utilizadas no controle de estoque, vendas e cadastros do sistema.
+
+\subsubsection{Tabela: Categoria}
+
+A tabela \textit{Categoria} é responsável pelo armazenamento das categorias dos produtos cadastrados no sistema. Sua finalidade é permitir a organização e classificação dos produtos comercializados pela empresa, facilitando processos de gerenciamento, consulta e controle de estoque.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{5cm}|}
+\hline
+\textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\ \hline
+id\_categoria & INT & PK, AI & Identificador único da categoria \\ \hline
+nome & VARCHAR(100) & NOT NULL & Nome da categoria \\ \hline
+descricao & VARCHAR(255) & NULL & Descrição da categoria \\ \hline
+\end{tabular}
+\caption{Tabela: Categoria}
+\end{table}
+
+\subsubsection{Tabela: Produto}
+
+A tabela \textit{Produto} armazena as informações relacionadas aos produtos comercializados pela empresa. Nela são registrados dados como nome, sabor, marca, quantidade atual, data de vencimento, preço unitário e categoria vinculada.
+
+Essa tabela possui papel central no sistema, pois é utilizada tanto nas operações de estoque quanto nas vendas. A quantidade atual do produto permite acompanhar a disponibilidade dos itens, enquanto o vínculo com a tabela de categoria facilita a organização dos produtos e a aplicação de filtros na interface.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{5cm}|}
+\hline
+\textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\ \hline
+id\_produto & INT & PK, AI & Identificador único do produto \\ \hline
+nome\_produto & VARCHAR(150) & NOT NULL & Nome do produto \\ \hline
+sabor & VARCHAR(50) & NULL & Sabor do produto \\ \hline
+marca & VARCHAR(100) & NULL & Marca do produto \\ \hline
+qtdd\_atual & INT & DEFAULT 0 & Quantidade disponível em estoque \\ \hline
+data\_vencimento & DATE & NULL & Data de vencimento do produto \\ \hline
+preco\_unitario & DECIMAL(10,2) & NOT NULL & Valor unitário do produto \\ \hline
+dt\_cadastro & DATETIME & DEFAULT CURRENT\_TIMESTAMP & Data de cadastro do produto \\ \hline
+id\_categoria & INT & FK, NOT NULL & Referência da categoria do produto \\ \hline
+ativo & BOOLEAN & DEFAULT TRUE & Status de ativação do produto \\ \hline
+\end{tabular}
+\caption{Tabela: Produto}
+\end{table}
+
+\subsubsection{Tabela: Usuário}
+
+A tabela \textit{Usuário} é responsável pelo armazenamento dos dados dos usuários do sistema. Essa estrutura permite o controle de autenticação, identificação e definição de níveis de acesso dos colaboradores que utilizam a aplicação.
+
+Por meio dessa tabela, o sistema diferencia usuários administradores e vendedores, permitindo restringir funcionalidades conforme o perfil de acesso. Além disso, o usuário é relacionado a pedidos e movimentações de estoque, possibilitando identificar o responsável por determinadas operações.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{5cm}|}
+\hline
+\textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\ \hline
+id\_usuario & INT & PK, AI & Identificador único do usuário \\ \hline
+nome\_usuario & VARCHAR(100) & NOT NULL & Nome do usuário \\ \hline
+cpf & VARCHAR(14) & NULL & CPF do usuário \\ \hline
+email & VARCHAR(150) & UNIQUE, NOT NULL & E-mail do usuário \\ \hline
+senha & VARCHAR(255) & NOT NULL & Senha de acesso armazenada em formato criptografado \\ \hline
+nivel\_acesso & ENUM & DEFAULT 'vendedor' & Nível de acesso do usuário, podendo ser administrador ou vendedor \\ \hline
+\end{tabular}
+\caption{Tabela: Usuário}
+\end{table}
+
+\subsubsection{Tabela: Cliente}
+
+A tabela \textit{Cliente} armazena as informações cadastrais dos clientes da empresa. Os dados registrados permitem identificar clientes vinculados às vendas, facilitando o controle comercial e o histórico de pedidos realizados.
+
+Essa tabela é utilizada principalmente no processo de registro de pedidos, pois cada venda deve estar associada a um cliente. Dessa forma, o sistema consegue manter rastreabilidade das transações e consultar posteriormente quais clientes realizaram compras.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{5cm}|}
+\hline
+\textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\ \hline
+id\_cliente & INT & PK, AI & Identificador único do cliente \\ \hline
+razao\_social & VARCHAR(100) & NOT NULL & Nome ou razão social do cliente \\ \hline
+cpf\_cnpj & VARCHAR(14) & NULL & CPF ou CNPJ do cliente \\ \hline
+telefone & VARCHAR(20) & NULL & Telefone de contato \\ \hline
+email & VARCHAR(150) & NULL & E-mail do cliente \\ \hline
+endereco & VARCHAR(255) & NULL & Endereço do cliente \\ \hline
+dt\_cadastro & DATETIME & DEFAULT CURRENT\_TIMESTAMP & Data de cadastro do cliente \\ \hline
+\end{tabular}
+\caption{Tabela: Cliente}
+\end{table}
+
+\subsubsection{Tabela: Pedido}
+
+A tabela \textit{Pedido} representa o registro principal de uma venda realizada no sistema. Ela armazena informações gerais da transação, como o cliente relacionado, o usuário responsável, a data do pedido e o método de pagamento utilizado.
+
+Essa tabela funciona como o cabeçalho da venda, pois reúne os dados principais do pedido, enquanto os produtos vendidos são detalhados na tabela \textit{Item Pedido}. O relacionamento com as tabelas \textit{Cliente} e \textit{Usuário} permite identificar tanto quem realizou a compra quanto o colaborador responsável pelo registro da operação.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{5cm}|}
+\hline
+\textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\ \hline
+id\_pedido & INT & PK, AI & Identificador único do pedido \\ \hline
+id\_cliente & INT & FK, NOT NULL & Referência ao cliente relacionado ao pedido \\ \hline
+id\_usuario & INT & FK, NOT NULL & Referência ao usuário responsável pelo pedido \\ \hline
+dt\_pedido & DATETIME & DEFAULT CURRENT\_TIMESTAMP & Data de realização do pedido \\ \hline
+mtd\_pagamento & ENUM & NULL & Método de pagamento utilizado no pedido \\ \hline
+\end{tabular}
+\caption{Tabela: Pedido}
+\end{table}
+
+\subsubsection{Tabela: Tipo Movimentação}
+
+A tabela \textit{Tipo Movimentação} armazena os tipos de movimentações possíveis no estoque, como entrada e saída. Sua finalidade é padronizar a classificação das operações realizadas sobre os produtos.
+
+Essa tabela é utilizada em conjunto com a tabela \textit{Movimentação Estoque}, permitindo identificar se uma determinada movimentação corresponde a uma entrada de mercadoria, uma saída por venda ou outro tipo de alteração no estoque. Esse controle contribui para a rastreabilidade das operações e para a organização do histórico de movimentações.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{5cm}|}
+\hline
+\textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\ \hline
+id\_tipo\_movimentacao & INT & PK, AI & Identificador único do tipo de movimentação \\ \hline
+tipo\_movimentacao & VARCHAR(150) & NULL & Tipo de movimentação do estoque, como entrada ou saída \\ \hline
+\end{tabular}
+\caption{Tabela: Tipo Movimentação}
+\end{table}
+
+\subsubsection{Tabela: Movimentação Estoque}
+
+A tabela \textit{Movimentação Estoque} registra o histórico das alterações realizadas na quantidade dos produtos. Cada registro representa uma movimentação de estoque, contendo o produto afetado, o usuário responsável, o tipo de movimentação, a quantidade movimentada e a data da atualização.
+
+Essa tabela é essencial para a rastreabilidade do sistema, pois permite acompanhar entradas e saídas de produtos ao longo do tempo. Além de apoiar o controle operacional, o histórico de movimentações também pode ser utilizado para auditoria, conferência de estoque e geração de relatórios gerenciais.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{5cm}|}
+\hline
+\textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\ \hline
+id\_estoque & INT & PK, AI & Identificador único da movimentação de estoque \\ \hline
+id\_produto & INT & FK, NOT NULL & Referência ao produto movimentado \\ \hline
+id\_usuario & INT & FK, NOT NULL & Referência ao usuário responsável pela movimentação \\ \hline
+id\_tipo\_movimentacao & INT & FK, NOT NULL & Referência ao tipo de movimentação realizada \\ \hline
+qtdd\_movimentacao & INT & DEFAULT 0 & Quantidade movimentada no estoque \\ \hline
+ultima\_atualizacao & DATETIME & DEFAULT CURRENT\_TIMESTAMP & Data e hora da movimentação \\ \hline
+\end{tabular}
+\caption{Tabela: Movimentação Estoque}
+\end{table}
+
+\subsubsection{Tabela: Item Pedido}
+
+A tabela \textit{Item Pedido} armazena os produtos associados a cada pedido realizado. Enquanto a tabela \textit{Pedido} registra os dados gerais da venda, a tabela \textit{Item Pedido} detalha quais produtos foram vendidos, suas quantidades, preços unitários e subtotal.
+
+Essa estrutura permite que um mesmo pedido contenha vários produtos, mantendo a relação entre a venda e seus respectivos itens. O uso dessa tabela também facilita o cálculo do valor total da venda e a atualização do estoque com base nas quantidades vendidas.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{5cm}|}
+\hline
+\textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\ \hline
+id\_item\_pedido & INT & PK, AI & Identificador único do item do pedido \\ \hline
+id\_pedido & INT & FK, NOT NULL & Referência ao pedido relacionado \\ \hline
+id\_produto & INT & FK, NOT NULL & Referência ao produto vendido \\ \hline
+qtdd\_pedido & INT & NOT NULL & Quantidade solicitada do produto \\ \hline
+preco\_unitario & DECIMAL(10,2) & NULL & Valor unitário do produto no momento da venda \\ \hline
+subtotal & DECIMAL(10,2) & GENERATED & Valor total do item, calculado pela quantidade multiplicada pelo preço unitário \\ \hline
+\end{tabular}
+\caption{Tabela: Item Pedido}
+\end{table}
+
+\subsubsection{Tabela: Fornecedor}
+
+A tabela \textit{Fornecedor} armazena os dados cadastrais dos fornecedores da empresa, como razão social, CNPJ, telefone e e-mail. Sua finalidade é permitir o controle das empresas ou pessoas responsáveis pelo fornecimento dos produtos comercializados pela Tropical Mix.
+
+Essa tabela está diretamente relacionada ao processo de abastecimento do estoque, pois cada entrada de produto pode ser vinculada a um fornecedor. Dessa forma, o sistema mantém o histórico de origem dos produtos e facilita consultas relacionadas a compras, reposições e contatos comerciais.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{5cm}|}
+\hline
+\textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\ \hline
+id\_fornecedor & INT & PK, AI & Identificador único do fornecedor \\ \hline
+razao\_social & VARCHAR(150) & NOT NULL & Nome ou razão social do fornecedor \\ \hline
+cnpj & VARCHAR(18) & UNIQUE & CNPJ do fornecedor \\ \hline
+telefone & VARCHAR(20) & NULL & Telefone de contato do fornecedor \\ \hline
+email & VARCHAR(150) & NULL & E-mail do fornecedor \\ \hline
+\end{tabular}
+\caption{Tabela: Fornecedor}
+\end{table}
+
+\subsubsection{Tabela: Abastecimento}
+
+A tabela \textit{Abastecimento} registra as entradas de produtos no estoque. Cada registro indica o fornecedor responsável, o produto abastecido, a data da entrada, a quantidade recebida, a quantidade disponível no lote, o valor unitário e a data de vencimento do lote.
+
+Essa tabela é utilizada para controlar as reposições de estoque e manter o histórico de abastecimentos realizados. Ao registrar uma nova entrada, o sistema consegue atualizar a quantidade disponível do produto e preservar informações importantes para acompanhamento de custos, fornecedores, lotes, validade e movimentações futuras.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{5cm}|}
+\hline
+\textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\ \hline
+id\_abastecimento & INT & PK, AI & Identificador único do abastecimento \\ \hline
+id\_fornecedor & INT & FK, NOT NULL & Referência ao fornecedor responsável pelo abastecimento \\ \hline
+id\_produto & INT & FK, NOT NULL & Referência ao produto abastecido \\ \hline
+numero\_lote & VARCHAR(50) & NULL & Número de identificação do lote do produto \\ \hline
+dt\_abastecimento & DATETIME & DEFAULT CURRENT\_TIMESTAMP & Data e hora do abastecimento \\ \hline
+qtdd\_recebida & INT & NOT NULL & Quantidade recebida no abastecimento \\ \hline
+qtdd\_disponivel & INT & NULL & Quantidade ainda disponível no lote \\ \hline
+valor\_unitario & DECIMAL(10,2) & NULL & Valor unitário do produto no abastecimento \\ \hline
+data\_vencimento & DATE & NULL & Data de vencimento do lote \\ \hline
+id\_usuario & INT & FK, NOT NULL & Usuário responsável pelo registro do abastecimento \\ \hline
+\end{tabular}
+\caption{Tabela: Abastecimento}
+\end{table}
+
+\subsubsection{Tabela: Categoria}
+
+A tabela \textit{Categoria} é responsável pelo armazenamento das categorias dos produtos cadastrados no sistema. Sua finalidade é permitir a organização e classificação dos produtos comercializados pela empresa, facilitando processos de gerenciamento, consulta e controle de estoque.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{5cm}|}
+\hline
+\textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\ \hline
+id\_categoria & INT & PK, AI & Identificador único da categoria \\ \hline
+nome & VARCHAR(100) & NOT NULL & Nome da categoria \\ \hline
+descricao & VARCHAR(255) & NULL & Descrição da categoria \\ \hline
+\end{tabular}
+\caption{Tabela: Categoria}
+\end{table}
+
+\subsubsection{Tabela: Produto}
+
+A tabela \textit{Produto} armazena as informações relacionadas aos produtos comercializados pela empresa. Nela são registrados dados como nome, sabor, marca, quantidade atual, data de vencimento, preço unitário e categoria vinculada.
+
+Essa tabela possui papel central no sistema, pois é utilizada tanto nas operações de estoque quanto nas vendas. A quantidade atual do produto permite acompanhar a disponibilidade dos itens, enquanto o vínculo com a tabela de categoria facilita a organização dos produtos e a aplicação de filtros na interface.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{5cm}|}
+\hline
+\textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\ \hline
+id\_produto & INT & PK, AI & Identificador único do produto \\ \hline
+nome\_produto & VARCHAR(150) & NOT NULL & Nome do produto \\ \hline
+sabor & VARCHAR(50) & NULL & Sabor do produto \\ \hline
+marca & VARCHAR(100) & NULL & Marca do produto \\ \hline
+qtdd\_atual & INT & DEFAULT 0 & Quantidade disponível em estoque \\ \hline
+data\_vencimento & DATE & NULL & Data de vencimento do produto \\ \hline
+preco\_unitario & DECIMAL(10,2) & NOT NULL & Valor unitário do produto \\ \hline
+dt\_cadastro & DATETIME & DEFAULT CURRENT\_TIMESTAMP & Data de cadastro do produto \\ \hline
+id\_categoria & INT & FK, NOT NULL & Referência da categoria do produto \\ \hline
+ativo & BOOLEAN & DEFAULT TRUE & Status de ativação do produto \\ \hline
+\end{tabular}
+\caption{Tabela: Produto}
+\end{table}
+
+\subsubsection{Tabela: Usuário}
+
+A tabela \textit{Usuário} é responsável pelo armazenamento dos dados dos usuários do sistema. Essa estrutura permite o controle de autenticação, identificação e definição de níveis de acesso dos colaboradores que utilizam a aplicação.
+
+Por meio dessa tabela, o sistema diferencia usuários administradores e vendedores, permitindo restringir funcionalidades conforme o perfil de acesso. Além disso, o usuário é relacionado a pedidos e movimentações de estoque, possibilitando identificar o responsável por determinadas operações.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{5cm}|}
+\hline
+\textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\ \hline
+id\_usuario & INT & PK, AI & Identificador único do usuário \\ \hline
+nome\_usuario & VARCHAR(100) & NOT NULL & Nome do usuário \\ \hline
+cpf & VARCHAR(14) & NULL & CPF do usuário \\ \hline
+email & VARCHAR(150) & UNIQUE, NOT NULL & E-mail do usuário \\ \hline
+senha & VARCHAR(255) & NOT NULL & Senha de acesso armazenada em formato criptografado \\ \hline
+nivel\_acesso & ENUM & DEFAULT 'vendedor' & Nível de acesso do usuário, podendo ser administrador ou vendedor \\ \hline
+\end{tabular}
+\caption{Tabela: Usuário}
+\end{table}
+
+\subsubsection{Tabela: Cliente}
+
+A tabela \textit{Cliente} armazena as informações cadastrais dos clientes da empresa. Os dados registrados permitem identificar clientes vinculados às vendas, facilitando o controle comercial e o histórico de pedidos realizados.
+
+Essa tabela é utilizada principalmente no processo de registro de pedidos, pois cada venda deve estar associada a um cliente. Dessa forma, o sistema consegue manter rastreabilidade das transações e consultar posteriormente quais clientes realizaram compras.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{5cm}|}
+\hline
+\textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\ \hline
+id\_cliente & INT & PK, AI & Identificador único do cliente \\ \hline
+razao\_social & VARCHAR(100) & NOT NULL & Nome ou razão social do cliente \\ \hline
+cpf\_cnpj & VARCHAR(14) & NULL & CPF ou CNPJ do cliente \\ \hline
+telefone & VARCHAR(20) & NULL & Telefone de contato \\ \hline
+email & VARCHAR(150) & NULL & E-mail do cliente \\ \hline
+endereco & VARCHAR(255) & NULL & Endereço do cliente \\ \hline
+dt\_cadastro & DATETIME & DEFAULT CURRENT\_TIMESTAMP & Data de cadastro do cliente \\ \hline
+\end{tabular}
+\caption{Tabela: Cliente}
+\end{table}
+
+\subsubsection{Tabela: Pedido}
+
+A tabela \textit{Pedido} representa o registro principal de uma venda realizada no sistema. Ela armazena informações gerais da transação, como o cliente relacionado, o usuário responsável, a data do pedido e o método de pagamento utilizado.
+
+Essa tabela funciona como o cabeçalho da venda, pois reúne os dados principais do pedido, enquanto os produtos vendidos são detalhados na tabela \textit{Item Pedido}. O relacionamento com as tabelas \textit{Cliente} e \textit{Usuário} permite identificar tanto quem realizou a compra quanto o colaborador responsável pelo registro da operação.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{5cm}|}
+\hline
+\textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\ \hline
+id\_pedido & INT & PK, AI & Identificador único do pedido \\ \hline
+id\_cliente & INT & FK, NOT NULL & Referência ao cliente relacionado ao pedido \\ \hline
+id\_usuario & INT & FK, NOT NULL & Referência ao usuário responsável pelo pedido \\ \hline
+dt\_pedido & DATETIME & DEFAULT CURRENT\_TIMESTAMP & Data de realização do pedido \\ \hline
+mtd\_pagamento & ENUM & NULL & Método de pagamento utilizado no pedido \\ \hline
+\end{tabular}
+\caption{Tabela: Pedido}
+\end{table}
+
+\subsubsection{Tabela: Tipo Movimentação}
+
+A tabela \textit{Tipo Movimentação} armazena os tipos de movimentações possíveis no estoque, como entrada e saída. Sua finalidade é padronizar a classificação das operações realizadas sobre os produtos.
+
+Essa tabela é utilizada em conjunto com a tabela \textit{Movimentação Estoque}, permitindo identificar se uma determinada movimentação corresponde a uma entrada de mercadoria, uma saída por venda ou outro tipo de alteração no estoque. Esse controle contribui para a rastreabilidade das operações e para a organização do histórico de movimentações.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{5cm}|}
+\hline
+\textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\ \hline
+id\_tipo\_movimentacao & INT & PK, AI & Identificador único do tipo de movimentação \\ \hline
+tipo\_movimentacao & VARCHAR(150) & NULL & Tipo de movimentação do estoque, como entrada ou saída \\ \hline
+\end{tabular}
+\caption{Tabela: Tipo Movimentação}
+\end{table}
+
+\subsubsection{Tabela: Movimentação Estoque}
+
+A tabela \textit{Movimentação Estoque} registra o histórico das alterações realizadas na quantidade dos produtos. Cada registro representa uma movimentação de estoque, contendo o produto afetado, o usuário responsável, o tipo de movimentação, a quantidade movimentada e a data da atualização.
+
+Essa tabela é essencial para a rastreabilidade do sistema, pois permite acompanhar entradas e saídas de produtos ao longo do tempo. Além de apoiar o controle operacional, o histórico de movimentações também pode ser utilizado para auditoria, conferência de estoque e geração de relatórios gerenciais.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{5cm}|}
+\hline
+\textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\ \hline
+id\_estoque & INT & PK, AI & Identificador único da movimentação de estoque \\ \hline
+id\_produto & INT & FK, NOT NULL & Referência ao produto movimentado \\ \hline
+id\_usuario & INT & FK, NOT NULL & Referência ao usuário responsável pela movimentação \\ \hline
+id\_tipo\_movimentacao & INT & FK, NOT NULL & Referência ao tipo de movimentação realizada \\ \hline
+qtdd\_movimentacao & INT & DEFAULT 0 & Quantidade movimentada no estoque \\ \hline
+ultima\_atualizacao & DATETIME & DEFAULT CURRENT\_TIMESTAMP & Data e hora da movimentação \\ \hline
+\end{tabular}
+\caption{Tabela: Movimentação Estoque}
+\end{table}
+
+\subsubsection{Tabela: Item Pedido}
+
+A tabela \textit{Item Pedido} armazena os produtos associados a cada pedido realizado. Enquanto a tabela \textit{Pedido} registra os dados gerais da venda, a tabela \textit{Item Pedido} detalha quais produtos foram vendidos, suas quantidades, preços unitários e subtotal.
+
+Essa estrutura permite que um mesmo pedido contenha vários produtos, mantendo a relação entre a venda e seus respectivos itens. O uso dessa tabela também facilita o cálculo do valor total da venda e a atualização do estoque com base nas quantidades vendidas.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{5cm}|}
+\hline
+\textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\ \hline
+id\_item\_pedido & INT & PK, AI & Identificador único do item do pedido \\ \hline
+id\_pedido & INT & FK, NOT NULL & Referência ao pedido relacionado \\ \hline
+id\_produto & INT & FK, NOT NULL & Referência ao produto vendido \\ \hline
+qtdd\_pedido & INT & NOT NULL & Quantidade solicitada do produto \\ \hline
+preco\_unitario & DECIMAL(10,2) & NULL & Valor unitário do produto no momento da venda \\ \hline
+subtotal & DECIMAL(10,2) & GENERATED & Valor total do item, calculado pela quantidade multiplicada pelo preço unitário \\ \hline
+\end{tabular}
+\caption{Tabela: Item Pedido}
+\end{table}
+
+\subsubsection{Tabela: Fornecedor}
+
+A tabela \textit{Fornecedor} armazena os dados cadastrais dos fornecedores da empresa, como razão social, CNPJ, telefone e e-mail. Sua finalidade é permitir o controle das empresas ou pessoas responsáveis pelo fornecimento dos produtos comercializados pela Tropical Mix.
+
+Essa tabela está diretamente relacionada ao processo de abastecimento do estoque, pois cada entrada de produto pode ser vinculada a um fornecedor. Dessa forma, o sistema mantém o histórico de origem dos produtos e facilita consultas relacionadas a compras, reposições e contatos comerciais.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{5cm}|}
+\hline
+\textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\ \hline
+id\_fornecedor & INT & PK, AI & Identificador único do fornecedor \\ \hline
+razao\_social & VARCHAR(150) & NOT NULL & Nome ou razão social do fornecedor \\ \hline
+cnpj & VARCHAR(18) & UNIQUE & CNPJ do fornecedor \\ \hline
+telefone & VARCHAR(20) & NULL & Telefone de contato do fornecedor \\ \hline
+email & VARCHAR(150) & NULL & E-mail do fornecedor \\ \hline
+\end{tabular}
+\caption{Tabela: Fornecedor}
+\end{table}
+
+\subsubsection{Tabela: Abastecimento}
+
+A tabela \textit{Abastecimento} registra as entradas de produtos no estoque. Cada registro indica o fornecedor responsável, o produto abastecido, a data da entrada, a quantidade recebida, a quantidade disponível no lote, o valor unitário e a data de vencimento do lote.
+
+Essa tabela é utilizada para controlar as reposições de estoque e manter o histórico de abastecimentos realizados. Ao registrar uma nova entrada, o sistema consegue atualizar a quantidade disponível do produto e preservar informações importantes para acompanhamento de custos, fornecedores, lotes, validade e movimentações futuras.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{5cm}|}
+\hline
+\textbf{Campo} & \textbf{Tipo} & \textbf{Restrição} & \textbf{Descrição} \\ \hline
+id\_abastecimento & INT & PK, AI & Identificador único do abastecimento \\ \hline
+id\_fornecedor & INT & FK, NOT NULL & Referência ao fornecedor responsável pelo abastecimento \\ \hline
+id\_produto & INT & FK, NOT NULL & Referência ao produto abastecido \\ \hline
+numero\_lote & VARCHAR(50) & NULL & Número de identificação do lote do produto \\ \hline
+dt\_abastecimento & DATETIME & DEFAULT CURRENT\_TIMESTAMP & Data e hora do abastecimento \\ \hline
+qtdd\_recebida & INT & NOT NULL & Quantidade recebida no abastecimento \\ \hline
+qtdd\_disponivel & INT & NULL & Quantidade ainda disponível no lote \\ \hline
+valor\_unitario & DECIMAL(10,2) & NULL & Valor unitário do produto no abastecimento \\ \hline
+data\_vencimento & DATE & NULL & Data de vencimento do lote \\ \hline
+id\_usuario & INT & FK, NOT NULL & Usuário responsável pelo registro do abastecimento \\ \hline
+\end{tabular}
+\caption{Tabela: Abastecimento}
+\end{table}

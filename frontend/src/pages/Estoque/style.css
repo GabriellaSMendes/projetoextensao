@@ -50,17 +50,17 @@
 
 .estoque-table .thead,
 .estoque-table .row {
- display: grid !important;
- align-items: center !important;
- grid-template-columns:
- 2.3fr
- 1.2fr
- 1fr
- 0.8fr
- 1.15fr
- 1.35fr
- 1.35fr
- 1fr;
+  display: grid !important;
+  align-items: center !important;
+  grid-template-columns:
+    2.25fr
+    1.1fr
+    1fr
+    0.7fr
+    1.1fr
+    1.6fr
+    1.35fr
+    1fr;
 }
 
 .estoque-table .thead {
@@ -446,26 +446,21 @@
   color: #4e1633;
 }
 
-.status-badge {
- display: inline-flex;
- align-items: center;
- justify-content: center;
- width: fit-content;
- max-width: 100%;
- padding: 6px 12px;
- border-radius: 999px;
- font-size: 12px;
- font-weight: 700;
- line-height: 1.15;
- white-space: nowrap;
- text-align: center;
+.estoque-table .status-badge {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  max-width: none;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.15;
+  white-space: nowrap !important;
+  text-align: center;
 }
 
-.status-badge.validade-alerta {
- background: #fdecec;
- color: #b30000;
- min-width: 132px;
-}
 
 .status-badge.ok {
   background: #e9f7ef;
@@ -482,9 +477,10 @@
   color: #b30000;
 }
 
-.status-badge.validade-alerta {
+.estoque-table .status-badge.validade-alerta {
   background: #fdecec;
   color: #b30000;
+  min-width: max-content;
 }
 
 .row-inativo {

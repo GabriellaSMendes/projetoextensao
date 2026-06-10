@@ -169,6 +169,74 @@ def listar_abastecimentos_produto(id_produto):
 
     return jsonify({"abastecimentos": lista_json}), 200
 
+
+@estoque_bp.route('/abastecimentos/<int:id_abastecimento>/baixar', methods=['PATCH'])
+@jwt_required()
+def baixar_lote_abastecimento(id_abastecimento):
+    """
+    Dá baixa em um lote específico, removendo sua quantidade disponível do estoque.
+    Usado principalmente para descarte de lote vencido.
+    """
+    identity = get_jwt_identity()
+    id_usuario_logado = int(identity)
+
+    abastecimento = Abastece.query.get_or_404(id_abastecimento)
+    produto = Produto.query.get_or_404(abastecimento.id_produto)
+
+    quantidade_disponivel = int(abastecimento.qtdd_disponivel or 0)
+
+    if quantidade_disponivel <= 0:
+        return jsonify({
+            "erro": "Este lote não possui quantidade disponível para baixa."
+        }), 400
+
+    dados = request.get_json() or {}
+    motivo = dados.get("motivo", "Baixa de lote vencido")
+
+    try:
+        # Zera o lote
+        abastecimento.qtdd_disponivel = 0
+
+        # Atualiza o saldo do produto
+        produto.qtdd_atual = max(int(produto.qtdd_atual or 0) - quantidade_disponivel, 0)
+
+        # Busca ou cria tipo de movimentação para baixa por vencimento
+        tipo = TipoMovimentacao.query.filter_by(
+            tipo_movimentacao="Baixa por vencimento"
+        ).first()
+
+        if not tipo:
+            tipo = TipoMovimentacao(tipo_movimentacao="Baixa por vencimento")
+            db.session.add(tipo)
+            db.session.flush()
+
+        movimentacao = MovimentacaoEstoque(
+            id_produto=produto.id_produto,
+            id_usuario=id_usuario_logado,
+            id_tipo_movimentacao=tipo.id_tipo_movimentacao,
+            qtdd_movimentacao=-quantidade_disponivel
+        )
+
+        db.session.add(movimentacao)
+        db.session.commit()
+
+        return jsonify({
+            "mensagem": "Lote baixado do estoque com sucesso.",
+            "id_abastecimento": abastecimento.id_abastecimento,
+            "id_produto": produto.id_produto,
+            "quantidade_baixada": quantidade_disponivel,
+            "motivo": motivo,
+            "qtdd_atual_produto": produto.qtdd_atual
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "erro": "Erro ao baixar lote.",
+            "detalhes": str(e)
+        }), 500
+
+
 @estoque_bp.route('/produtos/<int:id_produto>/movimentacoes', methods=['GET'])
 @jwt_required()
 def listar_movimentacoes_produto(id_produto):
@@ -211,7 +279,7 @@ def listar_movimentacoes_produto(id_produto):
 @jwt_required()
 def criar_produto():
     """
-    Cria um novo PRODUTO e (opcionalmente) regista o seu abastecimento inicial.
+    Cria um novo produto ou adiciona um novo lote caso o produto já exista.
     """
     dados = request.get_json()
     identity = get_jwt_identity()
@@ -222,8 +290,7 @@ def criar_produto():
 
     if not Categoria.query.get(dados.get('id_categoria')):
         return jsonify({"erro": "Categoria não encontrada"}), 404
-    
-    # Extrair fornecedor e quantidade inicial
+
     id_fornecedor = dados.get("id_fornecedor")
     qtdd_inicial = dados.get('qtdd_entrada', dados.get('qtdd_atual', 0))
     data_vencimento = dados.get("data_vencimento")
@@ -241,23 +308,79 @@ def criar_produto():
         if not fornecedor:
             return jsonify({"erro": "Fornecedor inválido"}), 404
 
+    nome_produto = dados.get('nome_produto').strip()
+    sabor = (dados.get('sabor') or "").strip()
+    marca = (dados.get('marca') or "").strip()
+    id_categoria = dados.get('id_categoria')
+
+    produto_existente = Produto.query.filter(
+        db.func.lower(Produto.nome_produto) == nome_produto.lower(),
+        db.func.lower(db.func.coalesce(Produto.sabor, "")) == sabor.lower(),
+        db.func.lower(db.func.coalesce(Produto.marca, "")) == marca.lower(),
+        Produto.id_categoria == id_categoria
+    ).first()
+
+    if produto_existente:
+        try:
+            if not id_fornecedor or int(qtdd_inicial or 0) <= 0:
+                return jsonify({
+                    "erro": "Produto já existente. Para adicionar novo lote, informe fornecedor e quantidade."
+                }), 400
+
+            novo_abastecimento = Abastece(
+                id_fornecedor=id_fornecedor,
+                id_produto=produto_existente.id_produto,
+                id_usuario=id_usuario_logado,
+                qtdd_recebida=qtdd_inicial,
+                valor_unitario=dados.get("custo_unitario", dados.get("preco_unitario")),
+                numero_lote=dados.get("numero_lote"),
+                data_vencimento=data_vencimento
+            )
+
+            produto_existente.preco_unitario = dados.get(
+                'preco_unitario',
+                produto_existente.preco_unitario
+            )
+            produto_existente.custo_unitario = dados.get(
+                'custo_unitario',
+                produto_existente.custo_unitario
+            )
+            produto_existente.ativo = True
+
+            db.session.add(novo_abastecimento)
+            db.session.commit()
+            db.session.refresh(produto_existente)
+
+            return jsonify({
+                "mensagem": "Produto já existente. Novo lote adicionado ao estoque.",
+                "id_produto": produto_existente.id_produto,
+                "id_abastecimento": novo_abastecimento.id_abastecimento,
+                "qtdd_atual": produto_existente.qtdd_atual
+            }), 201
+
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({
+                "erro": "Erro ao adicionar novo lote ao produto existente.",
+                "detalhes": str(e)
+            }), 500
+
     novo_produto = Produto(
-        nome_produto=dados.get('nome_produto'),
-        sabor=dados.get('sabor'),
-        marca=dados.get('marca'),
+        nome_produto=nome_produto,
+        sabor=sabor or None,
+        marca=marca or None,
         qtdd_atual=0,
         data_vencimento=data_vencimento,
         preco_unitario=dados.get('preco_unitario'),
         custo_unitario=dados.get('custo_unitario'),
-        id_categoria=dados.get('id_categoria')
+        id_categoria=id_categoria
     )
 
     try:
         db.session.add(novo_produto)
         db.session.flush()
-        
-        # Criar abastecimento inicial (se houver fornecedor)
-        if id_fornecedor and qtdd_inicial > 0:
+
+        if id_fornecedor and int(qtdd_inicial or 0) > 0:
             abastecimento_inicial = Abastece(
                 id_fornecedor=id_fornecedor,
                 id_produto=novo_produto.id_produto,
@@ -270,8 +393,6 @@ def criar_produto():
             db.session.add(abastecimento_inicial)
 
         db.session.commit()
-        
-        # Atualiza a variável com o valor real após os triggers do banco de dados rodarem
         db.session.refresh(novo_produto)
 
         return jsonify({
@@ -279,11 +400,14 @@ def criar_produto():
             "id_produto": novo_produto.id_produto,
             "qtdd_atual": novo_produto.qtdd_atual
         }), 201
-        
+
     except Exception as e:
         db.session.rollback()
-        return jsonify({"erro": "Erro ao criar produto", "detalhes": str(e)}), 500
-
+        return jsonify({
+            "erro": "Erro ao criar produto",
+            "detalhes": str(e)
+        }), 500
+        
 @estoque_bp.route('/produtos/<int:id_produto>', methods=['PUT'])
 @jwt_required()
 def atualizar_produto(id_produto):

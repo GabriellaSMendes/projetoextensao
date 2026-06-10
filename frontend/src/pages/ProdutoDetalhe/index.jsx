@@ -2,6 +2,8 @@ import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import api from "../../services/api";
 import "./style.css";
+import Notification from "../../components/Notification";
+import ConfirmModal from "../../components/ConfirmModal";
 
 function formatarDataHora(data) {
     if (!data) return "-";
@@ -53,6 +55,24 @@ function ProdutoDetalhe() {
         data_vencimento: "",
         numero_lote: ""
     });
+
+    const [notification, setNotification] = useState({
+        message: "",
+        type: "success"
+    });
+
+    const [confirmLoteModal, setConfirmLoteModal] = useState({
+        aberto: false,
+        abastecimento: null
+    });
+
+    function mostrarNotificacao(message, type = "success") {
+        setNotification({ message, type });
+
+        setTimeout(() => {
+            setNotification({ message: "", type: "success" });
+        }, 3500);
+    }
 
     async function carregarDetalhes() {
         try {
@@ -170,6 +190,54 @@ function ProdutoDetalhe() {
         }
     };
 
+    const abrirConfirmacaoBaixaLote = (abastecimento) => {
+        setConfirmLoteModal({
+            aberto: true,
+            abastecimento
+        });
+    };
+
+    const baixarLote = async () => {
+        const abastecimento = confirmLoteModal.abastecimento;
+
+        if (!abastecimento) return;
+
+        try {
+            const token = localStorage.getItem("token");
+
+            await api.patch(
+                `/estoque/abastecimentos/${abastecimento.id_abastecimento}/baixar`,
+                {
+                    motivo: "Descarte por validade vencida"
+                },
+                {
+                    headers: { Authorization: `Bearer ${token}` }
+                }
+            );
+
+            setConfirmLoteModal({
+                aberto: false,
+                abastecimento: null
+            });
+
+            mostrarNotificacao("Lote baixado do estoque com sucesso.", "success");
+            carregarDetalhes();
+        } catch (err) {
+            console.error("Erro ao baixar lote:", err);
+
+            setConfirmLoteModal({
+                aberto: false,
+                abastecimento: null
+            });
+
+            mostrarNotificacao(
+                err.response?.data?.detalhes ||
+                err.response?.data?.erro ||
+                "Erro ao baixar lote do estoque.",
+                "error"
+            );
+        }
+    };
     const lotesDisponiveis = abastecimentos.filter(
         (ab) => Number(ab.qtdd_disponivel) > 0
     );
@@ -220,6 +288,11 @@ function ProdutoDetalhe() {
     if (erro) {
         return (
             <div className="produto-detalhe-page">
+                <Notification
+                    message={notification.message}
+                    type={notification.type}
+                    onClose={() => setNotification({ message: "", type: "success" })}
+                />
                 <h1>Detalhe do Produto</h1>
                 <p className="produto-error">{erro}</p>
             </div>
@@ -237,6 +310,11 @@ function ProdutoDetalhe() {
 
     return (
         <div className="produto-detalhe-page">
+            <Notification
+                message={notification.message}
+                type={notification.type}
+                onClose={() => setNotification({ message: "", type: "success" })}
+            />
             <div className="produto-header">
                 <div>
                     <h1>Detalhe do Produto</h1>
@@ -388,6 +466,7 @@ function ProdutoDetalhe() {
                                 <th>Custo unitário</th>
                                 <th>Custo total do lote</th>
                                 <th>Entrada</th>
+                                <th>Ações</th>
                             </tr>
                         </thead>
 
@@ -433,7 +512,23 @@ function ProdutoDetalhe() {
                                             R$ {custoTotalLote.toFixed(2)}
                                         </td>
 
-                                        <td>{formatarDataHora(ab.dt_abastecimento)}</td>
+                                        <td>
+                                            {formatarDataHora(ab.dt_abastecimento)}
+                                        </td>
+
+                                        <td>
+                                            {dias !== null && dias < 0 && Number(ab.qtdd_disponivel) > 0 ? (
+                                                <button
+                                                    type="button"
+                                                    className="btn-baixar-lote"
+                                                    onClick={() => abrirConfirmacaoBaixaLote(ab)}
+                                                >
+                                                    Baixar lote
+                                                </button>
+                                            ) : (
+                                                <span className="acao-indisponivel">-</span>
+                                            )}
+                                        </td>
                                     </tr>
                                 );
                             })}
@@ -559,6 +654,23 @@ function ProdutoDetalhe() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {confirmLoteModal.aberto && confirmLoteModal.abastecimento && (
+                <ConfirmModal
+                    title="Baixar lote vencido"
+                    message={`Deseja baixar o lote "${confirmLoteModal.abastecimento.numero_lote || "-"}" do estoque? Essa ação irá remover ${confirmLoteModal.abastecimento.qtdd_disponivel} unidade(s) disponíveis deste lote.`}
+                    confirmText="Baixar lote"
+                    cancelText="Cancelar"
+                    type="danger"
+                    onConfirm={baixarLote}
+                    onCancel={() =>
+                        setConfirmLoteModal({
+                            aberto: false,
+                            abastecimento: null
+                        })
+                    }
+                />
             )}
         </div>
     );

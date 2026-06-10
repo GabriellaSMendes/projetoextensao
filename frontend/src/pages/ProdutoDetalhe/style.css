@@ -473,3 +473,24 @@
     grid-template-columns: 1fr;
   }
 }
+
+.btn-baixar-lote {
+  background: #b30000;
+  color: #ffffff;
+  border: none;
+  padding: 7px 10px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-baixar-lote:hover {
+  background: #8a0000;
+}
+
+.acao-indisponivel {
+  color: #999999;
+  font-size: 13px;
+}

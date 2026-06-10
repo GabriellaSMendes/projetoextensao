@@ -3,6 +3,14 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 18px;
+  gap: 16px;
+  min-width: 0;
+}
+
+.actions-right {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 /* TÍTULO */
@@ -42,9 +50,12 @@
 
 /* TABELA */
 .estoque-table {
+  width: 100%;
+  max-width: 100%;
   border: 1px solid #ddd;
   border-radius: 8px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 
@@ -61,8 +72,8 @@
     1.6fr
     1.35fr
     1fr;
+  min-width: 1040px;
 }
-
 .estoque-table .thead {
   padding: 1px 0 !important;
   min-height: 30px !important;
@@ -403,6 +414,8 @@
 
 .estoque-main {
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
   margin-left: 0;
   transition: all 0.3s ease;
   padding: 40px;
@@ -736,8 +749,9 @@
 }
 
 .produto-nome-linha strong {
-  white-space: nowrap;
-  flex-shrink: 0;
+  white-space: normal;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .produto-nome-linha .estoque-badge {
@@ -989,4 +1003,13 @@
     margin-right: 24px;
     grid-template-columns: 1fr;
   }
+}
+
+.estoque-table .col {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.estoque-table .col.action {
+  min-width: 110px;
 }

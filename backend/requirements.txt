@@ -16,3 +16,4 @@ pandas
 matplotlib
 openpyxl==3.1.5
 gunicorn
+validate-docbr

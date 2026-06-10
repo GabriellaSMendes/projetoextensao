@@ -1,5 +1,6 @@
 from flask import request, jsonify, Blueprint
 from app.models import db, Cliente, Pedido
+from app.utils import validar_cnpj, validar_cpf
 from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func
@@ -59,8 +60,22 @@ def criar_cliente():
     """
     Cria um novo cliente.
     """
+    
     dados = request.get_json()
     razao_social = dados.get('razao_social')
+    cpf_cnpj = dados.get('cpf_cnpj')
+    if cpf_cnpj:
+        # Remove pontos e traços para contar o tamanho
+        doc_limpo = ''.join(filter(str.isdigit, cpf_cnpj))
+        
+        if len(doc_limpo) == 11: # É CPF
+            if not validar_cpf(cpf_cnpj):
+                return jsonify({"erro": "CPF inválido."}), 400
+        elif len(doc_limpo) == 14: # É CNPJ
+            if not validar_cnpj(cpf_cnpj):
+                return jsonify({"erro": "CNPJ inválido."}), 400
+        else:
+            return jsonify({"erro": "Documento deve ter 11 (CPF) ou 14 (CNPJ) dígitos numéricos."}), 400 
 
     if not razao_social:
         return jsonify({"erro": "A Razão Social (ou Nome) é obrigatória"}), 400
@@ -72,7 +87,7 @@ def criar_cliente():
         email=dados.get('email'),
         endereco=dados.get('endereco')
     )
-
+    
     try:
         db.session.add(novo_cliente)
         db.session.commit()

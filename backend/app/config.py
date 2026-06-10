@@ -26,7 +26,7 @@ class Config:
     """Configuração base."""
     SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_hex(32))
 
-    SQLALCHEMY_DATABASE_URI = montar_database_url()
+    SQLALCHEMY_DATABASE_URI =  montar_database_url
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 

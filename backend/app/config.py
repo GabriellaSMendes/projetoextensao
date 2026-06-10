@@ -7,7 +7,10 @@ class Config:
     """Configuração base."""
     SECRET_KEY = secrets.token_hex(32)
 
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:root@localhost/tropicalmix_db' # ATUALIZAR PARA CONECTAR AO DB
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        "DATABASE_URL", #p/ o Render
+        "mysql+pymysql://root:root@localhost/tropicalmix_db" #p/ Local
+    )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     JWT_SECRET_KEY = SECRET_KEY

@@ -1,7 +1,8 @@
 from flask import request, jsonify, Blueprint
-from app.models import db, Cliente
+from app.models import db, Cliente, Pedido
 from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import func
 
 cliente_bp = Blueprint('clientes', __name__)
 
@@ -11,11 +12,34 @@ cliente_bp = Blueprint('clientes', __name__)
 @jwt_required()
 def listar_clientes():
     """
-    Lista todos os clientes.
+    Lista todos os clientes com a data da última compra.
     """
-    clientes = Cliente.query.all()
+
+    ultima_compra_subquery = (
+        db.session.query(
+            Pedido.id_cliente,
+            func.max(Pedido.dt_pedido).label("ultima_compra")
+        )
+        .group_by(Pedido.id_cliente)
+        .subquery()
+    )
+
+    clientes = (
+        db.session.query(
+            Cliente,
+            ultima_compra_subquery.c.ultima_compra
+        )
+        .outerjoin(
+            ultima_compra_subquery,
+            Cliente.id_cliente == ultima_compra_subquery.c.id_cliente
+        )
+        .order_by(Cliente.razao_social.asc())
+        .all()
+    )
+
     lista_json = []
-    for c in clientes:
+
+    for c, ultima_compra in clientes:
         lista_json.append({
             "id_cliente": c.id_cliente,
             "razao_social": c.razao_social,
@@ -23,8 +47,10 @@ def listar_clientes():
             "telefone": c.telefone,
             "email": c.email,
             "endereco": c.endereco,
-            "dt_cadastro": c.dt_cadastro.isoformat() if c.dt_cadastro else None
+            "dt_cadastro": c.dt_cadastro.isoformat() if c.dt_cadastro else None,
+            "ultima_compra": ultima_compra.isoformat() if ultima_compra else None
         })
+
     return jsonify(clientes=lista_json), 200
 
 @cliente_bp.route('', methods=['POST'])

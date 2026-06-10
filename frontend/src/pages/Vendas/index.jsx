@@ -338,7 +338,12 @@ function Vendas() {
       const resp = await api.get("/estoque/produtos", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setProdutos(resp.data.produtos);
+
+      const produtosAtivos = (resp.data.produtos || []).filter(
+        (produto) => produto.ativo === true
+      );
+
+      setProdutos(produtosAtivos);
     } catch (err) {
       console.error("Erro ao carregar produtos:", err);
     }

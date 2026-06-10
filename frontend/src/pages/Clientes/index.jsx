@@ -421,7 +421,9 @@ function Clientes() {
                 <div className="col">{c.endereco || "-"}</div>
 
                 <div className="col">
-                  {c.ultima_compra_texto || "Sem compras"}
+                  {c.ultima_compra
+                    ? new Date(c.ultima_compra).toLocaleDateString("pt-BR")
+                    : "Sem compras"}
                 </div>
 
                 <div className="col action">

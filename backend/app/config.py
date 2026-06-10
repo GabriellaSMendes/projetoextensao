@@ -3,17 +3,30 @@ from datetime import timedelta
 import secrets
 
 
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+AIVEN_CA_PATH = os.path.join(BASE_DIR, "aiven-ca.pem")
+
+
 class Config:
     """Configuração base."""
-    SECRET_KEY = secrets.token_hex(32)
+    SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_hex(32))
 
     SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_URL", #p/ o Render
-        "mysql+pymysql://root:root@localhost/tropicalmix_db" #p/ Local
+        "DATABASE_URL",
+        "mysql+pymysql://root:root@localhost/tropicalmix_db"
     )
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    JWT_SECRET_KEY = SECRET_KEY
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "connect_args": {
+            "ssl": {
+                "ca": AIVEN_CA_PATH
+            }
+        }
+    }
+
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", SECRET_KEY)
 
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=8)
 
@@ -24,6 +37,7 @@ class DevelopmentConfig(Config):
 
 class ProductionConfig(Config):
     DEBUG = False
+
 
 config_by_name = {
     'development': DevelopmentConfig,

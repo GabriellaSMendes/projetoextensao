@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from flask_bcrypt import generate_password_hash
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from sqlalchemy.exc import IntegrityError
+from app.models import Usuario, Pedido, MovimentacaoEstoque, TipoMovimentacao, Produto
 
 from app import db
 from app.models import Usuario
@@ -167,3 +168,48 @@ def deletar_usuario(id_usuario):
     except Exception as e:
         db.session.rollback()
         return jsonify({"erro": "Erro ao deletar usuário", "detalhes": str(e)}), 500
+    
+
+@usuario_bp.route('/me', methods=['GET'])
+@jwt_required()
+def perfil_usuario_logado():
+    id_usuario_logado = int(get_jwt_identity())
+
+    usuario = Usuario.query.get_or_404(id_usuario_logado)
+
+    total_pedidos = Pedido.query.filter_by(id_usuario=id_usuario_logado).count()
+
+    movimentacoes = (
+        MovimentacaoEstoque.query
+        .filter_by(id_usuario=id_usuario_logado)
+        .order_by(MovimentacaoEstoque.ultima_atualizacao.desc())
+        .limit(8)
+        .all()
+    )
+
+    movimentacoes_json = []
+
+    for mov in movimentacoes:
+        produto = Produto.query.get(mov.id_produto)
+        tipo = TipoMovimentacao.query.get(mov.id_tipo_movimentacao)
+
+        movimentacoes_json.append({
+            "id_movimentacao": mov.id_estoque,
+            "produto": produto.nome_produto if produto else "-",
+            "tipo_movimentacao": tipo.tipo_movimentacao if tipo else "-",
+            "qtdd_movimentacao": mov.qtdd_movimentacao,
+            "ultima_atualizacao": mov.ultima_atualizacao.isoformat() if mov.ultima_atualizacao else None
+        })
+
+    return jsonify({
+        "usuario": {
+            "id_usuario": usuario.id_usuario,
+            "nome_usuario": usuario.nome_usuario,
+            "cpf": usuario.cpf,
+            "email": usuario.email,
+            "nivel_acesso": usuario.nivel_acesso,
+            "total_pedidos": total_pedidos,
+            "total_movimentacoes": len(usuario.movimentacoes)
+        },
+        "movimentacoes": movimentacoes_json
+    }), 200
